@@ -535,6 +535,10 @@ function mulberry32(a) {
   };
 }
 let rng = Math.random;
+// Bump whenever spawn()/column() change what a seed produces. The server only puts
+// players with the same course version in a room, so mixed app versions never race
+// on different courses.
+const COURSE_V = 2;
 // Objects become visible/collidable only inside this window ahead of the player.
 // Patterns can be generated further ahead than a full lap would allow, and without
 // this they would sit (and collide) right behind the player on the circle.
@@ -1281,7 +1285,7 @@ async function quickMatch() {
   Net.quick = true; Net.phase = 'connecting'; Net.players = [];
   showScreen('lobby'); renderLobby();
   try {
-    const r = await api('/api/quick');
+    const r = await api('/api/quick?v=' + COURSE_V);
     if (Net.phase !== 'connecting') return; // user backed out
     Net.connect(r.room, true);
   } catch (e) { toast('Server unreachable: racing bots instead'); startBotMatch(); }
@@ -1451,7 +1455,7 @@ const Net = {
     this.players = []; this.ghosts.clear(); this.ranking = null; this.me = null;
     showScreen('lobby'); syncNames(); renderLobby();
     const url = SERVER.replace(/^http/, 'ws') + '/ws?room=' + encodeURIComponent(code) +
-      '&name=' + encodeURIComponent(myName) + '&pid=' + encodeURIComponent(PID) + (quick ? '&quick=1' : '');
+      '&name=' + encodeURIComponent(myName) + '&pid=' + encodeURIComponent(PID) + '&v=' + COURSE_V + (quick ? '&quick=1' : '');
     let ws;
     try { ws = new WebSocket(url); } catch (e) { toast('Could not connect'); backToTitle(); return; }
     this.ws = ws;
@@ -1459,7 +1463,7 @@ const Net = {
     ws.onclose = () => {
       if (this.ws !== ws) return;
       this.ws = null; this.phase = 'off';
-      toast('Disconnected from the room');
+      if (Date.now() - (this.errorAt || 0) > 1500) toast('Disconnected from the room');
       if (S.mode !== 'playing') backToTitle();
     };
     this.pinger = setInterval(() => this.send({ t: 'ping' }), 25000);
@@ -1530,6 +1534,7 @@ const Net = {
         else if (S.mode === 'playing') { S.mode = 'over'; showResults(); }
         break;
       case 'error':
+        this.errorAt = Date.now();
         toast(m.msg || 'Server error');
         break;
     }

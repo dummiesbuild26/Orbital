@@ -16,6 +16,10 @@ const RESULTS_MS = 5000;        // results screen before the room resets
 const MATCH_TIMEOUT_MS = 15 * 60 * 1000;
 const COLORS = ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88'];
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+// Course generator version sent by clients (?v=). Clients with different versions
+// generate different courses from the same seed, so they never share a room.
+// Clients from before versioning send nothing and count as 1.
+const courseVersion = s => Math.max(1, Math.min(999, Math.floor(Number(s)) || 1));
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -65,7 +69,7 @@ export default {
 export class Hub extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
-    this.open = null; // { code, n, pairedAt }
+    this.open = {}; // course version -> { code, n, pairedAt }
     ctx.blockConcurrencyWhile(async () => {
       ctx.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS scores (pid TEXT PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL, ts INTEGER NOT NULL)'
@@ -80,14 +84,16 @@ export class Hub extends DurableObject {
 
     if (url.pathname === '/api/quick') {
       const now = Date.now();
-      const o = this.open;
+      const v = courseVersion(url.searchParams.get('v'));
+      const o = this.open[v];
       // Move on to a fresh room once this one is full or its countdown has had time to fire.
       if (!o || o.n >= MAX_PLAYERS || (o.pairedAt && now - o.pairedAt > QUICK_WAIT_MS - 1500)) {
-        this.open = { code: 'Q' + randomCode(5), n: 0, pairedAt: 0 };
+        this.open[v] = { code: 'Q' + randomCode(5), n: 0, pairedAt: 0 };
       }
-      this.open.n++;
-      if (this.open.n === 2) this.open.pairedAt = now;
-      return json({ room: this.open.code });
+      const q = this.open[v];
+      q.n++;
+      if (q.n === 2) q.pairedAt = now;
+      return json({ room: q.code });
     }
 
     if (url.pathname === '/api/leaderboard') {
@@ -145,7 +151,7 @@ export class Room extends DurableObject {
   async load() {
     if (!this.meta) {
       this.meta = (await this.ctx.storage.get('meta')) || {
-        code: '', quick: false, phase: 'lobby', host: null, seed: 0, startAt: 0, waitUntil: 0, round: 0, count: 0,
+        code: '', quick: false, phase: 'lobby', host: null, seed: 0, startAt: 0, waitUntil: 0, round: 0, count: 0, v: 0,
       };
     }
     return this.meta;
@@ -196,6 +202,13 @@ export class Room extends DurableObject {
     if (others.length >= MAX_PLAYERS) {
       this.send(server, { t: 'error', msg: 'Room is full' });
       server.close(4001, 'full');
+      return new Response(null, { status: 101, webSocket: client });
+    }
+    const v = courseVersion(url.searchParams.get('v'));
+    if (!others.length || !m.v) m.v = v;
+    if (v !== m.v) {
+      this.send(server, { t: 'error', msg: v < m.v ? 'Update ORBITAL to join this room' : 'This room is on an older ORBITAL version' });
+      server.close(4002, 'version');
       return new Response(null, { status: 101, webSocket: client });
     }
 
