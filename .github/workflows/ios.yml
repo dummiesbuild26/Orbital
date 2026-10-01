@@ -1,0 +1,86 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Pick version
+        id: ver
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            TAG="v1.0.${{ github.run_number }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build (unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project ios/Orbital.xcodeproj \
+            -scheme Orbital \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            MARKETING_VERSION="${{ steps.ver.outputs.version }}" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package IPA
+        run: |
+          APP=build/Build/Products/Release-iphoneos/Orbital.app
+          test -f "$APP/web/index.html"
+          mkdir -p Payload
+          cp -R "$APP" Payload/
+          zip -qry Orbital.ipa Payload
+          ls -lh Orbital.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Orbital-ipa
+          path: Orbital.ipa
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ORBITAL ${{ steps.ver.outputs.tag }}
+          make_latest: true
+          files: Orbital.ipa
+          body: |
+            🪐 **ORBITAL** — one tap, two orbits, zero mercy.
+
+            **Install the IPA** (unsigned — your sideloading tool signs it with your Apple ID):
+            - [Sideloadly](https://sideloadly.io) or [AltStore](https://altstore.io): drag in `Orbital.ipa`
+            - TrollStore: open `Orbital.ipa` directly
+
+            Built from ${{ github.sha }}.

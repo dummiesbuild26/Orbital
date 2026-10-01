@@ -1,0 +1,32 @@
+name: Orbital
+options:
+  bundleIdPrefix: com.orbitalgame
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  Orbital:
+    type: application
+    platform: iOS
+    sources:
+      - path: Orbital
+      # The whole web game is bundled as a folder reference -> Orbital.app/web/
+      - path: ../web
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.orbitalgame.orbital
+        PRODUCT_NAME: Orbital
+        INFOPLIST_FILE: Orbital/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        ENABLE_BITCODE: NO
+        CODE_SIGN_STYLE: Automatic
+    scheme: {}
