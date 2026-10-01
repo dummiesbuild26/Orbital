@@ -28,10 +28,6 @@ Works on phones and desktops. Multiplayer, private rooms and the leaderboard all
 
 Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: tap the **left** half of the screen to move **in** toward the core and the **right** half to move **out**; IN / OUT pads at the bottom show which side is which. On a keyboard, use ← / → (or ↓ / ↑). **P** / **Esc** pauses.
 
-## App Store
-
-Everything is prepared for App Review. **[APP_STORE.md](APP_STORE.md)** has the step-by-step submission guide, ready-to-paste listing text, privacy and age-rating answers, and the review notes. Screenshots at Apple's sizes are in `appstore/screenshots/`. The **Upload to App Store Connect** workflow signs and uploads builds once your Apple Developer secrets are set.
-
 ## Multiplayer server
 
 The server (rooms, matchmaking and the leaderboard) and the web version are live at the URL above. Every push to `main` redeploys them automatically.
@@ -51,10 +47,7 @@ ios/project.yml      XcodeGen spec for the native iOS wrapper
 ios/Orbital/         Swift WKWebView shell (haptics + native share sheet bridge)
 server/              multiplayer server: rooms, matchmaking, leaderboard
 tools/render-icon.mjs  regenerates the app icon (node + playwright)
-tools/screenshots.mjs  regenerates App Store screenshots
-appstore/screenshots/  App Store screenshots (iPhone 6.9", iPad 13")
 .github/workflows/   release.yml: deploys the server, builds the IPA, publishes a Release
-                     appstore.yml: signs and uploads to App Store Connect (manual)
 ```
 
 ## How the IPA gets built
@@ -67,7 +60,7 @@ Each push to `main` (or a `v*` tag, or a manual run from the Actions tab) runs `
 4. zips it into `Orbital.ipa`
 5. publishes a GitHub Release (`v1.1.<run>`, or your tag) with the IPA attached
 
-This IPA is unsigned on purpose: sideloading tools re-sign it with your Apple ID when they install it. App Store and TestFlight builds go through the separate **Upload to App Store Connect** workflow (see [APP_STORE.md](APP_STORE.md)).
+This IPA is unsigned on purpose: sideloading tools re-sign it with your Apple ID when they install it.
 
 Build locally on a Mac:
 

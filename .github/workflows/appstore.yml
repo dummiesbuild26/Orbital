@@ -1,7 +1,7 @@
 name: Upload to App Store Connect
 
 # Manual only: Actions tab → "Upload to App Store Connect" → Run workflow.
-# Needs the secrets/variables listed in APP_STORE.md.
+# Needs the Apple secrets/variables (see your private App Store guide).
 on:
   workflow_dispatch:
     inputs:
@@ -29,9 +29,9 @@ jobs:
         run: |
           missing=0
           for v in BUNDLE_ID TEAM_ID ASC_KEY_ID ASC_ISSUER_ID; do
-            if [ -z "${!v}" ]; then echo "::error::$v is not set (see APP_STORE.md)"; missing=1; fi
+            if [ -z "${!v}" ]; then echo "::error::$v is not set"; missing=1; fi
           done
-          if [ -z "${{ secrets.ASC_KEY_P8 }}" ]; then echo "::error::ASC_KEY_P8 secret is not set (see APP_STORE.md)"; missing=1; fi
+          if [ -z "${{ secrets.ASC_KEY_P8 }}" ]; then echo "::error::ASC_KEY_P8 secret is not set"; missing=1; fi
           if grep -q REPLACE_WITH_CONTACT_EMAIL web/privacy.html web/support.html; then
             echo "::error::Put your contact email in web/privacy.html and web/support.html first (Apple rejects placeholder contact info)"; missing=1
           fi
