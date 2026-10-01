@@ -16,6 +16,7 @@
 <style>
 :root{
   --a:#22f3ff;--b:#ff2d95;--g:#fff36b;--bg:#05010f;
+  --a22:rgba(34,243,255,.22);--a40:rgba(34,243,255,.4);--a50:rgba(34,243,255,.5);--a70:rgba(34,243,255,.7);--b50:rgba(255,45,149,.5);
   --top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px);
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;
 }
@@ -35,7 +36,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .tag{margin-top:14px;font-size:clamp(13px,3.6vw,17px);font-weight:700;letter-spacing:.32em;text-transform:uppercase;opacity:.75;text-align:center}
 .top-block{display:flex;flex-direction:column;align-items:center}
 .bottom-block{display:flex;flex-direction:column;align-items:center;gap:16px}
-.cta{font-size:clamp(20px,6vw,28px);font-weight:900;letter-spacing:.18em;padding:16px 34px;border-radius:999px;border:2px solid var(--a);box-shadow:0 0 24px var(--a),inset 0 0 18px color-mix(in srgb,var(--a) 40%,transparent);text-shadow:0 0 12px var(--a);animation:pulse 1.2s ease-in-out infinite}
+.cta{font-size:clamp(20px,6vw,28px);font-weight:900;letter-spacing:.18em;padding:16px 34px;border-radius:999px;border:2px solid var(--a);box-shadow:0 0 24px var(--a),inset 0 0 18px var(--a40);text-shadow:0 0 12px var(--a);animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 .best{font-size:14px;font-weight:800;letter-spacing:.3em;opacity:.8}
 .best b{color:var(--g);text-shadow:0 0 10px var(--g);font-size:18px;letter-spacing:.05em}
@@ -64,7 +65,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .btns{display:flex;flex-direction:column;gap:12px;width:min(320px,100%)}
 .btn{font:900 clamp(14px,4.4vw,18px) var(--font);letter-spacing:.12em;white-space:nowrap;color:#fff;padding:17px 20px;border-radius:999px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);cursor:pointer;transition:transform .12s ease;display:flex;align-items:center;justify-content:center;gap:10px}
 .btn:active{transform:scale(.94)}
-.btn.primary{border:none;background:linear-gradient(90deg,var(--a),var(--b));color:#0a0414;box-shadow:0 0 28px color-mix(in srgb,var(--a) 70%,transparent),0 0 28px color-mix(in srgb,var(--b) 50%,transparent)}
+.btn.primary{border:none;background:linear-gradient(90deg,var(--a),var(--b));color:#0a0414;box-shadow:0 0 28px var(--a70),0 0 28px var(--b50)}
 .btn svg{width:20px;height:20px}
 
 /* ---------- pause ---------- */
@@ -89,11 +90,11 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .sub{font-size:13px;font-weight:700;letter-spacing:.18em;opacity:.7;text-align:center;text-transform:uppercase}
 .code{font-size:clamp(46px,16vw,72px);font-weight:900;letter-spacing:.2em;color:var(--g);text-shadow:0 0 22px var(--g);font-variant-numeric:tabular-nums}
 .field{width:min(320px,100%);font:800 18px var(--font);color:#fff;text-align:center;letter-spacing:.08em;padding:14px 16px;border-radius:16px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);outline:none;-webkit-user-select:text;user-select:text}
-.field:focus{border-color:var(--a);box-shadow:0 0 18px color-mix(in srgb,var(--a) 50%,transparent)}
+.field:focus{border-color:var(--a);box-shadow:0 0 18px var(--a50)}
 .field.codein{font-size:28px;letter-spacing:.35em;text-transform:uppercase}
 .list{list-style:none;width:min(340px,100%);display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow-y:auto;touch-action:pan-y}
 .list li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.06);font-weight:800;font-size:16px}
-.list li.me{background:color-mix(in srgb,var(--a) 22%,transparent);box-shadow:inset 0 0 0 1.5px var(--a)}
+.list li.me{background:var(--a22);box-shadow:inset 0 0 0 1.5px var(--a)}
 .list .dot{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:0 0 10px currentColor;background:currentColor}
 .list .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .list .rk{width:26px;opacity:.6;font-variant-numeric:tabular-nums}
@@ -103,7 +104,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .row .btn{flex:1}
 .or{font-size:12px;font-weight:800;letter-spacing:.3em;opacity:.45}
 .grank{font-size:14px;font-weight:900;letter-spacing:.2em;color:var(--g);min-height:18px}
-#banner{position:fixed;left:50%;top:calc(var(--top) + 70px);transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px color-mix(in srgb,var(--a) 50%,transparent);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
+#banner{position:fixed;left:50%;top:calc(var(--top) + 70px);transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
 #banner.show{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
 </style>
@@ -274,18 +275,17 @@ const ROAST = ['WASTED', 'SO CLOSE', 'ORBIT DECAYED', 'SPAGHETTIFIED', 'OOF', 'G
    ========================================================= */
 const cvs = $('#game');
 const ctx = cvs.getContext('2d', { alpha: false });
-let W, H, DPR, CX, CY, U, R_IN, R_OUT, SAFE_TOP = 0, SAFE_BOT = 0;
+let W, H, DPR, CX, CY, U, R_OUT, SAFE_TOP = 0, SAFE_BOT = 0;
 const P_R = 8, SPIKE_R = 10, GEM_R = 8;
 
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
   W = window.innerWidth; H = window.innerHeight;
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt(2.6e6 / (W * H)));
   cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
   const m = Math.min(W, H);
   U = m / 400;
   CX = W / 2; CY = H / 2 + (H > W ? H * 0.02 : 0);
   R_OUT = m * (H > W ? 0.4 : 0.36);
-  R_IN = R_OUT * 0.6;
   const cs = getComputedStyle($('#safe'));
   SAFE_TOP = parseFloat(cs.paddingTop) || 0;
   SAFE_BOT = parseFloat(cs.paddingBottom) || 0;
@@ -345,10 +345,18 @@ function applyTheme(i) {
   };
   const r = document.documentElement.style;
   r.setProperty('--a', T.a); r.setProperty('--b', T.b); r.setProperty('--g', T.g); r.setProperty('--bg', T.bg[1]);
+  // translucent variants (instead of CSS color-mix, which needs iOS 16.2+)
+  for (const k of [22, 40, 50, 70]) r.setProperty('--a' + k, hexA(T.a, k / 100));
+  r.setProperty('--b50', hexA(T.b, 0.5));
   const meta = document.querySelector('meta[name=theme-color]');
   if (meta) meta.setAttribute('content', T.bg[1]);
 }
 applyTheme(0);
+// Build every theme's sprites up front so level-ups and new colors never hitch mid-run.
+setTimeout(() => {
+  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); }
+  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88']) glowSprite(c);
+}, 50);
 
 /* =========================================================
    Audio — everything synthesized, no assets
@@ -463,12 +471,13 @@ function beatPulse() {
    Game state
    ========================================================= */
 const S = {
-  mode: 'title', t: 0, theta: 0, omega: 1.2, omegaT: 1.2, ring: 1, rPos: 1,
+  mode: 'title', t: 0, theta: 0, omega: 1.2, omegaT: 1.2, ring: 0, rPos: 0, rings: 2, ringsF: 2,
+  prevFree: [0, 1], prevA: -99, ringHintT: -99,
   items: [], parts: [], texts: [], waves: [], trail: [],
   score: 0, best: store.get('best', 0), runs: store.get('runs', 0), passed: 0, level: 1,
   combo: 0, maxCombo: 0, gems: 0, mult: 1, next: 0,
   shake: 0, flash: 0, flashColor: '#fff', timeScale: 1, warp: 0, coreKick: 0,
-  lastSwitch: -9, switchFrom: 1, demoT: 0, runT: 0, paused: false, card: null,
+  lastSwitch: -9, switchFrom: 0, demoT: 0, runT: 0, paused: false, card: null,
   mp: false, spawned: 0, cdSec: 0, sentScore: 0, sentT: 0, lastStanding: false, prevBest: 0,
 };
 const stars = Array.from({ length: 170 }, () => ({ a: rand(0, TAU), d: rand(0.02, 1), s: rand(0.3, 1) }));
@@ -477,8 +486,19 @@ function pos(a, r) {
   const ang = a - Math.PI / 2;
   return { x: CX + Math.cos(ang) * r, y: CY + Math.sin(ang) * r };
 }
-const ringR = ring => (ring ? R_OUT : R_IN);
-const playerPos = () => pos(S.theta, lerp(R_IN, R_OUT, S.rPos));
+/* Orbits are indexed from the outside: 0 is the outer ring. More rings appear
+   inside as the levels go up; the outer ring never moves and the others
+   re-space smoothly (ringsF animates toward the ring count). */
+const MAX_RINGS = 4;
+const ringsFor = L => (L >= 6 ? 4 : L >= 3 ? 3 : 2);
+function innerFrac(n) {          // inner ring radius as a fraction of R_OUT
+  const k = clamp(n, 2, 4);
+  return k <= 3 ? lerp(0.6, 0.5, k - 2) : lerp(0.5, 0.43, k - 3);
+}
+const gapFrac = n => (1 - innerFrac(n)) / (Math.max(2, n) - 1);
+const radiusAt = k => R_OUT * (1 - k * gapFrac(S.ringsF));
+const ringR = ring => radiusAt(ring);
+const playerPos = () => pos(S.theta, radiusAt(S.rPos));
 
 /* ----- effects ----- */
 function burst(x, y, n, colors, speed = 260, life = 0.8, size = 14, grav = 0) {
@@ -506,33 +526,91 @@ function mulberry32(a) {
   };
 }
 let rng = Math.random;
+// Objects become visible/collidable only inside this window ahead of the player.
+// Patterns can be generated further ahead than a full lap would allow, and without
+// this they would sit (and collide) right behind the player on the circle.
+const VIEW_AHEAD = 3.7;
+const inView = it => it.a - S.theta < VIEW_AHEAD;
 const omegaFor = L => Math.min(3.8, 1.9 + (L - 1) * 0.19);
 function addItem(type, a, ring) {
-  if (type === 'spike') S.spawned++;
   S.items.push({ type, a, ring, born: S.t, fade: 0, passed: false, spin: rng() * 2 - 1 });
 }
+// Place a column of spikes at angle `a`, pushed forward if needed so that every
+// orbit the player could be on after the previous column can reach a free orbit
+// in time (one extra gap per orbit to cross).
+function column(a, blocked, gemRing, n, g) {
+  if (blocked.length) {
+    const free = [];
+    for (let k = 0; k < n; k++) if (!blocked.includes(k)) free.push(k);
+    let dist = 0;
+    for (const p of S.prevFree) {
+      let m = 99;
+      for (const f of free) m = Math.min(m, Math.abs(p - f));
+      dist = Math.max(dist, m);
+    }
+    a = Math.max(a, S.prevA + (dist === 0 ? 0.21 : g * (0.45 + 0.6 * dist)));
+    for (const r of blocked) addItem('spike', a, r);
+    S.prevFree = free; S.prevA = a;
+    S.spawned++;                     // difficulty counts columns, not individual spikes
+  }
+  if (gemRing >= 0) addItem('gem', a, gemRing);
+  return a;
+}
 function spawn() {
-  while (S.next < S.theta + TAU * 0.6) {
+  while (S.next < S.theta + TAU * 0.65) {
     const L = 1 + Math.floor(S.spawned / 12);
     const g = omegaFor(L) * clamp(0.5 - (L - 1) * 0.022, 0.34, 0.5);
-    let a = S.next, r = rng() < 0.5 ? 0 : 1;
-    const roll = rng();
-    if (roll < 0.34) {                               // single spike, gem on the safe orbit
-      addItem('spike', a, r); addItem('gem', a, 1 - r); a += g;
-    } else if (roll < 0.62) {                        // zig-zag
-      const n = 2 + ((rng() * Math.min(4, 1 + L)) | 0);
-      for (let i = 0; i < n; i++) { const rr = (r + i) % 2; addItem('spike', a, rr); addItem('gem', a, 1 - rr); a += g * 1.05; }
-    } else if (roll < 0.82) {                        // long wall on one orbit
-      const n = 3 + ((rng() * Math.min(4, L + 1)) | 0);
-      for (let i = 0; i < n; i++) { addItem('spike', a, r); if (i % 2 === 0) addItem('gem', a, 1 - r); a += 0.21; }
-      a += g * 0.6;
-    } else {                                         // gem river with a spike guard
-      const n = 4 + ((rng() * 3) | 0);
-      for (let i = 0; i < n; i++) { addItem('gem', a, r); if (i === ((n / 2) | 0)) addItem('spike', a, 1 - r); a += 0.19; }
+    const n = ringsFor(L);
+    if (n > S.rings) unlockRing(n);
+    const other = r => { const o = (rng() * (n - 1)) | 0; return o >= r ? o + 1 : o; };
+    const step = (r, i) => (n === 2 ? (r + i) % 2 : clamp(r + (rng() < 0.5 ? -1 : 1), 0, n - 1));
+    let a = S.next, r = (rng() * n) | 0;
+    let roll = rng();
+    if (n >= 3 && roll < 0.24) {                     // gates: every orbit blocked but one
+      const cnt = 2 + ((rng() * Math.min(3, L - 1)) | 0);
+      let hole = r;
+      for (let i = 0; i < cnt; i++) {
+        const blocked = [];
+        for (let k = 0; k < n; k++) if (k !== hole) blocked.push(k);
+        a = column(a, blocked, hole, n, g) + 0.05;
+        hole = step(hole, 1);
+      }
       a += g * 0.4;
+    } else {
+      if (n >= 3) roll = (roll - 0.24) / 0.76;
+      if (roll < 0.34) {                             // single spike, gem on a safe orbit
+        a = column(a, [r], other(r), n, g) + g;
+      } else if (roll < 0.62) {                      // zig-zag
+        const cnt = 2 + ((rng() * Math.min(4, 1 + L)) | 0);
+        let rr = r, prev = -1;
+        for (let i = 0; i < cnt; i++) {
+          a = column(a, [rr], prev >= 0 && prev !== rr ? prev : other(rr), n, g) + g * 1.05;
+          prev = rr; rr = n === 2 ? 1 - rr : step(rr, 1);
+          if (rr === prev) rr = other(prev);
+        }
+      } else if (roll < 0.82) {                      // long wall on one orbit
+        const cnt = 3 + ((rng() * Math.min(4, L + 1)) | 0);
+        for (let i = 0; i < cnt; i++) a = column(a, [r], i % 2 === 0 ? other(r) : -1, n, g) + 0.21;
+        a += g * 0.6;
+      } else {                                       // gem river with a spike guard
+        const cnt = 4 + ((rng() * 3) | 0);
+        for (let i = 0; i < cnt; i++) {
+          a = i === ((cnt / 2) | 0) ? column(a, [other(r)], r, n, g) : column(a, [], r, n, g);
+          a += 0.19;
+        }
+        a += g * 0.4;
+      }
     }
     S.next = a + g * (0.95 + rng() * 0.55);
   }
+}
+function unlockRing(n) {
+  S.rings = n;
+  if (S.mode !== 'playing') return;
+  S.ringHintT = S.t;
+  popText('+1 ORBIT', CX, CY + R_OUT + 40 * U, T.a, 30, 1.6);
+  wave(CX, CY, T.a, R_OUT * innerFrac(n) / U, 6, 0.9);
+  tone(330, 0.5, 'sine', 0.15, 0, 660);
 }
 
 /* ----- flow ----- */
@@ -548,7 +626,8 @@ function start(seed) {
   S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
   S.omega = S.omegaT = omegaFor(1); S.timeScale = 1; S.runT = 0;
   S.items.length = 0; S.trail.length = 0;
-  S.theta = 0; S.ring = 1; S.rPos = 1; S.switchFrom = 1; S.lastSwitch = -9;
+  S.theta = 0; S.ring = 0; S.rPos = 0; S.switchFrom = 0; S.lastSwitch = -9;
+  S.rings = 2; S.ringsF = 2; S.prevFree = [0, 1]; S.prevA = -99; S.ringHintT = -99; S.lastPassA = -99; S.lastNearA = -99;
   S.next = 2.4;
   S.sentScore = 0; S.sentT = 0; S.lastStanding = false; S.prevBest = S.best;
   S.runs++; store.set('runs', S.runs);
@@ -561,24 +640,32 @@ function start(seed) {
   musicStart();
 }
 
-function switchRing() {
-  S.switchFrom = S.ring; S.ring = 1 - S.ring; S.lastSwitch = S.t;
+function switchRing(dir) {
+  const n = S.rings;
+  if (!dir) dir = S.ring < n - 1 ? 1 : -1;
+  let to = S.ring + dir;
+  if (to < 0 || to > n - 1) to = S.ring - dir;
+  if (to < 0 || to > n - 1) return;
+  S.switchFrom = S.ring; S.ring = to; S.lastSwitch = S.t;
   const p = playerPos();
   burst(p.x, p.y, 6, [T.a, '#ffffff'], 120, 0.35, 10);
-  SFX.swap(S.ring === 1); haptic('light');
+  SFX.swap(to < S.switchFrom); haptic('light');
   if (S.mp) Net.send({ t: 'sw', r: S.ring, th: +S.theta.toFixed(4) });
 }
 
 function onPassSpike(it, p) {
-  S.passed++; addScore(1);
-  if (S.t - S.lastSwitch < 0.3 && S.switchFrom === it.ring && S.ring !== it.ring) {
+  // A column (e.g. a gate blocking 3 orbits) counts once for score and level.
+  const newCol = Math.abs(it.a - S.lastPassA) > 0.01;
+  if (newCol) { S.lastPassA = it.a; S.passed++; addScore(1); }
+  if (Math.abs(it.a - S.lastNearA) > 0.01 && S.t - S.lastSwitch < 0.3 && S.switchFrom === it.ring && S.ring !== it.ring) {
+    S.lastNearA = it.a;
     addScore(2);
     popText(['CLOSE!', 'WHOA!', 'NICE!', 'CLUTCH!', 'INSANE!'][(Math.random() * 5) | 0] + ' +2', p.x, p.y - 30 * U, '#ffffff', 22);
     wave(p.x, p.y, '#ffffff', 50, 3, 0.35);
     S.shake = Math.max(S.shake, 0.18);
     SFX.near(); haptic('light');
   }
-  if (S.passed % 12 === 0) levelUp();
+  if (newCol && S.passed % 12 === 0) levelUp();
 }
 
 function collect(it, p) {
@@ -745,6 +832,7 @@ function update(dt) {
   S.timeScale = lerp(S.timeScale, 1, 1 - Math.exp(-dt * (S.mode === 'dying' ? 1.4 : 6)));
   const gdt = dt * S.timeScale;
   S.omega = lerp(S.omega, S.omegaT, 1 - Math.exp(-dt * 2));
+  S.ringsF += (S.rings - S.ringsF) * (1 - Math.exp(-dt * 3));
 
   if (S.mode === 'playing') {
     S.runT += dt;
@@ -755,6 +843,7 @@ function update(dt) {
     for (let i = S.items.length - 1; i >= 0; i--) {
       const it = S.items[i];
       if (it.fade > 0) { it.fade += gdt * 4; if (it.fade >= 1) S.items.splice(i, 1); continue; }
+      if (!inView(it)) continue;
       const ip = pos(it.a, ringR(it.ring));
       const d = Math.hypot(ip.x - pp.x, ip.y - pp.y);
       if (it.type === 'spike') {
@@ -779,8 +868,8 @@ function update(dt) {
       if (S.theta > it.a + 0.7) it.fade = 0.001;
     }
   } else if (S.mode === 'countdown') {
-    S.theta = 0; S.ring = 1;
-    S.rPos += (1 - S.rPos) * (1 - Math.exp(-dt * 10));
+    S.theta = 0; S.ring = 0; S.rings = 2;
+    S.rPos += (0 - S.rPos) * (1 - Math.exp(-dt * 10));
     for (let i = S.items.length - 1; i >= 0; i--) { const it = S.items[i]; if (!it.fade) it.fade = 0.001; it.fade += dt * 3; if (it.fade >= 1) S.items.splice(i, 1); }
     const left = Net.localStart - Date.now();
     const sec = Math.ceil(left / 1000);
@@ -790,7 +879,10 @@ function update(dt) {
     // attract mode: the player orbits and hops by itself
     S.theta += (S.mode === 'dying' ? S.omega : 1.3) * gdt;
     S.demoT += dt;
-    if (S.mode !== 'dying' && S.demoT > 1.1) { S.demoT = 0; S.ring = 1 - S.ring; }
+    if (S.mode !== 'dying') {
+      S.rings = 2;
+      if (S.demoT > 1.1 || S.ring > 1) { S.demoT = 0; S.ring = S.ring ? 0 : 1; }
+    }
     S.rPos += (S.ring - S.rPos) * (1 - Math.exp(-gdt * 14));
     for (let i = S.items.length - 1; i >= 0; i--) {
       const it = S.items[i];
@@ -851,10 +943,10 @@ function render() {
   ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
-  // background
-  const bg = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.hypot(W, H) * 0.62);
-  bg.addColorStop(0, T.bg[0]); bg.addColorStop(1, T.bg[1]);
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  // background (low-res layer, stretched)
+  drawBackdrop();
+  ctx.globalAlpha = 1;
+  ctx.drawImage(BG.c, 0, 0, W, H);
 
   // screen shake
   if (S.shake > 0.01) {
@@ -863,29 +955,32 @@ function render() {
   }
 
   ctx.globalCompositeOperation = 'lighter';
-  // nebula
-  const nt = S.t * 0.15;
-  drawImg(SPR.a, CX + Math.cos(nt) * W * 0.3, CY + Math.sin(nt * 1.3) * H * 0.25, Math.max(W, H) * 1.3, 0.07);
-  drawImg(SPR.b, CX + Math.cos(nt * 0.8 + 2) * W * 0.35, CY + Math.sin(nt + 1) * H * 0.3, Math.max(W, H) * 1.1, 0.06);
-
-  // warp stars
+  // warp stars, batched into a few brightness buckets (one stroke call each)
   const maxR = Math.hypot(W, H) * 0.55;
   ctx.strokeStyle = '#ffffff'; ctx.lineCap = 'round';
-  for (const st of stars) {
-    const r = st.d * maxR, r0 = r * (1 - 0.04 - S.warp * 0.3);
-    const c = Math.cos(st.a), s = Math.sin(st.a);
-    ctx.globalAlpha = Math.min(1, st.d * 1.4) * 0.85;
-    ctx.lineWidth = st.s * U * (0.6 + st.d * 1.6);
-    ctx.beginPath(); ctx.moveTo(CX + c * r0, CY + s * r0); ctx.lineTo(CX + c * r, CY + s * r); ctx.stroke();
+  for (let b = 0; b < 4; b++) {
+    ctx.globalAlpha = 0.22 + b * 0.21;
+    ctx.lineWidth = U * (0.8 + b * 0.75);
+    ctx.beginPath();
+    for (const st of stars) {
+      if (Math.min(3, (st.d * 4) | 0) !== b) continue;
+      const r = st.d * maxR, r0 = r * (1 - 0.04 - S.warp * 0.3);
+      const c = Math.cos(st.a), s = Math.sin(st.a);
+      ctx.moveTo(CX + c * r0, CY + s * r0); ctx.lineTo(CX + c * r, CY + s * r);
+    }
+    ctx.stroke();
   }
 
   // rings
-  const onOut = S.rPos;
-  for (const [R, active] of [[R_IN, 1 - onOut], [R_OUT, onOut]]) {
-    ctx.strokeStyle = T.a;
-    ctx.globalAlpha = 0.06 + 0.06 * active + beat * 0.05; ctx.lineWidth = 16 * U;
+  const R_INNER = R_OUT * innerFrac(S.ringsF);
+  ctx.strokeStyle = T.a;
+  for (let k = 0; k < MAX_RINGS; k++) {
+    const vis = clamp(S.ringsF - k, 0, 1);
+    if (vis < 0.01) continue;
+    const R = radiusAt(k), active = Math.max(0, 1 - Math.abs(S.rPos - k));
+    ctx.globalAlpha = (0.06 + 0.06 * active + beat * 0.05) * vis; ctx.lineWidth = 16 * U;
     ctx.beginPath(); ctx.arc(CX, CY, R, 0, TAU); ctx.stroke();
-    ctx.globalAlpha = 0.35 + 0.5 * active; ctx.lineWidth = (1.5 + active * 1.5) * U;
+    ctx.globalAlpha = (0.35 + 0.5 * active) * vis; ctx.lineWidth = (1.5 + active * 1.5) * U;
     ctx.beginPath(); ctx.arc(CX, CY, R, 0, TAU); ctx.stroke();
   }
   // decorative rotating dashes
@@ -893,11 +988,11 @@ function render() {
   ctx.setLineDash([4 * U, 14 * U]); ctx.lineDashOffset = -S.t * 40 * U;
   ctx.beginPath(); ctx.arc(CX, CY, R_OUT + 22 * U * (1 + beat * 0.15), 0, TAU); ctx.stroke();
   ctx.strokeStyle = T.b; ctx.lineDashOffset = S.t * 30 * U; ctx.globalAlpha = 0.2;
-  ctx.beginPath(); ctx.arc(CX, CY, R_IN - 18 * U, 0, TAU); ctx.stroke();
+  ctx.beginPath(); ctx.arc(CX, CY, R_INNER - 18 * U, 0, TAU); ctx.stroke();
   ctx.setLineDash([]);
 
   // core
-  const RC = R_IN * 0.62;
+  const RC = R_INNER * 0.62;
   drawImg(SPR.a, CX, CY, RC * (3 + beat * 0.6 + S.coreKick * 0.8), 0.3 + beat * 0.25);
   ctx.globalCompositeOperation = 'source-over';
   ctx.globalAlpha = 1;
@@ -925,10 +1020,12 @@ function render() {
 
   // items: glows (additive) then sprites
   ctx.globalCompositeOperation = 'lighter';
-  const prr = lerp(R_IN, R_OUT, S.rPos);
+  const prr = radiusAt(S.rPos);
   for (const it of S.items) {
+    if (!inView(it)) continue;
+    if (!it.shown) { it.shown = true; it.born = S.t; }   // fade in as it enters the view
     const p = pos(it.a, ringR(it.ring));
-    const app = easeOut(clamp((S.t - it.born) / 0.35, 0, 1)), al = app * (1 - it.fade);
+    const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     if (it.type === 'spike') {
       const ahead = it.a - S.theta;
       const danger = ahead > -0.1 && ahead < 1.2 && Math.abs(ringR(it.ring) - prr) < 12 * U ? 1 - Math.max(0, ahead) / 1.2 : 0;
@@ -939,8 +1036,9 @@ function render() {
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const it of S.items) {
+    if (!it.shown) continue;
     const p = pos(it.a, ringR(it.ring));
-    const app = easeOut(clamp((S.t - it.born) / 0.35, 0, 1)), al = app * (1 - it.fade);
+    const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     ctx.save(); ctx.translate(p.x, p.y); ctx.globalAlpha = al;
     if (it.type === 'spike') {
       ctx.rotate(S.t * (3 + it.spin) + it.a);
@@ -993,10 +1091,10 @@ function render() {
   for (const t of S.texts) {
     const k = t.t / t.life;
     const pop = k < 0.15 ? easeOut(k / 0.15) * 1.25 : 1.25 - Math.min(0.25, (k - 0.15) * 1.5);
-    ctx.shadowColor = t.color; ctx.shadowBlur = 12 * U;
-    txt(t.str, t.x, t.y, t.size * U * pop, t.color, k > 0.7 ? (1 - k) / 0.3 : 1);
+    const al = k > 0.7 ? (1 - k) / 0.3 : 1, size = t.size * U * pop;
+    txt(t.str, t.x + 1.5 * U, t.y + 1.5 * U, size, 'rgba(0,0,0,.55)', al);
+    txt(t.str, t.x, t.y, size, t.color, al);
   }
-  ctx.shadowBlur = 0;
 
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
@@ -1021,14 +1119,39 @@ function render() {
       const a = Math.min(1, (4.5 - S.runT)) * (0.6 + 0.4 * Math.sin(S.t * 8));
       txt('TAP ANYWHERE TO SWITCH ORBIT', CX, Math.min(H - SAFE_BOT - 40, CY + R_OUT + 60 * U), 14, '#ffffff', a, 800);
     }
+    if (S.t - S.ringHintT < 4 && S.mode === 'playing') {
+      const a = Math.min(1, 4 - (S.t - S.ringHintT)) * (0.7 + 0.3 * Math.sin(S.t * 8));
+      const yy = Math.min(H - SAFE_BOT - 52, CY + R_OUT + 76 * U);
+      txt('TAP INSIDE YOUR ORBIT ↓ TO DIVE IN', CX, yy, 14, '#ffffff', a, 800);
+      txt('TAP OUTSIDE ↑ TO RISE', CX, yy + 20, 14, '#ffffff', a, 800);
+    }
   }
 
-  // vignette + flash
-  const vg = ctx.createRadialGradient(CX, CY, Math.min(W, H) * 0.35, CX, CY, Math.hypot(W, H) * 0.6);
-  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
-  ctx.globalAlpha = 1; ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  // flash
   if (S.flash > 0.01) { ctx.globalAlpha = S.flash; ctx.fillStyle = S.flashColor; ctx.fillRect(0, 0, W, H); }
   ctx.globalAlpha = 1;
+}
+const BG = { c: document.createElement('canvas') };
+BG.g = BG.c.getContext('2d');
+function drawBackdrop() {
+  const sc = 0.25, w = Math.max(16, Math.ceil(W * sc)), h = Math.max(16, Math.ceil(H * sc));
+  if (BG.c.width !== w || BG.c.height !== h) { BG.c.width = w; BG.c.height = h; }
+  const g = BG.g, cx = CX * sc, cy = CY * sc, diag = Math.hypot(w, h);
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+  const bg = g.createRadialGradient(cx, cy, 0, cx, cy, diag * 0.62);
+  bg.addColorStop(0, T.bg[0]); bg.addColorStop(1, T.bg[1]);
+  g.fillStyle = bg; g.fillRect(0, 0, w, h);
+  // drifting nebula
+  g.globalCompositeOperation = 'lighter';
+  const nt = S.t * 0.15, big = Math.max(w, h);
+  const blob = (img, x, y, size, a) => { g.globalAlpha = a; g.drawImage(img, x - size / 2, y - size / 2, size, size); };
+  blob(SPR.a, cx + Math.cos(nt) * w * 0.3, cy + Math.sin(nt * 1.3) * h * 0.25, big * 1.3, 0.07);
+  blob(SPR.b, cx + Math.cos(nt * 0.8 + 2) * w * 0.35, cy + Math.sin(nt + 1) * h * 0.3, big * 1.1, 0.06);
+  // vignette
+  g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+  const vg = g.createRadialGradient(cx, cy, Math.min(w, h) * 0.35, cx, cy, diag * 0.6);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+  g.fillStyle = vg; g.fillRect(0, 0, w, h);
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath();
@@ -1244,7 +1367,7 @@ const Net = {
         for (const p of this.players) {
           if (p.id === this.me || !p.playing) continue;
           this.ghosts.set(p.id, { id: p.id, name: p.name, color: p.color, playing: true, alive: true, dead: false,
-            score: 0, ring: 1, rPos: 1, events: [], trail: [], phi: 0, slot: 0 });
+            score: 0, ring: 0, rPos: 0, events: [], trail: [], phi: 0, slot: 0 });
         }
         this.matchSize = this.ghosts.size + 1;
         S.mp = true; S.mode = 'countdown'; S.cdSec = 0; S.score = 0;
@@ -1300,7 +1423,7 @@ const Net = {
         if (ev.dead) {
           if (!g.dead) {
             g.dead = true;
-            const p = pos(phi, lerp(R_IN, R_OUT, g.rPos));
+            const p = pos(phi, radiusAt(g.rPos));
             burst(p.x, p.y, 40, [g.color, '#ffffff'], 380, 1, 14);
             wave(p.x, p.y, g.color, 110, 6, 0.6);
             noise(0.4, 0.15, 0, 2000, 'lowpass', 1, 100);
@@ -1309,7 +1432,7 @@ const Net = {
       }
       g.rPos += (g.ring - g.rPos) * (1 - Math.exp(-gdt * 22));
       g.phi = phi;
-      if (!g.dead) { g.trail.unshift(pos(phi, lerp(R_IN, R_OUT, g.rPos))); if (g.trail.length > 14) g.trail.pop(); }
+      if (!g.dead) { g.trail.unshift(pos(phi, radiusAt(g.rPos))); if (g.trail.length > 14) g.trail.pop(); }
       else if (g.trail.length) g.trail.pop();
     }
   },
@@ -1326,13 +1449,13 @@ const Net = {
         ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
       }
       if (g.dead) continue;
-      const p = pos(g.phi, lerp(R_IN, R_OUT, g.rPos));
+      const p = pos(g.phi, radiusAt(g.rPos));
       drawImg(glowSprite(g.color), p.x, p.y, P_R * U * 5, 0.75);
     }
     ctx.globalCompositeOperation = 'source-over';
     for (const g of this.ghosts.values()) {
       if (g.dead) continue;
-      const p = pos(g.phi, lerp(R_IN, R_OUT, g.rPos));
+      const p = pos(g.phi, radiusAt(g.rPos));
       ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.5, 0, TAU); ctx.fill();
       // name tag on the outside of the orbit
@@ -1363,7 +1486,10 @@ const Net = {
 function onTap(e) {
   if (e) e.preventDefault();
   audioInit();
-  if (S.mode === 'playing' && !S.paused) switchRing();
+  if (S.mode !== 'playing' || S.paused) return;
+  // Tap outside your orbit to move out, inside it to move in (any tap works with 2 orbits).
+  const d = e && e.clientX !== undefined ? Math.hypot(e.clientX - CX, e.clientY - CY) : 0;
+  switchRing(d > radiusAt(S.rPos) ? -1 : 1);
 }
 cvs.addEventListener('pointerdown', onTap);
 $('#playSolo').addEventListener('click', () => start());
@@ -1405,7 +1531,7 @@ window.addEventListener('keydown', e => {
     if (S.mode === 'title' && $('#title').classList.contains('show')) start();
     else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) start();
     else if (S.paused) resume();
-    else if (S.mode === 'playing') switchRing();
+    else if (S.mode === 'playing') switchRing(e.code === 'ArrowUp' || e.code === 'ArrowRight' ? -1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' ? 1 : 0);
   } else if (e.code === 'KeyP' || e.code === 'Escape') pause();
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });

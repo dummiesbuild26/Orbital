@@ -303,7 +303,7 @@ export class Room extends DurableObject {
         break;
       case 'sw':
         if (m.phase === 'playing' && p.alive) {
-          this.broadcast({ t: 'sw', id: p.id, r: msg.r ? 1 : 0, th: Number(msg.th) || 0 }, ws);
+          this.broadcast({ t: 'sw', id: p.id, r: Math.max(0, Math.min(3, Math.floor(Number(msg.r) || 0))), th: Number(msg.th) || 0 }, ws);
         }
         break;
       case 'sc':
