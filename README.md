@@ -10,6 +10,7 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 - Combo multipliers up to x6, near-miss bonuses ("CLUTCH! +2"), roast messages on death
 - **Hopper spikes** that jump to another orbit as you close in (a dashed target shows where they'll land), and **shield** pickups that absorb one hit
 - **Daily challenge:** one fixed course per day, with today's best and a day streak
+- **Pilot screen:** lifetime stats, 14 achievements and 8 unlockable comet skins (saved on the device)
 - **Challenge a Friend** creates a 1080×1080 score card and opens the share sheet
 - Haptics on iOS, saved best score, pause on background
 - **Online multiplayer:** in Quick Match, up to 8 players race the *identical* course live and the last comet alive wins. You see every rival as a glowing ghost on the orbit

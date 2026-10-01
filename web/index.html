@@ -116,6 +116,32 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .daily:active{transform:scale(.95)}
 .daily b{font-size:15px;font-weight:900;letter-spacing:.18em;color:var(--g);text-shadow:0 0 10px var(--g)}
 .daily span{font-size:11px;font-weight:700;letter-spacing:.1em;opacity:.7;text-transform:uppercase;white-space:nowrap}
+#pilotBtn{position:relative;display:flex;align-items:center;gap:12px;padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;font-family:var(--font);cursor:pointer}
+#pilotBtn:active{transform:scale(.95)}
+#pilotBtn .pl{font-size:12px;font-weight:900;letter-spacing:.2em;opacity:.85;border-left:1.5px solid rgba(255,255,255,.2);padding-left:12px}
+#pilotBtn .dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);display:none}
+#pilotBtn.new .dot{display:block}
+#pilot{justify-content:flex-start;padding-top:calc(var(--top) + 64px);gap:12px}
+.scroll{width:min(360px,100%);flex:1 1 auto;min-height:0;overflow-y:auto;touch-action:pan-y;display:flex;flex-direction:column;align-items:center;gap:14px;padding-bottom:6px;-webkit-mask-image:linear-gradient(#000 92%,transparent);mask-image:linear-gradient(#000 92%,transparent)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.grid div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.06);font-size:10px;font-weight:800;letter-spacing:.14em;opacity:.95;text-align:center}
+.grid b{font-size:19px;letter-spacing:0;color:#fff;font-variant-numeric:tabular-nums}
+.h2{font-size:12px;font-weight:900;letter-spacing:.3em;opacity:.65;align-self:flex-start;margin-top:4px}
+.skins{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%}
+.skin{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.skin i{width:18px;height:18px;border-radius:50%;background:var(--c);box-shadow:0 0 12px 3px var(--c),0 0 3px #fff inset}
+.skin.sel{border-color:#fff;box-shadow:0 0 16px var(--a50)}
+.skin.locked i{background:rgba(255,255,255,.15);box-shadow:none}
+.skin.locked::after{content:'🔒';position:absolute;font-size:16px}
+.skin:active{transform:scale(.92)}
+.ach{list-style:none;width:100%;display:flex;flex-direction:column;gap:6px}
+.ach li{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.05);opacity:.45}
+.ach li.got{opacity:1;background:rgba(255,255,255,.09)}
+.ach .ic{font-size:20px;width:26px;text-align:center;filter:grayscale(1)}
+.ach li.got .ic{filter:none}
+.ach .tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ach .tx b{font-size:14px;font-weight:900;letter-spacing:.04em}
+.ach .tx span{font-size:12px;font-weight:600;opacity:.7}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
 </style>
 </head>
@@ -145,7 +171,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
         RANKS
       </button>
     </div>
-    <div class="best">BEST <b id="tBest">0</b></div>
+    <button id="pilotBtn" aria-label="Pilot stats, comets and achievements"><span class="best">BEST <b id="tBest">0</b></span><span class="pl">★ PILOT</span><span class="dot"></span></button>
     <div class="howto">Tap to switch orbit · dodge <i class="dz"></i> · grab <i class="gm"></i></div>
     <div class="legal"><a id="lnkPrivacy" target="_blank" rel="noopener">Privacy</a> · <a id="lnkSupport" target="_blank" rel="noopener">Support</a></div>
   </div>
@@ -197,6 +223,18 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   <ul class="list" id="bList"></ul>
   <button class="btn" id="bBack" style="width:min(320px,100%)">BACK</button>
   <button class="linkbtn" id="bForget">Delete my online data</button>
+</div>
+
+<div id="pilot" class="screen panel">
+  <div class="go">PILOT</div>
+  <div class="scroll">
+    <div class="grid" id="pStats"></div>
+    <div class="h2">COMET</div>
+    <div class="skins" id="pSkins"></div>
+    <div class="h2" id="pAchH">ACHIEVEMENTS</div>
+    <ul class="ach" id="pAch"></ul>
+  </div>
+  <button class="btn" id="pBack" style="width:min(320px,100%);flex:none">BACK</button>
 </div>
 
 <div id="banner"></div>
@@ -381,7 +419,7 @@ applyTheme(0);
 // Build every theme's sprites up front so level-ups and new colors never hitch mid-run.
 setTimeout(() => {
   for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); shieldSprite(th.a); }
-  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88']) glowSprite(c);
+  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88', '#ffd84a', '#ff7a1a', '#ff4fd8', '#ff2d55']) glowSprite(c);
 }, 50);
 
 /* =========================================================
@@ -448,6 +486,7 @@ const SFX = {
   die() { noise(0.9, 0.5, 0, 3000, 'lowpass', 1, 80); tone(220, 0.7, 'sawtooth', 0.25, 0, 30); tone(110, 0.5, 'square', 0.15, 0, 25); },
   best() { if (!ok()) return; const t = A.ctx.currentTime; [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => tone(523.25 * Math.pow(2, n / 12), 0.25, 'triangle', 0.12, t + i * 0.07)); },
   click() { tone(900, 0.05, 'sine', 0.1, 0, 1300); },
+  achieve() { if (!ok()) return; const t = A.ctx.currentTime; [0, 7, 12, 19].forEach((n, i) => tone(659.25 * Math.pow(2, n / 12), 0.3, 'triangle', 0.1, t + i * 0.08)); },
   shield() { if (!ok()) return; const t = A.ctx.currentTime; [0, 5, 12].forEach((n, i) => tone(440 * Math.pow(2, n / 12), 0.2, 'triangle', 0.14, t + i * 0.05)); },
   shieldBreak() { noise(0.5, 0.35, 0, 5000, 'highpass', 0.7, 400); tone(880, 0.35, 'square', 0.08, 0, 110); },
   hop() { tone(300, 0.12, 'square', 0.05, 0, 900); noise(0.08, 0.05, 0, 3000, 'bandpass', 3); },
@@ -507,7 +546,7 @@ const S = {
   combo: 0, maxCombo: 0, gems: 0, mult: 1, next: 0,
   shake: 0, flash: 0, flashColor: '#fff', timeScale: 1, warp: 0, coreKick: 0,
   lastSwitch: -9, switchFrom: 0, demoT: 0, runT: 0, paused: false, card: null,
-  shield: 0, safeT: -9,
+  shield: 0, safeT: -9, nears: 0, saves: 0,
   mp: false, spawned: 0, cdSec: 0, sentScore: 0, sentT: 0, lastStanding: false, prevBest: 0,
 };
 const stars = Array.from({ length: 170 }, () => ({ a: rand(0, TAU), d: rand(0.02, 1), s: rand(0.3, 1) }));
@@ -676,6 +715,87 @@ function unlockRing(n) {
   tone(330, 0.5, 'sine', 0.15, 0, 660);
 }
 
+/* ----- pilot profile: lifetime stats, achievements, comet skins (all local) ----- */
+const STAT0 = { runs: 0, time: 0, gems: 0, spikes: 0, nears: 0, saves: 0, bestCombo: 0, bestLevel: 1, wins: 0, dailies: 0 };
+const loadStats = () => Object.assign({}, STAT0, store.get('stats', {}));
+const saveStats = st => store.set('stats', st);
+function recordRun() {
+  const st = loadStats();
+  st.runs++; st.time += S.runT; st.gems += S.gems; st.spikes += S.passed; st.nears += S.nears; st.saves += S.saves;
+  st.bestCombo = Math.max(st.bestCombo, S.maxCombo); st.bestLevel = Math.max(st.bestLevel, S.level);
+  if (S.daily) st.dailies++;
+  saveStats(st);
+  checkAchievements();
+}
+// r = this run (S), st = lifetime stats
+const ACH = [
+  { id: 'first', ic: '🚀', name: 'Liftoff', desc: 'Finish your first run', ok: (r, st) => st.runs >= 1 },
+  { id: 's50', ic: '⭐', name: 'Warming Up', desc: 'Score 50 in one run', ok: () => S.best >= 50 },
+  { id: 's150', ic: '🌟', name: 'Star Pilot', desc: 'Score 150 in one run', ok: () => S.best >= 150 },
+  { id: 's300', ic: '💫', name: 'Supernova', desc: 'Score 300 in one run', ok: () => S.best >= 300 },
+  { id: 's600', ic: '🌌', name: 'Event Horizon', desc: 'Score 600 in one run', ok: () => S.best >= 600 },
+  { id: 'lv5', ic: '🪐', name: 'Third Orbit', desc: 'Reach level 5', ok: (r, st) => st.bestLevel >= 5 },
+  { id: 'lv10', ic: '🌀', name: 'Deep Space', desc: 'Reach level 10', ok: (r, st) => st.bestLevel >= 10 },
+  { id: 'x6', ic: '🔥', name: 'On Fire', desc: 'Reach a x6 combo', ok: (r, st) => st.bestCombo >= 25 },
+  { id: 'clutch', ic: '😮', name: 'Clutch King', desc: '100 near misses in total', ok: (r, st) => st.nears >= 100 },
+  { id: 'gems', ic: '💎', name: 'Gem Hoarder', desc: 'Collect 1,000 gems in total', ok: (r, st) => st.gems >= 1000 },
+  { id: 'saved', ic: '🛡️', name: 'Saved!', desc: 'Survive a hit with a shield', ok: (r, st) => st.saves >= 1 },
+  { id: 'streak', ic: '📅', name: 'Regular', desc: 'Play the daily 3 days in a row', ok: () => store.get('streak', { n: 0 }).n >= 3 },
+  { id: 'win', ic: '🏆', name: 'Last One Standing', desc: 'Win a match (online or vs bots)', ok: (r, st) => st.wins >= 1 },
+  { id: 'hour', ic: '⏱️', name: 'Frequent Flyer', desc: 'Fly for 30 minutes in total', ok: (r, st) => st.time >= 1800 },
+];
+// Comet skins: unlocked by achievements. `c` is the comet colour (null = theme colour).
+const RAINBOW = ['#ff2d55', '#ff9e2c', '#fff36b', '#7dff5a', '#22f3ff', '#b48cff'];
+const SKINS = [
+  { id: 'classic', name: 'Classic', c: null },
+  { id: 'gold', name: 'Gold', c: '#ffd84a', need: 's150' },
+  { id: 'ghost', name: 'Ghost', c: '#ffffff', need: 'clutch' },
+  { id: 'ember', name: 'Ember', c: '#ff7a1a', need: 'x6' },
+  { id: 'toxic', name: 'Toxic', c: '#7dff5a', need: 'lv5' },
+  { id: 'void', name: 'Void', c: '#b48cff', need: 'streak' },
+  { id: 'rose', name: 'Champion', c: '#ff4fd8', need: 'win' },
+  { id: 'rainbow', name: 'Rainbow', c: 'rainbow', need: 's300' },
+];
+const unlocked = () => new Set(store.get('ach', []));
+function checkAchievements() {
+  const got = unlocked(), st = loadStats(), fresh = [];
+  for (const a of ACH) if (!got.has(a.id) && a.ok(S, st)) { got.add(a.id); fresh.push(a); }
+  if (!fresh.length) return;
+  store.set('ach', [...got]);
+  store.set('achNew', true); $('#pilotBtn').classList.add('new');
+  const skins = SKINS.filter(k => fresh.some(a => a.id === k.need));
+  setTimeout(() => {
+    toast(`🏆 ${fresh.map(a => a.name).join(' · ')}${skins.length ? ` — new comet: ${skins.map(k => k.name).join(', ')}` : ''}`);
+    SFX.achieve();
+  }, 1300);
+}
+let skin = SKINS.find(k => k.id === store.get('skin', 'classic')) || SKINS[0];
+// Comet colour for this frame; rainbow cycles through cached glow colours.
+const skinColor = () => skin.c === 'rainbow' ? RAINBOW[((S.t * 6) | 0) % RAINBOW.length] : skin.c || T.a;
+const trailColor = i => skin.c === 'rainbow' ? RAINBOW[(i + ((S.t * 12) | 0)) % RAINBOW.length] : skin.c || T.a;
+function renderPilot() {
+  const st = loadStats(), got = unlocked();
+  const mins = Math.floor(st.time / 60);
+  const cells = [['RUNS', st.runs], ['BEST', S.best], ['LEVEL', st.bestLevel], ['GEMS', st.gems], ['SPIKES', st.spikes], ['CLUTCH', st.nears],
+    ['TOP COMBO', st.bestCombo], ['WINS', st.wins], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+  $('#pStats').innerHTML = cells.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
+  $('#pSkins').innerHTML = SKINS.map(k => {
+    const lock = k.need && !got.has(k.need);
+    const c = k.c === 'rainbow' ? 'conic-gradient(' + RAINBOW.join(',') + ',' + RAINBOW[0] + ')' : k.c || 'var(--a)';
+    return `<button class="skin${lock ? ' locked' : ''}${k === skin ? ' sel' : ''}" data-id="${k.id}" aria-label="${k.name}" style="--c:${c}"><i style="background:${c}"></i></button>`;
+  }).join('');
+  $('#pAchH').textContent = `ACHIEVEMENTS ${ACH.filter(a => got.has(a.id)).length}/${ACH.length}`;
+  $('#pAch').innerHTML = ACH.map(a => {
+    const sk = SKINS.find(k => k.need === a.id);
+    return `<li class="${got.has(a.id) ? 'got' : ''}"><span class="ic">${a.ic}</span><span class="tx"><b>${a.name}</b><span>${a.desc}${sk ? ` · unlocks ${sk.name} comet` : ''}</span></span></li>`;
+  }).join('');
+}
+function openPilot() {
+  audioInit(); SFX.click();
+  store.set('achNew', false); $('#pilotBtn').classList.remove('new');
+  renderPilot(); showScreen('pilot');
+}
+
 /* ----- daily challenge: one fixed course per (local) day ----- */
 const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 function daySeed(key) {
@@ -722,7 +842,7 @@ function start(seed, mp = false, daily = false) {
   S.mp = mp; S.daily = daily;
   rng = mulberry32(seed !== undefined ? seed : (Math.random() * 2 ** 31) | 0);
   S.mode = 'playing'; S.paused = false;
-  S.shield = 0; S.safeT = -9;
+  S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0;
   S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
   S.omega = S.omegaT = omegaFor(1); S.timeScale = 1; S.runT = 0;
   S.items.length = 0; S.trail.length = 0;
@@ -761,7 +881,7 @@ function onPassSpike(it, p) {
   const newCol = Math.abs(it.a - S.lastPassA) > 0.01;
   if (newCol) { S.lastPassA = it.a; S.passed++; addScore(1); }
   if (Math.abs(it.a - S.lastNearA) > 0.01 && S.t - S.lastSwitch < 0.3 && S.switchFrom === it.ring && S.ring !== it.ring) {
-    S.lastNearA = it.a;
+    S.lastNearA = it.a; S.nears++;
     addScore(2);
     popText(['CLOSE!', 'WHOA!', 'NICE!', 'CLUTCH!', 'INSANE!'][(Math.random() * 5) | 0] + ' +2', p.x, p.y - 30 * U, '#ffffff', 22);
     wave(p.x, p.y, '#ffffff', 50, 3, 0.35);
@@ -797,7 +917,7 @@ function getShield(p) {
 }
 // The shield eats one hit: the spike shatters and you get a short grace period.
 function shieldBreak(it, p) {
-  S.shield = 0; S.safeT = S.t + 0.6;
+  S.shield = 0; S.safeT = S.t + 0.6; S.saves++;
   it.passed = true; it.fade = 0.001;
   burst(p.x, p.y, 40, [T.a, T.b, '#ffffff'], 420, 0.8, 14);
   wave(p.x, p.y, T.a, 140, 8, 0.6);
@@ -834,6 +954,7 @@ function die(p) {
   S.shake = 1; S.flash = 0.75; S.flashColor = T.b;
   SFX.die(); haptic('error'); musicStop();
   if (S.score > S.best) { S.best = S.score; store.set('best', S.best); $('#tBest').textContent = S.best; }
+  recordRun();
   if (S.mp) {
     Net.send({ t: 'dead', s: S.score, th: +S.theta.toFixed(4) });
     submitScore(S.score, '#mGlobal');
@@ -1211,9 +1332,10 @@ function render() {
   // trail
   const tr = S.trail;
   if (tr.length > 1) {
-    ctx.strokeStyle = T.a; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = trailColor(0); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     for (let i = 1; i < tr.length; i++) {
       const k = 1 - i / tr.length;
+      if (skin.c === 'rainbow') ctx.strokeStyle = trailColor(i >> 2);
       ctx.globalAlpha = k * 0.75; ctx.lineWidth = P_R * 2 * U * k;
       ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
     }
@@ -1222,7 +1344,7 @@ function render() {
   // player
   if (S.mode !== 'dying' && S.mode !== 'spectate') {
     const p = playerPos();
-    drawImg(SPR.a, p.x, p.y, P_R * U * (7 + beat * 2), 0.9);
+    drawImg(skin.c ? glowSprite(skinColor()) : SPR.a, p.x, p.y, P_R * U * (7 + beat * 2), 0.9);
     drawImg(SPR.w, p.x, p.y, P_R * U * 3, 1);
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.75, 0, TAU); ctx.fill();
@@ -1506,6 +1628,7 @@ function showResults() {
   ).join('');
   showScreen('mpOver');
   if (won && r.length > 1) {
+    const st = loadStats(); st.wins++; saveStats(st); checkAchievements();
     for (let i = 0; i < 140; i++) {
       S.parts.push({ x: rand(0, W), y: rand(-60, -10), vx: rand(-60, 60) * U, vy: rand(80, 300) * U, life: rand(1.5, 2.8), max: 2.8,
         size: rand(8, 16) * U, img: glowSprite([T.a, T.b, T.g, '#ffffff'][i % 4]), grav: 180 * U, drag: 0.6 });
@@ -1821,6 +1944,15 @@ $('#mNext').addEventListener('click', () => {
 });
 $('#lBots').addEventListener('click', () => { SFX.click(); startBotMatch(); });
 $('#bForget').addEventListener('click', forgetMe);
+$('#pilotBtn').addEventListener('click', openPilot);
+$('#pBack').addEventListener('click', () => { SFX.click(); backToTitle(); });
+$('#pSkins').addEventListener('click', e => {
+  const b = e.target.closest('.skin'); if (!b) return;
+  const k = SKINS.find(x => x.id === b.dataset.id);
+  if (k.need && !unlocked().has(k.need)) { tone(160, 0.1, 'square', 0.05); toast(`🔒 ${ACH.find(a => a.id === k.need).desc} to unlock`); return; }
+  skin = k; store.set('skin', k.id); SFX.click(); haptic('light'); renderPilot();
+});
+if (store.get('achNew', false)) $('#pilotBtn').classList.add('new');
 const webBase = SERVER ? SERVER + '/' : '';
 $('#lnkPrivacy').href = webBase + 'privacy.html';
 $('#lnkSupport').href = webBase + 'support.html';
