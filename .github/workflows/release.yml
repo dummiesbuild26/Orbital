@@ -73,7 +73,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             TAG="$GITHUB_REF_NAME"
           else
-            TAG="v1.0.${{ github.run_number }}"
+            TAG="v1.1.${{ github.run_number }}"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"

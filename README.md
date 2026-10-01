@@ -68,7 +68,7 @@ Each push to `main` (or a `v*` tag, or a manual run from the Actions tab) runs `
 2. generates `Orbital.xcodeproj` with XcodeGen
 3. builds an **unsigned** Release `.app` that bundles `web/`
 4. zips it into `Orbital.ipa`
-5. publishes a GitHub Release (`v1.0.<run>`, or your tag) with the IPA attached
+5. publishes a GitHub Release (`v1.1.<run>`, or your tag) with the IPA attached
 
 The IPA is unsigned on purpose, because signing needs an Apple account. Sideloading tools re-sign it with your Apple ID when they install it. To publish to the App Store or TestFlight, you would add signing certificates as repository secrets and switch the build step to `xcodebuild archive` + `-exportArchive`.
 
