@@ -77,6 +77,35 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .icon-btn:active{transform:scale(.9)}
 #toast{position:fixed;left:50%;bottom:calc(var(--bot) + 30px);transform:translate(-50%,20px);background:rgba(255,255,255,.95);color:#111;font-weight:800;padding:12px 20px;border-radius:999px;opacity:0;transition:all .3s ease;pointer-events:none;z-index:9;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- menus / multiplayer ---------- */
+#title{cursor:default}
+.cta{cursor:pointer;background:transparent;color:#fff;font-family:var(--font)}
+.modes{display:flex;gap:10px;width:min(360px,100%)}
+.modes .btn{flex:1 1 0;min-width:0;flex-direction:column;gap:4px;padding:12px 6px;font-size:11px;letter-spacing:.12em}
+.modes .btn svg{width:22px;height:22px}
+.panel{justify-content:center;gap:14px;padding:calc(var(--top) + 24px) 22px calc(var(--bot) + 24px);background:radial-gradient(circle at 50% 40%,rgba(5,1,15,.6),rgba(5,1,15,.92) 70%);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.panel .go{color:#fff;text-shadow:0 0 18px var(--a)}
+.sub{font-size:13px;font-weight:700;letter-spacing:.18em;opacity:.7;text-align:center;text-transform:uppercase}
+.code{font-size:clamp(46px,16vw,72px);font-weight:900;letter-spacing:.2em;color:var(--g);text-shadow:0 0 22px var(--g);font-variant-numeric:tabular-nums}
+.field{width:min(320px,100%);font:800 18px var(--font);color:#fff;text-align:center;letter-spacing:.08em;padding:14px 16px;border-radius:16px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);outline:none;-webkit-user-select:text;user-select:text}
+.field:focus{border-color:var(--a);box-shadow:0 0 18px color-mix(in srgb,var(--a) 50%,transparent)}
+.field.codein{font-size:28px;letter-spacing:.35em;text-transform:uppercase}
+.list{list-style:none;width:min(340px,100%);display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow-y:auto;touch-action:pan-y}
+.list li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.06);font-weight:800;font-size:16px}
+.list li.me{background:color-mix(in srgb,var(--a) 22%,transparent);box-shadow:inset 0 0 0 1.5px var(--a)}
+.list .dot{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:0 0 10px currentColor;background:currentColor}
+.list .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .rk{width:26px;opacity:.6;font-variant-numeric:tabular-nums}
+.list .sc{font-variant-numeric:tabular-nums;color:var(--g)}
+.list .tag2{font-size:10px;letter-spacing:.15em;opacity:.6}
+.row{display:flex;gap:10px;width:min(340px,100%)}
+.row .btn{flex:1}
+.or{font-size:12px;font-weight:800;letter-spacing:.3em;opacity:.45}
+.grank{font-size:14px;font-weight:900;letter-spacing:.2em;color:var(--g);min-height:18px}
+#banner{position:fixed;left:50%;top:calc(var(--top) + 70px);transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px color-mix(in srgb,var(--a) 50%,transparent);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
+#banner.show{opacity:1;transform:translate(-50%,0)}
+.hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -89,16 +118,79 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
     <div class="tag">One tap · Two orbits · Zero mercy</div>
   </div>
   <div class="bottom-block">
-    <div class="cta">TAP TO PLAY</div>
+    <button class="cta" id="playSolo">TAP TO PLAY</button>
+    <div class="modes">
+      <button class="btn" id="btnQuick">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+        QUICK MATCH
+      </button>
+      <button class="btn" id="btnFriends">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M18.5 14a6.5 6.5 0 0 1 3 6"/></svg>
+        FRIENDS
+      </button>
+      <button class="btn" id="btnBoard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+        RANKS
+      </button>
+    </div>
     <div class="best">BEST <b id="tBest">0</b></div>
     <div class="howto">Tap to switch orbit · dodge <i class="dz"></i> · grab <i class="gm"></i></div>
   </div>
 </div>
 
+<div id="friends" class="screen panel">
+  <div class="go">PLAY WITH FRIENDS</div>
+  <div class="sub">Your name</div>
+  <input class="field" id="fName" maxlength="12" autocomplete="off" spellcheck="false">
+  <button class="btn primary" id="fCreate" style="width:min(320px,100%)">CREATE ROOM</button>
+  <div class="or">OR JOIN WITH A CODE</div>
+  <input class="field codein" id="fCode" maxlength="6" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false">
+  <div class="row"><button class="btn" id="fBack">BACK</button><button class="btn" id="fJoin">JOIN</button></div>
+</div>
+
+<div id="lobby" class="screen panel">
+  <div class="go" id="lTitle">ROOM</div>
+  <div class="code" id="lCode"></div>
+  <div class="sub" id="lStatus">Connecting…</div>
+  <ul class="list" id="lPlayers"></ul>
+  <input class="field" id="lName" maxlength="12" autocomplete="off" spellcheck="false" placeholder="Your name">
+  <div class="btns">
+    <button class="btn primary" id="lStart">START MATCH</button>
+    <div class="row">
+      <button class="btn" id="lLeave">LEAVE</button>
+      <button class="btn" id="lInvite">INVITE</button>
+    </div>
+  </div>
+</div>
+
+<div id="mpOver" class="screen panel">
+  <div class="go" id="mTitle">VICTORY</div>
+  <div class="sub" id="mSub"></div>
+  <ul class="list" id="mRank"></ul>
+  <div class="grank" id="mGlobal"></div>
+  <div class="btns">
+    <button class="btn primary" id="mNext">NEXT ROUND</button>
+    <div class="row">
+      <button class="btn" id="mLeave">LEAVE</button>
+      <button class="btn" id="mShare">SHARE</button>
+    </div>
+  </div>
+</div>
+
+<div id="board" class="screen panel">
+  <div class="go">GLOBAL RANKS</div>
+  <div class="sub" id="bSub">Loading…</div>
+  <ul class="list" id="bList"></ul>
+  <button class="btn" id="bBack" style="width:min(320px,100%)">BACK</button>
+</div>
+
+<div id="banner"></div>
+
 <div id="over" class="screen">
   <div class="go" id="oTitle">WASTED</div>
   <div class="score" id="oScore">0</div>
   <div class="newbest" id="newBest">NEW BEST!</div>
+  <div class="grank" id="oGlobal"></div>
   <div class="stats">
     <div>BEST<b id="oBest">0</b></div>
     <div>GEMS<b id="oGems">0</b></div>
@@ -110,10 +202,13 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
       PLAY AGAIN
     </button>
-    <button class="btn" id="share">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
-      CHALLENGE A FRIEND
-    </button>
+    <div class="row">
+      <button class="btn" id="menu">MENU</button>
+      <button class="btn" id="share">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>
+        SHARE
+      </button>
+    </div>
   </div>
 </div>
 
@@ -125,6 +220,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 <button class="icon-btn" id="mute" aria-label="Toggle sound"></button>
 <div id="toast"></div>
 
+<script src="config.js"></script>
 <script>
 (() => {
 'use strict';
@@ -373,6 +469,7 @@ const S = {
   combo: 0, maxCombo: 0, gems: 0, mult: 1, next: 0,
   shake: 0, flash: 0, flashColor: '#fff', timeScale: 1, warp: 0, coreKick: 0,
   lastSwitch: -9, switchFrom: 1, demoT: 0, runT: 0, paused: false, card: null,
+  mp: false, spawned: 0, cdSec: 0, sentScore: 0, sentT: 0, lastStanding: false, prevBest: 0,
 };
 const stars = Array.from({ length: 170 }, () => ({ a: rand(0, TAU), d: rand(0.02, 1), s: rand(0.3, 1) }));
 
@@ -396,43 +493,68 @@ function wave(x, y, color, max = 120, width = 6, life = 0.6) { S.waves.push({ x,
 function popText(str, x, y, color, size = 26, life = 0.9) { S.texts.push({ str, x, y, color, size, life, t: 0 }); }
 function addScore(n) { S.score += n; S.coreKick = 1; }
 
-/* ----- spawning ----- */
-function gapAngle() { return S.omega * clamp(0.5 - (S.level - 1) * 0.022, 0.34, 0.5); }
-function addItem(type, a, ring) { S.items.push({ type, a, ring, born: S.t, fade: 0, passed: false, spin: rand(-1, 1) }); }
+/* ----- spawning -----
+   The course is a pure function of the seed: every random choice comes from a
+   seeded RNG and difficulty follows the number of spikes spawned (not frame
+   timing), so all players in a multiplayer match get the identical course. */
+function mulberry32(a) {
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+let rng = Math.random;
+const omegaFor = L => Math.min(3.8, 1.9 + (L - 1) * 0.19);
+function addItem(type, a, ring) {
+  if (type === 'spike') S.spawned++;
+  S.items.push({ type, a, ring, born: S.t, fade: 0, passed: false, spin: rng() * 2 - 1 });
+}
 function spawn() {
   while (S.next < S.theta + TAU * 0.6) {
-    const g = gapAngle(), L = S.level;
-    let a = S.next, r = Math.random() < 0.5 ? 0 : 1;
-    const roll = Math.random();
+    const L = 1 + Math.floor(S.spawned / 12);
+    const g = omegaFor(L) * clamp(0.5 - (L - 1) * 0.022, 0.34, 0.5);
+    let a = S.next, r = rng() < 0.5 ? 0 : 1;
+    const roll = rng();
     if (roll < 0.34) {                               // single spike, gem on the safe orbit
       addItem('spike', a, r); addItem('gem', a, 1 - r); a += g;
     } else if (roll < 0.62) {                        // zig-zag
-      const n = 2 + ((Math.random() * Math.min(4, 1 + L)) | 0);
+      const n = 2 + ((rng() * Math.min(4, 1 + L)) | 0);
       for (let i = 0; i < n; i++) { const rr = (r + i) % 2; addItem('spike', a, rr); addItem('gem', a, 1 - rr); a += g * 1.05; }
     } else if (roll < 0.82) {                        // long wall on one orbit
-      const n = 3 + ((Math.random() * Math.min(4, L + 1)) | 0);
+      const n = 3 + ((rng() * Math.min(4, L + 1)) | 0);
       for (let i = 0; i < n; i++) { addItem('spike', a, r); if (i % 2 === 0) addItem('gem', a, 1 - r); a += 0.21; }
       a += g * 0.6;
     } else {                                         // gem river with a spike guard
-      const n = 4 + ((Math.random() * 3) | 0);
+      const n = 4 + ((rng() * 3) | 0);
       for (let i = 0; i < n; i++) { addItem('gem', a, r); if (i === ((n / 2) | 0)) addItem('spike', a, 1 - r); a += 0.19; }
       a += g * 0.4;
     }
-    S.next = a + g * rand(0.95, 1.5);
+    S.next = a + g * (0.95 + rng() * 0.55);
   }
 }
 
 /* ----- flow ----- */
-function start() {
+function hideScreens() {
+  document.querySelectorAll('.screen.show').forEach(el => el.classList.remove('show'));
+}
+function start(seed) {
   audioInit();
+  const mp = seed !== undefined;
+  S.mp = mp;
+  rng = mulberry32(mp ? seed : (Math.random() * 2 ** 31) | 0);
   S.mode = 'playing'; S.paused = false;
-  S.score = 0; S.passed = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
-  S.omega = S.omegaT = 1.9; S.timeScale = 1; S.runT = 0;
+  S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
+  S.omega = S.omegaT = omegaFor(1); S.timeScale = 1; S.runT = 0;
   S.items.length = 0; S.trail.length = 0;
-  S.next = S.theta + 2.4;
+  S.theta = 0; S.ring = 1; S.rPos = 1; S.switchFrom = 1; S.lastSwitch = -9;
+  S.next = 2.4;
+  S.sentScore = 0; S.sentT = 0; S.lastStanding = false; S.prevBest = S.best;
   S.runs++; store.set('runs', S.runs);
   applyTheme(0);
-  $('#title').classList.remove('show'); $('#over').classList.remove('show'); $('#pause').classList.remove('show');
+  hideScreens();
+  $('#oGlobal').textContent = '';
   S.flash = 0.35; S.flashColor = T.a; S.warp = 1;
   wave(CX, CY, T.a, 260, 8, 0.7);
   SFX.click(); haptic('medium');
@@ -444,6 +566,7 @@ function switchRing() {
   const p = playerPos();
   burst(p.x, p.y, 6, [T.a, '#ffffff'], 120, 0.35, 10);
   SFX.swap(S.ring === 1); haptic('light');
+  if (S.mp) Net.send({ t: 'sw', r: S.ring, th: +S.theta.toFixed(4) });
 }
 
 function onPassSpike(it, p) {
@@ -483,7 +606,7 @@ function missGem(it) {
 
 function levelUp() {
   S.level++;
-  S.omegaT = Math.min(3.8, 1.9 + (S.level - 1) * 0.19);
+  S.omegaT = omegaFor(S.level);
   applyTheme(S.level - 1);
   S.flash = 0.7; S.flashColor = '#ffffff'; S.warp = 1.4;
   wave(CX, CY, T.a, R_OUT / U + 80, 10, 0.9);
@@ -500,13 +623,20 @@ function die(p) {
   wave(p.x, p.y, T.b, 220, 10, 0.9); wave(p.x, p.y, '#ffffff', 120, 4, 0.6);
   S.shake = 1; S.flash = 0.75; S.flashColor = T.b;
   SFX.die(); haptic('error'); musicStop();
-  setTimeout(gameOver, 950);
+  if (S.score > S.best) { S.best = S.score; store.set('best', S.best); $('#tBest').textContent = S.best; }
+  if (S.mp) {
+    Net.send({ t: 'dead', s: S.score, th: +S.theta.toFixed(4) });
+    submitScore(S.score, '#mGlobal');
+    setTimeout(() => { if (S.mode === 'dying') { S.mode = 'spectate'; Net.afterDeath(); } }, 950);
+  } else {
+    setTimeout(gameOver, 950);
+  }
 }
 
 function gameOver() {
   S.mode = 'over';
-  const isBest = S.score > S.best;
-  if (isBest) { S.best = S.score; store.set('best', S.best); }
+  const isBest = S.score > S.prevBest;
+  submitScore(S.score, '#oGlobal');
   S.items.forEach(it => { if (!it.fade) it.fade = 0.001; });
   $('#oTitle').textContent = isBest ? 'LEGENDARY' : ROAST[(Math.random() * ROAST.length) | 0];
   $('#oBest').textContent = S.best; $('#oGems').textContent = S.gems;
@@ -540,7 +670,7 @@ function countUp(el, to, ms) {
 }
 
 function pause() {
-  if (S.mode !== 'playing' || S.paused) return;
+  if (S.mode !== 'playing' || S.paused || S.mp) return;
   S.paused = true; musicStop(); $('#pause').classList.add('show');
 }
 function resume() {
@@ -636,6 +766,26 @@ function update(dt) {
       }
       if (S.theta > it.a + 0.7) it.fade = 0.001;
     }
+    if (S.mp && S.mode === 'playing' && S.score !== S.sentScore && S.t - S.sentT > 0.3) {
+      S.sentScore = S.score; S.sentT = S.t; Net.send({ t: 'sc', s: S.score });
+    }
+  } else if (S.mp && (S.mode === 'dying' || S.mode === 'spectate')) {
+    // you're out, but the match goes on: keep the course moving so you can watch
+    S.theta += S.omega * gdt;
+    spawn();
+    for (let i = S.items.length - 1; i >= 0; i--) {
+      const it = S.items[i];
+      if (it.fade > 0) { it.fade += gdt * 4; if (it.fade >= 1) S.items.splice(i, 1); continue; }
+      if (S.theta > it.a + 0.7) it.fade = 0.001;
+    }
+  } else if (S.mode === 'countdown') {
+    S.theta = 0; S.ring = 1;
+    S.rPos += (1 - S.rPos) * (1 - Math.exp(-dt * 10));
+    for (let i = S.items.length - 1; i >= 0; i--) { const it = S.items[i]; if (!it.fade) it.fade = 0.001; it.fade += dt * 3; if (it.fade >= 1) S.items.splice(i, 1); }
+    const left = Net.localStart - Date.now();
+    const sec = Math.ceil(left / 1000);
+    if (sec !== S.cdSec && sec >= 1 && sec <= 3) { S.cdSec = sec; tone(440, 0.12, 'square', 0.08); S.coreKick = 1; haptic('light'); }
+    if (left <= 0) { S.cdSec = 0; tone(880, 0.3, 'square', 0.1); start(Net.seed); }
   } else {
     // attract mode: the player orbits and hops by itself
     S.theta += (S.mode === 'dying' ? S.omega : 1.3) * gdt;
@@ -649,8 +799,10 @@ function update(dt) {
     }
   }
 
+  if (S.mp) Net.updateGhosts(dt, gdt);
+
   // trail
-  if (S.mode !== 'dying') {
+  if (S.mode !== 'dying' && S.mode !== 'spectate') {
     S.trail.unshift(playerPos());
     if (S.trail.length > 26) S.trail.pop();
   } else if (S.trail.length) S.trail.pop();
@@ -755,10 +907,16 @@ function render() {
   ctx.beginPath(); ctx.arc(CX, CY, RC * (1 + beat * 0.04), 0, TAU); ctx.fill();
   ctx.lineWidth = 2 * U; ctx.strokeStyle = T.a; ctx.globalAlpha = 0.8;
   ctx.stroke();
-  if (S.mode !== 'title') {
+  if (S.mode === 'countdown') {
+    const left = Net.localStart - Date.now();
+    const label = left > 3000 ? '…' : String(Math.max(1, Math.ceil(left / 1000)));
+    ctx.shadowColor = T.a; ctx.shadowBlur = 18 * U;
+    txt(label, CX, CY + 2 * U, RC * (1 + S.coreKick * 0.35), '#ffffff', 1);
+    ctx.shadowBlur = 0;
+  } else if (S.mode !== 'title' && !(S.mp && S.mode === 'over')) {
     const sz = RC * (S.score > 999 ? 0.62 : S.score > 99 ? 0.8 : 1) * (1 + S.coreKick * 0.28);
     ctx.shadowColor = T.a; ctx.shadowBlur = 18 * U;
-    txt(String(S.score), CX, CY + 2 * U, sz, '#ffffff', S.mode === 'over' ? 0.4 : 1);
+    txt(String(S.score), CX, CY + 2 * U, sz, '#ffffff', S.mode === 'over' || S.mode === 'spectate' ? 0.4 : 1);
     ctx.shadowBlur = 0;
   } else {
     // a little planet
@@ -814,8 +972,9 @@ function render() {
       ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
     }
   }
+  if (S.mp) Net.drawGhosts();
   // player
-  if (S.mode !== 'dying') {
+  if (S.mode !== 'dying' && S.mode !== 'spectate') {
     const p = playerPos();
     drawImg(SPR.a, p.x, p.y, P_R * U * (7 + beat * 2), 0.9);
     drawImg(SPR.w, p.x, p.y, P_R * U * 3, 1);
@@ -842,6 +1001,7 @@ function render() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
   // HUD
+  if (S.mp && S.mode !== 'title' && S.mode !== 'over') Net.drawHud(SAFE_TOP + 34);
   if (S.mode === 'playing' || S.mode === 'dying') {
     const y = SAFE_TOP + 34;
     ctx.textAlign = 'left';
@@ -879,21 +1039,371 @@ function roundRect(x, y, w, h, r) {
 /* =========================================================
    Input + boot
    ========================================================= */
+/* =========================================================
+   Online: global leaderboard + multiplayer rooms
+   ========================================================= */
+const SERVER = String(window.ORBITAL_SERVER ||
+  (/^https?:$/.test(location.protocol) && !/github\.io$/.test(location.hostname) ? location.origin : '')).replace(/\/+$/, '');
+const PID = store.get('pid', null) || (() => {
+  const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+  store.set('pid', id); return id;
+})();
+const NAMES = ['Comet', 'Nova', 'Pulsar', 'Quasar', 'Meteor', 'Nebula', 'Photon', 'Zenith', 'Astro', 'Vortex'];
+let myName = store.get('name', '') || NAMES[(Math.random() * NAMES.length) | 0] + ((Math.random() * 90 + 10) | 0);
+const cleanName = n => String(n || '').replace(/[^\p{L}\p{N} _.\-!?]/gu, '').trim().slice(0, 12);
+function setName(n) { n = cleanName(n); if (!n) return false; myName = n; store.set('name', n); return true; }
+const cleanCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function api(path, body) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const res = await fetch(SERVER + path, body
+      ? { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'text/plain' }, signal: ctl.signal }
+      : { signal: ctl.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } finally { clearTimeout(timer); }
+}
+
+function submitScore(score, sel) {
+  const el = $(sel);
+  if (el) el.textContent = '';
+  if (!SERVER || score <= 0) return;
+  api('/api/score', { pid: PID, name: myName, score })
+    .then(r => { if (el) el.textContent = `GLOBAL RANK #${r.rank} OF ${r.total}`; })
+    .catch(() => {});
+}
+
+function showScreen(id) { hideScreens(); $('#' + id).classList.add('show'); }
+function banner(text, ms) {
+  const b = $('#banner');
+  clearTimeout(banner.h);
+  if (!text) { b.classList.remove('show'); return; }
+  b.textContent = text; b.classList.add('show');
+  if (ms) banner.h = setTimeout(() => b.classList.remove('show'), ms);
+}
+function backToTitle() {
+  S.mp = false; S.mode = 'title'; S.paused = false;
+  musicStop(); banner('');
+  showScreen('title');
+}
+
+async function openBoard() {
+  showScreen('board');
+  const list = $('#bList'), sub = $('#bSub');
+  list.innerHTML = '';
+  if (!SERVER) { sub.textContent = 'Online ranks need the game server (see README)'; return; }
+  sub.textContent = 'Loading…';
+  try {
+    const r = await api('/api/leaderboard');
+    sub.textContent = `${r.total} pilots worldwide`;
+    list.innerHTML = r.top.map((e, i) =>
+      `<li class="${e.name === myName ? 'me' : ''}"><span class="rk">${i + 1}</span><span class="nm">${esc(e.name)}</span><span class="sc">${e.score}</span></li>`
+    ).join('') || '<li><span class="nm">No scores yet — be the first!</span></li>';
+  } catch (e) { sub.textContent = 'Could not reach the server'; }
+}
+
+async function quickMatch() {
+  if (!SERVER) { toast('Online play needs the game server (see README)'); return; }
+  audioInit();
+  Net.leave();
+  Net.quick = true; Net.phase = 'connecting'; Net.players = [];
+  showScreen('lobby'); renderLobby();
+  try {
+    const r = await api('/api/quick');
+    if (Net.phase !== 'connecting') return; // user backed out
+    Net.connect(r.room, true);
+  } catch (e) { toast('Could not reach the server'); backToTitle(); }
+}
+
+function inviteLink() {
+  const base = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : SERVER + '/';
+  return `${base}?room=${Net.code}`;
+}
+async function invite() {
+  SFX.click();
+  const text = `Join my ORBITAL room ${Net.code} 🪐 Last comet alive wins!`;
+  const url = inviteLink();
+  if (native && native.share) { native.share.postMessage({ text: text + '\n' + url }); return; }
+  if (navigator.share) {
+    try { await navigator.share({ title: 'ORBITAL', text, url }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(text + ' ' + url); toast('Invite link copied!'); }
+  catch (e) { toast(url); }
+}
+
+function renderLobby() {
+  if (!$('#lobby').classList.contains('show')) return;
+  const q = Net.quick;
+  $('#lTitle').textContent = q ? 'QUICK MATCH' : 'PRIVATE ROOM';
+  $('#lCode').textContent = q ? '' : Net.code;
+  $('#lCode').classList.toggle('hidden', q);
+  $('#lInvite').classList.toggle('hidden', q);
+  const isHost = Net.me && Net.me === Net.host;
+  $('#lStart').classList.toggle('hidden', q || !isHost || Net.phase !== 'lobby');
+  $('#lPlayers').innerHTML = Net.players.map(p => {
+    const tags = [p.id === Net.me ? 'YOU' : '', p.id === Net.host && !q ? 'HOST' : '', Net.phase === 'playing' && p.playing ? 'IN MATCH' : '']
+      .filter(Boolean).join(' · ');
+    return `<li class="${p.id === Net.me ? 'me' : ''}"><span class="dot" style="color:${p.color}"></span><span class="nm">${esc(p.name)}</span><span class="tag2">${tags}</span></li>`;
+  }).join('');
+  let status = 'Connecting…';
+  if (Net.phase === 'lobby') {
+    if (q) {
+      status = Net.waitUntil ? `Match starts in ${Math.max(0, Math.ceil((Net.waitUntil - Date.now()) / 1000))}s` : 'Finding players…';
+    } else if (isHost) {
+      status = Net.players.length < 2 ? 'Share the code — or start solo' : 'Ready when you are!';
+    } else status = 'Waiting for the host to start…';
+  } else if (Net.phase === 'playing') status = 'Match in progress — you’re in the next round';
+  else if (Net.phase === 'results') status = 'Next round starting soon…';
+  $('#lStatus').textContent = status;
+}
+setInterval(() => { if (Net.waitUntil) renderLobby(); }, 250);
+
+function showResults() {
+  S.mode = 'over'; musicStop(); banner('');
+  const r = Net.ranking || [];
+  const mine = r.find(x => x.id === Net.me);
+  const won = mine && mine.place === 1;
+  $('#mTitle').textContent = won ? (r.length > 1 ? 'VICTORY ROYALE' : 'SURVIVOR') : mine ? `#${mine.place} OF ${r.length}` : 'MATCH OVER';
+  $('#mTitle').style.color = won ? 'var(--g)' : '';
+  $('#mSub').textContent = `Your score ${S.score}`;
+  $('#mRank').innerHTML = r.map(e =>
+    `<li class="${e.id === Net.me ? 'me' : ''}"><span class="rk">${e.place}</span><span class="dot" style="color:${e.color}"></span><span class="nm">${esc(e.name)}</span><span class="sc">${e.score}</span></li>`
+  ).join('');
+  showScreen('mpOver');
+  if (won && r.length > 1) {
+    for (let i = 0; i < 140; i++) {
+      S.parts.push({ x: rand(0, W), y: rand(-60, -10), vx: rand(-60, 60) * U, vy: rand(80, 300) * U, life: rand(1.5, 2.8), max: 2.8,
+        size: rand(8, 16) * U, img: glowSprite([T.a, T.b, T.g, '#ffffff'][i % 4]), grav: 180 * U, drag: 0.6 });
+    }
+    SFX.best(); haptic('success');
+  }
+  S.card = null;
+  makeCard(false).then(c => { S.card = c; }).catch(() => {});
+}
+
+const Net = {
+  ws: null, code: '', quick: false, me: null, host: null, phase: 'off', players: [], ghosts: new Map(),
+  seed: 0, localStart: 0, waitUntil: 0, ranking: null, myPlace: 0, matchSize: 0, requeue: null, pinger: null,
+
+  send(m) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(m)); },
+
+  connect(code, quick) {
+    this.leave();
+    this.code = code; this.quick = quick; this.phase = 'connecting';
+    this.players = []; this.ghosts.clear(); this.ranking = null; this.me = null;
+    showScreen('lobby'); $('#lName').value = myName; renderLobby();
+    const url = SERVER.replace(/^http/, 'ws') + '/ws?room=' + encodeURIComponent(code) +
+      '&name=' + encodeURIComponent(myName) + '&pid=' + encodeURIComponent(PID) + (quick ? '&quick=1' : '');
+    let ws;
+    try { ws = new WebSocket(url); } catch (e) { toast('Could not connect'); backToTitle(); return; }
+    this.ws = ws;
+    ws.onmessage = ev => { let m; try { m = JSON.parse(ev.data); } catch (e) { return; } this.onMsg(m); };
+    ws.onclose = () => {
+      if (this.ws !== ws) return;
+      this.ws = null; this.phase = 'off';
+      toast('Disconnected from the room');
+      if (S.mode !== 'playing') backToTitle();
+    };
+    this.pinger = setInterval(() => this.send({ t: 'ping' }), 25000);
+  },
+
+  leave() {
+    clearTimeout(this.requeue); clearInterval(this.pinger);
+    const ws = this.ws; this.ws = null;
+    if (ws) { try { ws.close(1000); } catch (e) {} }
+    this.phase = 'off'; this.waitUntil = 0;
+    S.mp = false;
+  },
+
+  onMsg(m) {
+    switch (m.t) {
+      case 'state': {
+        this.me = m.you; this.code = m.code; this.quick = m.quick; this.host = m.host; this.phase = m.phase;
+        this.waitUntil = m.waitUntil ? m.waitUntil - (m.now - Date.now()) : 0;
+        this.players = m.players;
+        for (const p of m.players) {
+          const g = this.ghosts.get(p.id);
+          if (g) { g.name = p.name; g.color = p.color; g.playing = p.playing; }
+        }
+        clearTimeout(this.requeue);
+        if (this.quick && this.phase === 'lobby' && this.players.length < 2) {
+          // Alone in a quick room for a while: try a fresh one.
+          this.requeue = setTimeout(() => { if ($('#lobby').classList.contains('show')) quickMatch(); }, 20000);
+        }
+        renderLobby();
+        break;
+      }
+      case 'start': {
+        const offset = m.now - Date.now();
+        this.seed = m.seed; this.localStart = m.startAt - offset; this.ranking = null; this.myPlace = 0;
+        this.ghosts.clear();
+        for (const p of this.players) {
+          if (p.id === this.me || !p.playing) continue;
+          this.ghosts.set(p.id, { id: p.id, name: p.name, color: p.color, playing: true, alive: true, dead: false,
+            score: 0, ring: 1, rPos: 1, events: [], trail: [], phi: 0, slot: 0 });
+        }
+        this.matchSize = this.ghosts.size + 1;
+        S.mp = true; S.mode = 'countdown'; S.cdSec = 0; S.score = 0;
+        hideScreens(); banner(this.matchSize > 1 ? `${this.matchSize} PILOTS · LAST ONE ALIVE WINS` : 'GET READY', 2500);
+        break;
+      }
+      case 'sw': { const g = this.ghosts.get(m.id); if (g) g.events.push({ th: m.th, r: m.r }); break; }
+      case 'sc': { const g = this.ghosts.get(m.id); if (g) g.score = m.s; break; }
+      case 'dead': {
+        if (m.id === this.me) { this.myPlace = m.place; break; }
+        const g = this.ghosts.get(m.id);
+        if (!g || !g.alive) break;
+        g.alive = false; g.score = m.s;
+        g.events.push({ th: m.th || 0, dead: true });
+        const left = [...this.ghosts.values()].filter(x => x.alive).length + (S.mode === 'playing' ? 1 : 0);
+        if (S.mode === 'playing' && left === 1 && this.matchSize > 1 && !S.lastStanding) {
+          S.lastStanding = true;
+          banner('🏆 LAST ONE STANDING! KEEP GOING', 3500);
+          SFX.best(); haptic('success');
+        } else if (S.mode === 'playing') {
+          banner(`${g.name} crashed · ${left} left`, 1800);
+        }
+        break;
+      }
+      case 'end':
+        this.ranking = m.ranking; this.phase = 'results';
+        if (S.mode === 'spectate' || S.mode === 'countdown' || S.mode === 'over') showResults();
+        else if (S.mode === 'playing') { S.mode = 'over'; showResults(); }
+        break;
+      case 'error':
+        toast(m.msg || 'Server error');
+        break;
+    }
+  },
+
+  afterDeath() {
+    if (this.ranking) { showResults(); return; }
+    const alive = [...this.ghosts.values()].filter(g => g.alive).length;
+    banner(this.myPlace ? `YOU PLACED #${this.myPlace} · SPECTATING ${alive} LEFT` : 'SPECTATING…');
+  },
+
+  updateGhosts(dt, gdt) {
+    const running = S.mode === 'playing' || S.mode === 'dying' || S.mode === 'spectate' || S.mode === 'countdown';
+    if (!running) return;
+    let slot = 0;
+    for (const g of this.ghosts.values()) {
+      g.slot = slot++;
+      // Draw opponents slightly behind you; their events are replayed at the exact
+      // course angle they happened, which also hides network latency.
+      const phi = S.mode === 'countdown' ? -0.08 * (g.slot + 1) : S.theta - S.omega * (0.12 + 0.06 * g.slot);
+      while (g.events.length && g.events[0].th <= phi) {
+        const ev = g.events.shift();
+        if (ev.dead) {
+          if (!g.dead) {
+            g.dead = true;
+            const p = pos(phi, lerp(R_IN, R_OUT, g.rPos));
+            burst(p.x, p.y, 40, [g.color, '#ffffff'], 380, 1, 14);
+            wave(p.x, p.y, g.color, 110, 6, 0.6);
+            noise(0.4, 0.15, 0, 2000, 'lowpass', 1, 100);
+          }
+        } else g.ring = ev.r;
+      }
+      g.rPos += (g.ring - g.rPos) * (1 - Math.exp(-gdt * 22));
+      g.phi = phi;
+      if (!g.dead) { g.trail.unshift(pos(phi, lerp(R_IN, R_OUT, g.rPos))); if (g.trail.length > 14) g.trail.pop(); }
+      else if (g.trail.length) g.trail.pop();
+    }
+  },
+
+  drawGhosts() {
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'round';
+    for (const g of this.ghosts.values()) {
+      const tr = g.trail;
+      ctx.strokeStyle = g.color;
+      for (let i = 1; i < tr.length; i++) {
+        const k = 1 - i / tr.length;
+        ctx.globalAlpha = k * 0.45; ctx.lineWidth = P_R * 1.4 * U * k;
+        ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
+      }
+      if (g.dead) continue;
+      const p = pos(g.phi, lerp(R_IN, R_OUT, g.rPos));
+      drawImg(glowSprite(g.color), p.x, p.y, P_R * U * 5, 0.75);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    for (const g of this.ghosts.values()) {
+      if (g.dead) continue;
+      const p = pos(g.phi, lerp(R_IN, R_OUT, g.rPos));
+      ctx.globalAlpha = 0.9; ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.5, 0, TAU); ctx.fill();
+      // name tag on the outside of the orbit
+      const ang = g.phi - Math.PI / 2, rr = R_OUT + (16 + 12 * (g.slot % 2)) * U;
+      txt(g.name, CX + Math.cos(ang) * rr, CY + Math.sin(ang) * rr, 11, g.color, 0.9, 800);
+    }
+    ctx.globalAlpha = 1;
+  },
+
+  drawHud(y) {
+    const rows = [{ name: myName, color: '#ffffff', score: S.score, alive: S.mode === 'playing' || S.mode === 'countdown', me: true }];
+    for (const g of this.ghosts.values()) rows.push({ name: g.name, color: g.color, score: g.score, alive: g.alive });
+    rows.sort((a, b) => (b.alive - a.alive) || (b.score - a.score));
+    const alive = rows.filter(r => r.alive).length;
+    const x = W - 16;
+    ctx.textAlign = 'right';
+    txt(`${alive}/${rows.length} ALIVE`, x, y + 36, 12, T.a, 0.9, 900);
+    rows.slice(0, 6).forEach((r, i) => {
+      const yy = y + 56 + i * 18;
+      const a = r.alive ? 0.95 : 0.35;
+      txt(String(r.score), x, yy, 12, r.me ? T.g : '#ffffff', a, 800);
+      txt(r.name, x - 34, yy, 12, r.color, a, r.me ? 900 : 700);
+    });
+    ctx.textAlign = 'center';
+  },
+};
+
 function onTap(e) {
   if (e) e.preventDefault();
   audioInit();
   if (S.mode === 'playing' && !S.paused) switchRing();
 }
 cvs.addEventListener('pointerdown', onTap);
-$('#title').addEventListener('pointerdown', e => { e.preventDefault(); start(); });
+$('#playSolo').addEventListener('click', () => start());
+$('#btnQuick').addEventListener('click', () => { SFX.click(); quickMatch(); });
+$('#btnFriends').addEventListener('click', () => { audioInit(); SFX.click(); $('#fName').value = myName; showScreen('friends'); });
+$('#btnBoard').addEventListener('click', () => { audioInit(); SFX.click(); openBoard(); });
+$('#bBack').addEventListener('click', () => { SFX.click(); backToTitle(); });
+$('#fBack').addEventListener('click', () => { SFX.click(); backToTitle(); });
+$('#fName').addEventListener('change', e => setName(e.target.value));
+$('#fCreate').addEventListener('click', () => {
+  if (!SERVER) { toast('Online play needs the game server (see README)'); return; }
+  setName($('#fName').value); SFX.click();
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  Net.connect(Array.from({ length: 4 }, () => chars[(Math.random() * chars.length) | 0]).join(''), false);
+});
+$('#fJoin').addEventListener('click', () => {
+  if (!SERVER) { toast('Online play needs the game server (see README)'); return; }
+  const code = cleanCode($('#fCode').value);
+  if (code.length < 4) { toast('Enter a 4-letter room code'); return; }
+  setName($('#fName').value); SFX.click();
+  Net.connect(code, false);
+});
+$('#fCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#fJoin').click(); });
+$('#lName').addEventListener('change', e => { if (setName(e.target.value)) Net.send({ t: 'name', name: myName }); });
+$('#lStart').addEventListener('click', () => { SFX.click(); Net.send({ t: 'start' }); });
+$('#lInvite').addEventListener('click', invite);
+$('#lLeave').addEventListener('click', () => { SFX.click(); Net.leave(); backToTitle(); });
+$('#mNext').addEventListener('click', () => { SFX.click(); S.mode = 'title'; showScreen('lobby'); $('#lName').value = myName; renderLobby(); });
+$('#mLeave').addEventListener('click', () => { SFX.click(); Net.leave(); backToTitle(); });
+$('#mShare').addEventListener('click', share);
+$('#menu').addEventListener('click', () => { SFX.click(); backToTitle(); });
 $('#pause').addEventListener('pointerdown', e => { e.preventDefault(); resume(); });
 $('#again').addEventListener('click', () => start());
 $('#share').addEventListener('click', share);
 window.addEventListener('keydown', e => {
-  if (e.repeat) return;
+  if (e.repeat || (e.target && e.target.tagName === 'INPUT')) return;
   if (e.code === 'Space' || e.code === 'Enter' || e.code.startsWith('Arrow')) {
     e.preventDefault(); audioInit();
-    if (S.mode === 'title' || S.mode === 'over') start();
+    if (S.mode === 'title' && $('#title').classList.contains('show')) start();
+    else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) start();
     else if (S.paused) resume();
     else if (S.mode === 'playing') switchRing();
   } else if (e.code === 'KeyP' || e.code === 'Escape') pause();
@@ -923,7 +1433,10 @@ function frame(now) {
 requestAnimationFrame(frame);
 
 // tiny hook for automated tests
-window.__orbital = { S, start, switchRing };
+const linkRoom = cleanCode(new URLSearchParams(location.search).get('room'));
+if (linkRoom.length >= 4 && SERVER) Net.connect(linkRoom, false);
+
+window.__orbital = { S, start, switchRing, Net };
 })();
 </script>
 </body>

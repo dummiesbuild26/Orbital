@@ -1,0 +1,357 @@
+// ORBITAL multiplayer server — Cloudflare Worker + Durable Objects (free plan).
+//
+//   GET  /ws?room=CODE&name=..&pid=..[&quick=1]  WebSocket into a match room
+//   GET  /api/quick                               matchmaking: returns { room }
+//   GET  /api/leaderboard                         global top 50
+//   POST /api/score  { pid, name, score }         submit a score, returns { rank, best, total }
+//   everything else                               static web game (../web)
+
+import { DurableObject } from 'cloudflare:workers';
+
+const MAX_PLAYERS = 8;
+const QUICK_WAIT_MS = 8000;     // lobby countdown once a quick room has 2+ players
+const START_DELAY_MS = 3500;    // 3-2-1-GO on every client
+const RESULTS_MS = 5000;        // results screen before the room resets
+const MATCH_TIMEOUT_MS = 15 * 60 * 1000;
+const COLORS = ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88'];
+const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+const json = (data, status = 200) =>
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json', ...CORS } });
+
+const cleanName = s =>
+  String(s || '').replace(/[^\p{L}\p{N} _.\-!?]/gu, '').trim().slice(0, 12) || 'Comet';
+const cleanCode = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+const randomCode = n => Array.from({ length: n }, () => CODE_CHARS[(Math.random() * CODE_CHARS.length) | 0]).join('');
+
+export default {
+  async fetch(req, env) {
+    const url = new URL(req.url);
+    if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
+
+    if (url.pathname.startsWith('/api/')) {
+      const hub = env.HUB.get(env.HUB.idFromName('global'));
+      return hub.fetch(req);
+    }
+
+    if (url.pathname === '/ws') {
+      if (req.headers.get('Upgrade') !== 'websocket') return new Response('Expected WebSocket', { status: 426 });
+      const code = cleanCode(url.searchParams.get('room'));
+      if (code.length < 4) return new Response('Bad room code', { status: 400 });
+      return env.ROOM.get(env.ROOM.idFromName(code)).fetch(req);
+    }
+
+    return new Response('Not found', { status: 404 });
+  },
+};
+
+/* ------------------------------------------------------------------ */
+/* Hub: matchmaking + global leaderboard (one instance, SQLite)        */
+/* ------------------------------------------------------------------ */
+export class Hub extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.open = null; // { code, n, pairedAt }
+    ctx.blockConcurrencyWhile(async () => {
+      ctx.storage.sql.exec(
+        'CREATE TABLE IF NOT EXISTS scores (pid TEXT PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL, ts INTEGER NOT NULL)'
+      );
+      ctx.storage.sql.exec('CREATE INDEX IF NOT EXISTS scores_score ON scores (score DESC)');
+    });
+  }
+
+  async fetch(req) {
+    const url = new URL(req.url);
+    const sql = this.ctx.storage.sql;
+
+    if (url.pathname === '/api/quick') {
+      const now = Date.now();
+      const o = this.open;
+      // Move on to a fresh room once this one is full or its countdown has had time to fire.
+      if (!o || o.n >= MAX_PLAYERS || (o.pairedAt && now - o.pairedAt > QUICK_WAIT_MS - 1500)) {
+        this.open = { code: 'Q' + randomCode(5), n: 0, pairedAt: 0 };
+      }
+      this.open.n++;
+      if (this.open.n === 2) this.open.pairedAt = now;
+      return json({ room: this.open.code });
+    }
+
+    if (url.pathname === '/api/leaderboard') {
+      const top = sql.exec('SELECT name, score FROM scores ORDER BY score DESC, ts ASC LIMIT 50').toArray();
+      const total = sql.exec('SELECT COUNT(*) AS n FROM scores').one().n;
+      return json({ top, total });
+    }
+
+    if (url.pathname === '/api/score' && req.method === 'POST') {
+      let body;
+      try { body = JSON.parse(await req.text()); } catch { return json({ error: 'bad json' }, 400); }
+      const pid = String(body.pid || '').replace(/[^a-zA-Z0-9-]/g, '').slice(0, 40);
+      const score = Math.floor(Number(body.score));
+      if (!pid || !Number.isFinite(score) || score < 0 || score > 100000) return json({ error: 'invalid' }, 400);
+      const name = cleanName(body.name);
+      const now = Date.now();
+      sql.exec(
+        `INSERT INTO scores (pid, name, score, ts) VALUES (?, ?, ?, ?)
+         ON CONFLICT(pid) DO UPDATE SET
+           name = excluded.name,
+           ts = CASE WHEN excluded.score > scores.score THEN excluded.ts ELSE scores.ts END,
+           score = MAX(scores.score, excluded.score)`,
+        pid, name, score, now
+      );
+      const best = sql.exec('SELECT score FROM scores WHERE pid = ?', pid).one().score;
+      const rank = sql.exec('SELECT COUNT(*) AS n FROM scores WHERE score > ?', best).one().n + 1;
+      const total = sql.exec('SELECT COUNT(*) AS n FROM scores').one().n;
+      return json({ rank, best, total });
+    }
+
+    return json({ error: 'not found' }, 404);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Room: one match lobby. Uses WebSocket hibernation, so idle rooms    */
+/* cost nothing; state lives in socket attachments + storage.          */
+/* ------------------------------------------------------------------ */
+export class Room extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.meta = null;
+  }
+
+  async load() {
+    if (!this.meta) {
+      this.meta = (await this.ctx.storage.get('meta')) || {
+        code: '', quick: false, phase: 'lobby', host: null, seed: 0, startAt: 0, waitUntil: 0, round: 0, count: 0,
+      };
+    }
+    return this.meta;
+  }
+  async save() { await this.ctx.storage.put('meta', this.meta); }
+
+  /** Connected players, optionally excluding a socket that is closing. */
+  members(except) {
+    const out = [];
+    for (const ws of this.ctx.getWebSockets()) {
+      if (ws === except) continue;
+      const p = ws.deserializeAttachment();
+      if (p) out.push({ ws, p });
+    }
+    return out;
+  }
+  put(ws, p) { ws.serializeAttachment(p); }
+  send(ws, msg) { try { ws.send(JSON.stringify(msg)); } catch {} }
+  broadcast(msg, except) {
+    const s = JSON.stringify(msg);
+    for (const { ws } of this.members(except)) { try { ws.send(s); } catch {} }
+  }
+  stateMsg(except) {
+    const m = this.meta;
+    return {
+      t: 'state', code: m.code, quick: m.quick, phase: m.phase, host: m.host, round: m.round,
+      waitUntil: m.waitUntil, now: Date.now(),
+      players: this.members(except).map(({ p }) => ({
+        id: p.id, name: p.name, color: p.color, alive: p.alive, score: p.score, playing: p.playing, place: p.place,
+      })),
+    };
+  }
+  broadcastState(except) {
+    for (const { ws, p } of this.members(except)) this.send(ws, { ...this.stateMsg(except), you: p.id });
+  }
+
+  async fetch(req) {
+    const url = new URL(req.url);
+    const m = await this.load();
+    if (!m.code) m.code = cleanCode(url.searchParams.get('room'));
+    if (url.searchParams.get('quick') === '1') m.quick = true;
+
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair);
+    this.ctx.acceptWebSocket(server);
+
+    const others = this.members(server);
+    if (others.length >= MAX_PLAYERS) {
+      this.send(server, { t: 'error', msg: 'Room is full' });
+      server.close(4001, 'full');
+      return new Response(null, { status: 101, webSocket: client });
+    }
+
+    const used = new Set(others.map(o => o.p.color));
+    const p = {
+      id: crypto.randomUUID().slice(0, 8),
+      pid: String(url.searchParams.get('pid') || '').slice(0, 40),
+      name: cleanName(url.searchParams.get('name')),
+      color: COLORS.find(c => !used.has(c)) || COLORS[others.length % COLORS.length],
+      alive: false, playing: false, score: 0, place: 0,
+    };
+    this.put(server, p);
+    if (!m.host || !others.some(o => o.p.id === m.host)) m.host = p.id;
+    await this.save();
+
+    this.broadcastState();
+    await this.maybeAutoStart();
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  async maybeAutoStart() {
+    const m = this.meta;
+    if (!m.quick || m.phase !== 'lobby') return;
+    const n = this.members().length;
+    if (n >= 2 && !m.waitUntil) {
+      m.waitUntil = Date.now() + QUICK_WAIT_MS;
+      await this.ctx.storage.setAlarm(m.waitUntil);
+      await this.save();
+      this.broadcastState();
+    } else if (n >= MAX_PLAYERS && m.waitUntil) {
+      await this.startMatch();
+    }
+  }
+
+  async startMatch() {
+    const m = this.meta;
+    const members = this.members();
+    if (!members.length) return;
+    m.phase = 'playing';
+    m.round++;
+    m.waitUntil = 0;
+    m.seed = (Math.random() * 2 ** 31) | 0;
+    m.startAt = Date.now() + START_DELAY_MS;
+    m.count = members.length;
+    for (const { ws, p } of members) {
+      p.alive = true; p.playing = true; p.score = 0; p.place = 0;
+      this.put(ws, p);
+    }
+    await this.ctx.storage.setAlarm(Date.now() + MATCH_TIMEOUT_MS);
+    await this.save();
+    this.broadcastState();
+    this.broadcast({ t: 'start', seed: m.seed, startAt: m.startAt, now: Date.now(), round: m.round });
+  }
+
+  async endMatch() {
+    const m = this.meta;
+    m.phase = 'results';
+    const ranking = this.members()
+      .filter(({ p }) => p.playing)
+      .map(({ p }) => ({ id: p.id, name: p.name, color: p.color, score: p.score, place: p.place || 1 }))
+      .sort((a, b) => a.place - b.place || b.score - a.score);
+    await this.ctx.storage.setAlarm(Date.now() + RESULTS_MS);
+    await this.save();
+    this.broadcast({ t: 'end', ranking, round: m.round });
+  }
+
+  async resetToLobby() {
+    const m = this.meta;
+    m.phase = 'lobby';
+    m.waitUntil = 0;
+    for (const { ws, p } of this.members()) {
+      p.alive = false; p.playing = false; p.place = 0;
+      this.put(ws, p);
+    }
+    await this.ctx.storage.deleteAlarm();
+    await this.save();
+    this.broadcastState();
+    await this.maybeAutoStart();
+  }
+
+  async alarm() {
+    const m = await this.load();
+    if (m.phase === 'lobby' && m.waitUntil) {
+      if (this.members().length >= 2) await this.startMatch();
+      else { m.waitUntil = 0; await this.save(); this.broadcastState(); }
+    } else if (m.phase === 'results') {
+      await this.resetToLobby();
+    } else if (m.phase === 'playing') {
+      await this.endMatch(); // safety net for stalled matches
+    }
+  }
+
+  async markDead(ws, p, score, th) {
+    const m = this.meta;
+    if (m.phase !== 'playing' || !p.alive) return;
+    const aliveBefore = this.members().filter(o => o.p.alive).length;
+    p.alive = false;
+    p.place = aliveBefore;
+    if (Number.isFinite(score)) p.score = Math.max(0, Math.min(100000, Math.floor(score)));
+    this.put(ws, p);
+    this.broadcast({ t: 'dead', id: p.id, s: p.score, th: Number(th) || 0, place: p.place });
+    if (!this.members().some(o => o.p.alive)) await this.endMatch();
+  }
+
+  async webSocketMessage(ws, raw) {
+    if (typeof raw !== 'string' || raw.length > 512) return;
+    let msg;
+    try { msg = JSON.parse(raw); } catch { return; }
+    const m = await this.load();
+    const p = ws.deserializeAttachment();
+    if (!p) return;
+
+    switch (msg.t) {
+      case 'ping':
+        this.send(ws, { t: 'pong', now: Date.now(), c: msg.c });
+        break;
+      case 'name':
+        p.name = cleanName(msg.name);
+        this.put(ws, p);
+        this.broadcastState();
+        break;
+      case 'start':
+        if (p.id === m.host && m.phase === 'lobby') await this.startMatch();
+        break;
+      case 'sw':
+        if (m.phase === 'playing' && p.alive) {
+          this.broadcast({ t: 'sw', id: p.id, r: msg.r ? 1 : 0, th: Number(msg.th) || 0 }, ws);
+        }
+        break;
+      case 'sc':
+        if (m.phase === 'playing' && p.playing) {
+          p.score = Math.max(0, Math.min(100000, Math.floor(Number(msg.s) || 0)));
+          this.put(ws, p);
+          this.broadcast({ t: 'sc', id: p.id, s: p.score }, ws);
+        }
+        break;
+      case 'dead':
+        await this.markDead(ws, p, Number(msg.s), msg.th);
+        break;
+    }
+  }
+
+  async webSocketClose(ws) {
+    await this.onLeave(ws);
+    try { ws.close(1000, 'bye'); } catch {}
+  }
+  async webSocketError(ws) { await this.onLeave(ws); }
+
+  async onLeave(ws) {
+    const m = await this.load();
+    const p = ws.deserializeAttachment();
+    if (!p || p.left) return;
+    // Leaving mid-match counts as a crash.
+    if (m.phase === 'playing' && p.alive) {
+      const aliveBefore = this.members().filter(o => o.p.alive).length;
+      this.broadcast({ t: 'dead', id: p.id, s: p.score, th: 0, place: aliveBefore }, ws);
+    }
+    p.left = true;
+    ws.serializeAttachment(null);
+
+    const rest = this.members(ws);
+    if (!rest.length) {
+      // Empty room: forget everything so the code can be reused cleanly.
+      this.meta = null;
+      await this.ctx.storage.deleteAlarm();
+      await this.ctx.storage.deleteAll();
+      return;
+    }
+    if (m.host === p.id) m.host = rest[0].p.id;
+    if (m.quick && m.phase === 'lobby' && rest.length < 2 && m.waitUntil) {
+      m.waitUntil = 0;
+      await this.ctx.storage.deleteAlarm();
+    }
+    await this.save();
+    this.broadcastState(ws);
+    if (m.phase === 'playing' && !rest.some(o => o.p.alive)) await this.endMatch();
+  }
+}

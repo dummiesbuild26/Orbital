@@ -1,4 +1,4 @@
-name: Build iOS IPA
+name: Deploy server & build iOS IPA
 
 on:
   push:
@@ -14,10 +14,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Deploys the multiplayer server + web game to Cloudflare Workers (free plan).
+  # Skipped until the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets exist.
+  server:
+    runs-on: ubuntu-latest
+    env:
+      HAS_CF: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    outputs:
+      url: ${{ steps.url.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Deploy to Cloudflare Workers
+        if: env.HAS_CF == 'true'
+        working-directory: server
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -o pipefail
+          npm ci --no-audit --no-fund
+          npx wrangler deploy 2>&1 | tee deploy.log
+      - name: Resolve server URL
+        id: url
+        run: |
+          URL="${{ vars.ORBITAL_SERVER_URL }}"
+          if [ -f server/deploy.log ]; then
+            URL=$(grep -oE 'https://[A-Za-z0-9.-]+\.workers\.dev' server/deploy.log | head -1)
+          fi
+          echo "Server URL: ${URL:-<none, single-player only>}"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          if [ -n "$URL" ]; then
+            echo "### 🌐 Play online: $URL" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   build:
+    needs: server
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+
+      - name: Point the app at the multiplayer server
+        if: needs.server.outputs.url != ''
+        run: echo "window.ORBITAL_SERVER = '${{ needs.server.outputs.url }}';" > web/config.js
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -78,6 +119,8 @@ jobs:
           files: Orbital.ipa
           body: |
             🪐 **ORBITAL** — one tap, two orbits, zero mercy.
+
+            ${{ needs.server.outputs.url && format('🌐 **Play in any browser / invite friends:** {0}', needs.server.outputs.url) || '' }}
 
             **Install the IPA** (unsigned — your sideloading tool signs it with your Apple ID):
             - [Sideloadly](https://sideloadly.io) or [AltStore](https://altstore.io): drag in `Orbital.ipa`
