@@ -640,10 +640,13 @@ function start(seed) {
   musicStart();
 }
 
-function switchRing(dir) {
+// dir: +1 = in (toward the core), -1 = out, 0 = toggle/bounce.
+// strict: an explicit IN/OUT press at the edge does nothing (instead of bouncing).
+function switchRing(dir, strict) {
   const n = S.rings;
   if (!dir) dir = S.ring < n - 1 ? 1 : -1;
   let to = S.ring + dir;
+  if ((to < 0 || to > n - 1) && strict) { tone(120, 0.08, 'square', 0.05); haptic('light'); return; }
   if (to < 0 || to > n - 1) to = S.ring - dir;
   if (to < 0 || to > n - 1) return;
   S.switchFrom = S.ring; S.ring = to; S.lastSwitch = S.t;
@@ -1115,16 +1118,17 @@ function render() {
       ctx.globalAlpha = 1; ctx.fillStyle = T.g;
       roundRect(bx, by, bw * (S.mult >= 6 ? 1 : (S.combo % 5) / 5 || 0.02), 5, 3); ctx.fill();
     }
-    if (S.runs <= 3 && S.runT < 4.5 && S.mode === 'playing') {
+    if (S.runs <= 3 && S.runT < 4.5 && S.mode === 'playing' && S.rings <= 2) {
       const a = Math.min(1, (4.5 - S.runT)) * (0.6 + 0.4 * Math.sin(S.t * 8));
       txt('TAP ANYWHERE TO SWITCH ORBIT', CX, Math.min(H - SAFE_BOT - 40, CY + R_OUT + 60 * U), 14, '#ffffff', a, 800);
     }
     if (S.t - S.ringHintT < 4 && S.mode === 'playing') {
       const a = Math.min(1, 4 - (S.t - S.ringHintT)) * (0.7 + 0.3 * Math.sin(S.t * 8));
       const yy = Math.min(H - SAFE_BOT - 52, CY + R_OUT + 76 * U);
-      txt('TAP INSIDE YOUR ORBIT ↓ TO DIVE IN', CX, yy, 14, '#ffffff', a, 800);
-      txt('TAP OUTSIDE ↑ TO RISE', CX, yy + 20, 14, '#ffffff', a, 800);
+      txt('NEW ORBIT! TAP LEFT TO MOVE IN', CX, yy, 14, '#ffffff', a, 800);
+      txt('TAP RIGHT TO MOVE OUT', CX, yy + 20, 14, '#ffffff', a, 800);
     }
+    if (S.rings > 2 && S.mode === 'playing') drawPads();
   }
 
   // flash
@@ -1152,6 +1156,20 @@ function drawBackdrop() {
   const vg = g.createRadialGradient(cx, cy, Math.min(w, h) * 0.35, cx, cy, diag * 0.6);
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
   g.fillStyle = vg; g.fillRect(0, 0, w, h);
+}
+// IN / OUT touch pads shown at the bottom once there are 3+ orbits.
+function drawPads() {
+  const vis = clamp(S.ringsF - 2, 0, 1);
+  const h = 54, y = H - SAFE_BOT - h - 14, w = Math.min(150, W * 0.4), m = 14;
+  const pads = [{ dir: 1, x: m, label: '◀  IN' }, { dir: -1, x: W - m - w, label: 'OUT  ▶' }];
+  for (const p of pads) {
+    const hit = S.padFlash && S.padFlash.dir === p.dir ? Math.max(0, 1 - (S.t - S.padFlash.t) / 0.25) : 0;
+    ctx.globalAlpha = (0.1 + 0.25 * hit) * vis; ctx.fillStyle = T.a;
+    roundRect(p.x, y, w, h, 18); ctx.fill();
+    ctx.globalAlpha = (0.45 + 0.4 * hit) * vis; ctx.strokeStyle = T.a; ctx.lineWidth = 1.5;
+    roundRect(p.x, y, w, h, 18); ctx.stroke();
+    txt(p.label, p.x + w / 2, y + h / 2 + 1, 17, '#ffffff', (0.75 + 0.25 * hit) * vis, 900);
+  }
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath();
@@ -1487,9 +1505,11 @@ function onTap(e) {
   if (e) e.preventDefault();
   audioInit();
   if (S.mode !== 'playing' || S.paused) return;
-  // Tap outside your orbit to move out, inside it to move in (any tap works with 2 orbits).
-  const d = e && e.clientX !== undefined ? Math.hypot(e.clientX - CX, e.clientY - CY) : 0;
-  switchRing(d > radiusAt(S.rPos) ? -1 : 1);
+  // 2 orbits: any tap switches. 3+ orbits: left half = IN (toward the core), right half = OUT.
+  if (S.rings <= 2 || !e || e.clientX === undefined) { switchRing(0); return; }
+  const dir = e.clientX < W / 2 ? 1 : -1;
+  S.padFlash = { dir, t: S.t };
+  switchRing(dir, true);
 }
 cvs.addEventListener('pointerdown', onTap);
 $('#playSolo').addEventListener('click', () => start());
@@ -1531,7 +1551,7 @@ window.addEventListener('keydown', e => {
     if (S.mode === 'title' && $('#title').classList.contains('show')) start();
     else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) start();
     else if (S.paused) resume();
-    else if (S.mode === 'playing') switchRing(e.code === 'ArrowUp' || e.code === 'ArrowRight' ? -1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' ? 1 : 0);
+    else if (S.mode === 'playing') switchRing(e.code === 'ArrowUp' || e.code === 'ArrowRight' ? -1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' ? 1 : 0, e.code.startsWith('Arrow') && S.rings > 2);
   } else if (e.code === 'KeyP' || e.code === 'Escape') pause();
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });

@@ -22,7 +22,7 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 | **Web** | The Cloudflare Worker URL (shown in the release notes and on the Actions run summary), or open `web/index.html` locally for single-player |
 | **Add to Home Screen** | Open the web version in Safari → Share → *Add to Home Screen* for a full-screen app |
 
-Controls: **tap** / **space** to switch orbit, **P** / **Esc** to pause.
+Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: tap the **left** half of the screen to move **in** toward the core and the **right** half to move **out**; IN / OUT pads at the bottom show which side is which. On a keyboard, use ← / → (or ↓ / ↑). **P** / **Esc** pauses.
 
 ## Free multiplayer server (one-time setup, about 5 minutes)
 
