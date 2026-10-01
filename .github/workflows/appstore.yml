@@ -15,6 +15,9 @@ permissions:
 
 jobs:
   upload:
+    # Locked: only the repository owner, on this repository, can run an upload.
+    # (Running a workflow already requires write access; forks never get these secrets.)
+    if: github.repository == 'dummiesbuild26/Testcc' && github.actor == github.repository_owner && github.triggering_actor == github.repository_owner
     runs-on: macos-15
     env:
       BUNDLE_ID: ${{ vars.APP_BUNDLE_ID }}
