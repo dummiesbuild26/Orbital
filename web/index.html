@@ -104,9 +104,15 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .row .btn{flex:1}
 .or{font-size:12px;font-weight:800;letter-spacing:.3em;opacity:.45}
 .grank{font-size:14px;font-weight:900;letter-spacing:.2em;color:var(--g);min-height:18px}
-#banner{position:fixed;left:50%;top:calc(var(--top) + 70px);transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
+#banner{position:fixed;left:50%;top:calc(var(--top) + min(205px, 24vh));transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
 #banner.show{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
+.namebtn{display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.namebtn svg{width:18px;height:18px;opacity:.7}
+.namebtn:active{transform:scale(.97)}
+.legal{font-size:12px;font-weight:700;opacity:.55;letter-spacing:.05em}
+.legal a{color:#fff;text-decoration:none;cursor:pointer;padding:6px}
+.linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
 </style>
 </head>
 <body>
@@ -136,13 +142,14 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
     </div>
     <div class="best">BEST <b id="tBest">0</b></div>
     <div class="howto">Tap to switch orbit · dodge <i class="dz"></i> · grab <i class="gm"></i></div>
+    <div class="legal"><a id="lnkPrivacy" target="_blank" rel="noopener">Privacy</a> · <a id="lnkSupport" target="_blank" rel="noopener">Support</a></div>
   </div>
 </div>
 
 <div id="friends" class="screen panel">
   <div class="go">PLAY WITH FRIENDS</div>
-  <div class="sub">Your name</div>
-  <input class="field" id="fName" maxlength="12" autocomplete="off" spellcheck="false">
+  <div class="sub">Your pilot name · tap to shuffle</div>
+  <button class="field namebtn" id="fName"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg></button>
   <button class="btn primary" id="fCreate" style="width:min(320px,100%)">CREATE ROOM</button>
   <div class="or">OR JOIN WITH A CODE</div>
   <input class="field codein" id="fCode" maxlength="6" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false">
@@ -154,9 +161,10 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   <div class="code" id="lCode"></div>
   <div class="sub" id="lStatus">Connecting…</div>
   <ul class="list" id="lPlayers"></ul>
-  <input class="field" id="lName" maxlength="12" autocomplete="off" spellcheck="false" placeholder="Your name">
+  <button class="field namebtn" id="lName"><span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg></button>
   <div class="btns">
     <button class="btn primary" id="lStart">START MATCH</button>
+    <button class="btn" id="lBots">PLAY VS BOTS NOW</button>
     <div class="row">
       <button class="btn" id="lLeave">LEAVE</button>
       <button class="btn" id="lInvite">INVITE</button>
@@ -183,6 +191,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   <div class="sub" id="bSub">Loading…</div>
   <ul class="list" id="bList"></ul>
   <button class="btn" id="bBack" style="width:min(320px,100%)">BACK</button>
+  <button class="linkbtn" id="bForget">Delete my online data</button>
 </div>
 
 <div id="banner"></div>
@@ -1189,10 +1198,19 @@ const PID = store.get('pid', null) || (() => {
   const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2);
   store.set('pid', id); return id;
 })();
-const NAMES = ['Comet', 'Nova', 'Pulsar', 'Quasar', 'Meteor', 'Nebula', 'Photon', 'Zenith', 'Astro', 'Vortex'];
-let myName = store.get('name', '') || NAMES[(Math.random() * NAMES.length) | 0] + ((Math.random() * 90 + 10) | 0);
-const cleanName = n => String(n || '').replace(/[^\p{L}\p{N} _.\-!?]/gu, '').trim().slice(0, 12);
-function setName(n) { n = cleanName(n); if (!n) return false; myName = n; store.set('name', n); return true; }
+// Pilot names are generated from these lists only (the server enforces the same
+// lists), so players never see text typed by strangers.
+const NAME_A = ['Neon', 'Swift', 'Hyper', 'Cosmic', 'Solar', 'Lunar', 'Turbo', 'Pixel', 'Rapid', 'Silent',
+  'Lucky', 'Brave', 'Mighty', 'Shiny', 'Wild', 'Chill', 'Frosty', 'Zappy', 'Retro', 'Mega', 'Ultra', 'Sonic', 'Atomic', 'Laser'];
+const NAME_B = ['Comet', 'Nova', 'Pulsar', 'Quasar', 'Meteor', 'Nebula', 'Photon', 'Orbit', 'Rocket', 'Star',
+  'Moon', 'Zenith', 'Vortex', 'Saturn', 'Pluto', 'Galaxy', 'Plasma', 'Ion', 'Flare', 'Spark', 'Echo', 'Falcon', 'Fox', 'Tiger'];
+const pick = arr => arr[(Math.random() * arr.length) | 0];
+const randomName = () => pick(NAME_A) + pick(NAME_B);
+const isValidName = n => NAME_A.some(a => n.startsWith(a) && NAME_B.includes(n.slice(a.length)));
+let myName = store.get('name', '');
+if (!isValidName(myName)) { myName = randomName(); store.set('name', myName); }
+function shuffleName() { myName = randomName(); store.set('name', myName); syncNames(); return myName; }
+function syncNames() { for (const id of ['#fName', '#lName']) $(id + ' span').textContent = myName; }
 const cleanCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
 const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -1246,8 +1264,18 @@ async function openBoard() {
   } catch (e) { sub.textContent = 'Could not reach the server'; }
 }
 
+async function forgetMe() {
+  if (!SERVER) { toast('Nothing stored online'); return; }
+  if (!window.confirm('Delete your scores and pilot name from the online leaderboard?')) return;
+  try {
+    await api('/api/forget', { pid: PID });
+    toast('Your online data was deleted');
+    openBoard();
+  } catch (e) { toast('Could not reach the server, try again later'); }
+}
+
 async function quickMatch() {
-  if (!SERVER) { toast('Online play needs the game server (see README)'); return; }
+  if (!SERVER) { toast('Offline: racing bots'); startBotMatch(); return; }
   audioInit();
   Net.leave();
   Net.quick = true; Net.phase = 'connecting'; Net.players = [];
@@ -1256,7 +1284,7 @@ async function quickMatch() {
     const r = await api('/api/quick');
     if (Net.phase !== 'connecting') return; // user backed out
     Net.connect(r.room, true);
-  } catch (e) { toast('Could not reach the server'); backToTitle(); }
+  } catch (e) { toast('Server unreachable: racing bots instead'); startBotMatch(); }
 }
 
 function inviteLink() {
@@ -1285,6 +1313,7 @@ function renderLobby() {
   $('#lInvite').classList.toggle('hidden', q);
   const isHost = Net.me && Net.me === Net.host;
   $('#lStart').classList.toggle('hidden', q || !isHost || Net.phase !== 'lobby');
+  $('#lBots').classList.toggle('hidden', !q || Net.players.length >= 2 || Net.phase === 'playing');
   $('#lPlayers').innerHTML = Net.players.map(p => {
     const tags = [p.id === Net.me ? 'YOU' : '', p.id === Net.host && !q ? 'HOST' : '', Net.phase === 'playing' && p.playing ? 'IN MATCH' : '']
       .filter(Boolean).join(' · ');
@@ -1326,17 +1355,101 @@ function showResults() {
   makeCard(false).then(c => { S.card = c; }).catch(() => {});
 }
 
+/* Bot match: same rules as an online match, fully offline. Bots are ghosts driven
+   locally that read the (seeded) course and occasionally misjudge a column. */
+function startBotMatch() {
+  Net.leave();
+  audioInit();
+  Net.offline = true; Net.me = 'me'; Net.quick = true;
+  Net.seed = (Math.random() * 2 ** 31) | 0;
+  Net.localStart = Date.now() + 3500; Net.ranking = null; Net.myPlace = 0;
+  Net.ghosts.clear();
+  const colors = ['#ff2d95', '#fff36b', '#7dff5a'];
+  const names = new Set([myName]);
+  for (let i = 0; i < 3; i++) {
+    let n = randomName(); while (names.has(n)) n = randomName(); names.add(n);
+    Net.ghosts.set('bot' + i, { id: 'bot' + i, name: n, color: colors[i], playing: true, alive: true, dead: false,
+      score: 0, ring: 0, rPos: 0, events: [], trail: [], phi: 0, slot: 0,
+      bot: { err: 0.012 + i * 0.008, lastCol: null, miss: false, prevPhi: -1, nextMove: 0, lastScored: -99 } });
+  }
+  Net.matchSize = 4;
+  Net.players = [{ id: 'me', name: myName, color: '#ffffff', playing: true }];
+  for (const g of Net.ghosts.values()) Net.players.push({ id: g.id, name: g.name, color: g.color, playing: true });
+  S.mp = true; S.mode = 'countdown'; S.cdSec = 0; S.score = 0;
+  hideScreens(); banner('YOU VS 3 BOTS · LAST ONE ALIVE WINS', 2500);
+}
+
+function botThink(g, phi) {
+  const b = g.bot;
+  if (S.mode === 'countdown') { b.prevPhi = phi; return; }
+  const spikes = S.items.filter(it => it.type === 'spike' && it.a > phi - 0.3 && it.a < phi + 2.5);
+  // crossed a column this frame on a blocked orbit -> crash
+  for (const it of spikes) {
+    if (it.a > b.prevPhi && it.a <= phi) {
+      if (it.ring === g.ring && g.alive) {
+        const place = [...Net.ghosts.values()].filter(x => x.alive).length + (S.mode === 'playing' ? 1 : 0);
+        Net.onMsg({ t: 'dead', id: g.id, s: g.score, th: phi, place });
+        g.place = place;
+        Net.checkOfflineEnd();
+        return;
+      }
+      if (Math.abs(it.a - b.lastScored) > 0.01) { b.lastScored = it.a; g.score++; }
+    }
+  }
+  for (const it of S.items) if (it.type === 'gem' && it.a > b.prevPhi && it.a <= phi && it.ring === g.ring) g.score += 2;
+  b.prevPhi = phi;
+  // hold steady while passing a column, then steer for the next one
+  const near = spikes.filter(it => it.a > phi - 0.26).sort((x, y) => x.a - y.a);
+  if (!near.length || near[0].a - phi < 0.17) return;
+  const ahead = near;
+  const a0 = ahead[0].a;
+  if (b.lastCol !== a0) { b.lastCol = a0; b.miss = Math.random() < b.err * (1 + S.level * 0.35) * (S.mode === 'playing' ? 1 : 4); }
+  if (b.miss || S.t < b.nextMove) return;
+  const blocked = new Set(ahead.filter(it => Math.abs(it.a - a0) < 0.02).map(it => it.ring));
+  let best = -1;
+  for (let k = 0; k < S.rings; k++) if (!blocked.has(k) && (best < 0 || Math.abs(k - g.ring) < Math.abs(best - g.ring))) best = k;
+  if (best >= 0 && best !== g.ring) {
+    g.events.push({ th: phi, r: g.ring + Math.sign(best - g.ring) });
+    b.nextMove = S.t + 0.09;
+  }
+}
+
 const Net = {
+  offline: false,
   ws: null, code: '', quick: false, me: null, host: null, phase: 'off', players: [], ghosts: new Map(),
   seed: 0, localStart: 0, waitUntil: 0, ranking: null, myPlace: 0, matchSize: 0, requeue: null, pinger: null,
 
-  send(m) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(m)); },
+  send(m) {
+    if (this.offline) {
+      if (m.t === 'dead') {
+        this.myPlace = [...this.ghosts.values()].filter(g => g.alive).length + 1;
+        this.checkOfflineEnd();
+      }
+      return;
+    }
+    if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(m));
+  },
+
+  checkOfflineEnd() {
+    const botsAlive = [...this.ghosts.values()].some(g => g.alive);
+    const meAlive = S.mode === 'playing' || S.mode === 'countdown';
+    if (botsAlive || meAlive || this.ending) return;
+    this.ending = true;
+    setTimeout(() => {
+      this.ending = false;
+      if (!this.offline) return;
+      const ranking = [{ id: 'me', name: myName, color: '#ffffff', score: S.score, place: this.myPlace || 1 }];
+      for (const g of this.ghosts.values()) ranking.push({ id: g.id, name: g.name + ' (bot)', color: g.color, score: g.score, place: g.place || 1 });
+      ranking.sort((a, b) => a.place - b.place || b.score - a.score);
+      this.onMsg({ t: 'end', ranking });
+    }, 1200);
+  },
 
   connect(code, quick) {
     this.leave();
     this.code = code; this.quick = quick; this.phase = 'connecting';
     this.players = []; this.ghosts.clear(); this.ranking = null; this.me = null;
-    showScreen('lobby'); $('#lName').value = myName; renderLobby();
+    showScreen('lobby'); syncNames(); renderLobby();
     const url = SERVER.replace(/^http/, 'ws') + '/ws?room=' + encodeURIComponent(code) +
       '&name=' + encodeURIComponent(myName) + '&pid=' + encodeURIComponent(PID) + (quick ? '&quick=1' : '');
     let ws;
@@ -1353,6 +1466,7 @@ const Net = {
   },
 
   leave() {
+    this.offline = false;
     clearTimeout(this.requeue); clearInterval(this.pinger);
     const ws = this.ws; this.ws = null;
     if (ws) { try { ws.close(1000); } catch (e) {} }
@@ -1436,6 +1550,7 @@ const Net = {
       // Draw opponents slightly behind you; their events are replayed at the exact
       // course angle they happened, which also hides network latency.
       const phi = S.mode === 'countdown' ? -0.08 * (g.slot + 1) : S.theta - S.omega * (0.12 + 0.06 * g.slot);
+      if (g.bot && g.alive) botThink(g, phi);
       while (g.events.length && g.events[0].th <= phi) {
         const ev = g.events.shift();
         if (ev.dead) {
@@ -1514,14 +1629,14 @@ function onTap(e) {
 cvs.addEventListener('pointerdown', onTap);
 $('#playSolo').addEventListener('click', () => start());
 $('#btnQuick').addEventListener('click', () => { SFX.click(); quickMatch(); });
-$('#btnFriends').addEventListener('click', () => { audioInit(); SFX.click(); $('#fName').value = myName; showScreen('friends'); });
+$('#btnFriends').addEventListener('click', () => { audioInit(); SFX.click(); syncNames(); showScreen('friends'); });
 $('#btnBoard').addEventListener('click', () => { audioInit(); SFX.click(); openBoard(); });
 $('#bBack').addEventListener('click', () => { SFX.click(); backToTitle(); });
 $('#fBack').addEventListener('click', () => { SFX.click(); backToTitle(); });
-$('#fName').addEventListener('change', e => setName(e.target.value));
+$('#fName').addEventListener('click', () => { SFX.click(); shuffleName(); });
 $('#fCreate').addEventListener('click', () => {
   if (!SERVER) { toast('Online play needs the game server (see README)'); return; }
-  setName($('#fName').value); SFX.click();
+  SFX.click();
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   Net.connect(Array.from({ length: 4 }, () => chars[(Math.random() * chars.length) | 0]).join(''), false);
 });
@@ -1529,15 +1644,25 @@ $('#fJoin').addEventListener('click', () => {
   if (!SERVER) { toast('Online play needs the game server (see README)'); return; }
   const code = cleanCode($('#fCode').value);
   if (code.length < 4) { toast('Enter a 4-letter room code'); return; }
-  setName($('#fName').value); SFX.click();
+  SFX.click();
   Net.connect(code, false);
 });
 $('#fCode').addEventListener('keydown', e => { if (e.key === 'Enter') $('#fJoin').click(); });
-$('#lName').addEventListener('change', e => { if (setName(e.target.value)) Net.send({ t: 'name', name: myName }); });
+$('#lName').addEventListener('click', () => { SFX.click(); shuffleName(); Net.send({ t: 'name', name: myName }); });
 $('#lStart').addEventListener('click', () => { SFX.click(); Net.send({ t: 'start' }); });
 $('#lInvite').addEventListener('click', invite);
 $('#lLeave').addEventListener('click', () => { SFX.click(); Net.leave(); backToTitle(); });
-$('#mNext').addEventListener('click', () => { SFX.click(); S.mode = 'title'; showScreen('lobby'); $('#lName').value = myName; renderLobby(); });
+$('#mNext').addEventListener('click', () => {
+  SFX.click();
+  if (Net.offline) { startBotMatch(); return; }
+  S.mode = 'title'; showScreen('lobby'); syncNames(); renderLobby();
+});
+$('#lBots').addEventListener('click', () => { SFX.click(); startBotMatch(); });
+$('#bForget').addEventListener('click', forgetMe);
+const webBase = SERVER ? SERVER + '/' : '';
+$('#lnkPrivacy').href = webBase + 'privacy.html';
+$('#lnkSupport').href = webBase + 'support.html';
+syncNames();
 $('#mLeave').addEventListener('click', () => { SFX.click(); Net.leave(); backToTitle(); });
 $('#mShare').addEventListener('click', share);
 $('#menu').addEventListener('click', () => { SFX.click(); backToTitle(); });

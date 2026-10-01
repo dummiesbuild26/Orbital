@@ -24,6 +24,10 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 
 Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: tap the **left** half of the screen to move **in** toward the core and the **right** half to move **out**; IN / OUT pads at the bottom show which side is which. On a keyboard, use ← / → (or ↓ / ↑). **P** / **Esc** pauses.
 
+## App Store
+
+Everything is prepared for App Review. **[APP_STORE.md](APP_STORE.md)** has the step-by-step submission guide, ready-to-paste listing text, privacy and age-rating answers, and the review notes. Screenshots at Apple's sizes are in `appstore/screenshots/`. The **Upload to App Store Connect** workflow signs and uploads builds once your Apple Developer secrets are set.
+
 ## Free multiplayer server (one-time setup, about 5 minutes)
 
 The server runs on **Cloudflare Workers + Durable Objects**. Both are included in Cloudflare's **free plan**, with no credit card required. The same Worker also hosts the web version of the game.
@@ -57,7 +61,10 @@ ios/project.yml      XcodeGen spec for the native iOS wrapper
 ios/Orbital/         Swift WKWebView shell (haptics + native share sheet bridge)
 server/              Cloudflare Worker: multiplayer rooms, matchmaking, leaderboard
 tools/render-icon.mjs  regenerates the app icon (node + playwright)
-.github/workflows/   release.yml deploys the server, builds the IPA, publishes a Release
+tools/screenshots.mjs  regenerates App Store screenshots
+appstore/screenshots/  App Store screenshots (iPhone 6.9", iPad 13")
+.github/workflows/   release.yml: deploys the server, builds the IPA, publishes a Release
+                     appstore.yml: signs and uploads to App Store Connect (manual)
 ```
 
 ## How the IPA gets built

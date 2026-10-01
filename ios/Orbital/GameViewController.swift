@@ -4,7 +4,7 @@ import WebKit
 /// Hosts the bundled HTML5 game full-screen and bridges a few native niceties:
 /// - `haptic`  : Taptic Engine feedback ("light", "medium", "heavy", "success", "error")
 /// - `share`   : native share sheet with the generated score card image
-final class GameViewController: UIViewController, WKScriptMessageHandler {
+final class GameViewController: UIViewController, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     private var webView: WKWebView!
     private let lightImpact = UIImpactFeedbackGenerator(style: .light)
     private let mediumImpact = UIImpactFeedbackGenerator(style: .medium)
@@ -29,9 +29,13 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
         webView.scrollView.bounces = false
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsLinkPreview = false
+        #if DEBUG
         if #available(iOS 16.4, *) {
             webView.isInspectable = true
         }
+        #endif
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
         view = webView
     }
 
@@ -48,6 +52,36 @@ final class GameViewController: UIViewController, WKScriptMessageHandler {
     override var prefersStatusBarHidden: Bool { true }
     override var prefersHomeIndicatorAutoHidden: Bool { true }
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge { .all }
+
+    // The game itself is bundled; any web link (privacy policy, support, invites) opens in Safari.
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        if let url = navigationAction.request.url, openExternallyIfNeeded(url) {
+            decisionHandler(.cancel)
+        } else {
+            decisionHandler(.allow)
+        }
+    }
+
+    // target="_blank" links
+    func webView(
+        _ webView: WKWebView,
+        createWebViewWith configuration: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction,
+        windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+        if let url = navigationAction.request.url { _ = openExternallyIfNeeded(url) }
+        return nil
+    }
+
+    private func openExternallyIfNeeded(_ url: URL) -> Bool {
+        guard let scheme = url.scheme?.lowercased(), ["http", "https", "mailto"].contains(scheme) else { return false }
+        UIApplication.shared.open(url)
+        return true
+    }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
