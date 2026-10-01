@@ -77,6 +77,36 @@ final class GameViewController: UIViewController, WKScriptMessageHandler, WKNavi
         return nil
     }
 
+    // WKWebView only shows JavaScript alert()/confirm() if the app presents them itself;
+    // without these, confirm() silently returns false (e.g. "Delete my online data").
+    func webView(
+        _ webView: WKWebView,
+        runJavaScriptAlertPanelWithMessage message: String,
+        initiatedByFrame frame: WKFrameInfo,
+        completionHandler: @escaping () -> Void
+    ) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in completionHandler() })
+        presentDialog(alert, fallback: completionHandler)
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        runJavaScriptConfirmPanelWithMessage message: String,
+        initiatedByFrame frame: WKFrameInfo,
+        completionHandler: @escaping (Bool) -> Void
+    ) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in completionHandler(false) })
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { _ in completionHandler(true) })
+        presentDialog(alert, fallback: { completionHandler(false) })
+    }
+
+    private func presentDialog(_ alert: UIAlertController, fallback: @escaping () -> Void) {
+        guard presentedViewController == nil else { fallback(); return }
+        present(alert, animated: true)
+    }
+
     private func openExternallyIfNeeded(_ url: URL) -> Bool {
         guard let scheme = url.scheme?.lowercased(), ["http", "https", "mailto"].contains(scheme) else { return false }
         UIApplication.shared.open(url)
