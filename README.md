@@ -8,6 +8,9 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 - A new color theme every level (Neon → Toxic → Solar → Ultraviolet → …)
 - A generative synth soundtrack that picks up as you level up (all audio is synthesized, with no asset files)
 - Combo multipliers up to x6, near-miss bonuses ("CLUTCH! +2"), roast messages on death
+- **Hopper spikes** that jump to another orbit as you close in (a dashed target shows where they'll land), and **shield** pickups that absorb one hit
+- **Daily challenge:** one fixed course per day, with today's best and a day streak
+- **Pilot screen:** lifetime stats, 14 achievements and 8 unlockable comet skins (saved on the device)
 - **Challenge a Friend** creates a 1080×1080 score card and opens the share sheet
 - Haptics on iOS, saved best score, pause on background
 - **Online multiplayer:** in Quick Match, up to 8 players race the *identical* course live and the last comet alive wins. You see every rival as a glowing ghost on the orbit
@@ -26,7 +29,7 @@ Works on phones and desktops. Multiplayer, private rooms and the leaderboard all
 | **Web** | **https://orbital-server.dummiesbuild26.workers.dev/** |
 | **Add to Home Screen** | Open the web version in Safari → Share → *Add to Home Screen* for a full-screen app |
 
-Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: tap the **left** half of the screen to move **in** toward the core and the **right** half to move **out**; IN / OUT pads at the bottom show which side is which. On a keyboard, use ← / → (or ↓ / ↑). **P** / **Esc** pauses.
+Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: **swipe up** to move **out** one orbit and **swipe down** to move **in** toward the core (taps do nothing then). The first time a third orbit appears in solo play, the game pauses and shows a short swipe tutorial. On a keyboard, use ↑ (out) / ↓ (in). **P** / **Esc** pauses.
 
 ## Multiplayer server
 

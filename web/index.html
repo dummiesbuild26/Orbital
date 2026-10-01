@@ -104,7 +104,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .row .btn{flex:1}
 .or{font-size:12px;font-weight:800;letter-spacing:.3em;opacity:.45}
 .grank{font-size:14px;font-weight:900;letter-spacing:.2em;color:var(--g);min-height:18px}
-#banner{position:fixed;left:50%;top:calc(var(--top) + min(205px, 24vh));transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
+#banner{position:fixed;left:50%;top:calc(var(--top) + min(205px, 24vh));transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;width:max-content;max-width:calc(100vw - 24px);text-align:center;z-index:4}
 #banner.show{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
 .namebtn{display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
@@ -112,6 +112,45 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .namebtn:active{transform:scale(.97)}
 .legal{font-size:12px;font-weight:700;opacity:.55;letter-spacing:.05em}
 .legal a{color:#fff;text-decoration:none;cursor:pointer;padding:6px}
+.daily{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 26px;border-radius:18px;border:2px solid var(--g);background:rgba(255,255,255,.05);color:#fff;font-family:var(--font);cursor:pointer;box-shadow:0 0 16px rgba(0,0,0,.3),inset 0 0 14px rgba(255,255,255,.04);transition:transform .12s ease}
+.daily:active{transform:scale(.95)}
+.daily b{font-size:15px;font-weight:900;letter-spacing:.18em;color:var(--g);text-shadow:0 0 10px var(--g)}
+.daily span{font-size:11px;font-weight:700;letter-spacing:.1em;opacity:.7;text-transform:uppercase;white-space:nowrap}
+#pilotBtn{position:relative;display:flex;align-items:center;gap:12px;padding:8px 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.05);color:#fff;font-family:var(--font);cursor:pointer}
+#pilotBtn:active{transform:scale(.95)}
+#pilotBtn .pl{font-size:12px;font-weight:900;letter-spacing:.2em;opacity:.85;border-left:1.5px solid rgba(255,255,255,.2);padding-left:12px}
+#pilotBtn .dot{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);display:none}
+#pilotBtn.new .dot{display:block}
+#pilot{justify-content:flex-start;padding-top:calc(var(--top) + 64px);gap:12px}
+.scroll{width:min(360px,100%);flex:1 1 auto;min-height:0;overflow-y:auto;touch-action:pan-y;display:flex;flex-direction:column;align-items:center;gap:14px;padding-bottom:6px;-webkit-mask-image:linear-gradient(#000 92%,transparent);mask-image:linear-gradient(#000 92%,transparent)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.grid div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.06);font-size:10px;font-weight:800;letter-spacing:.14em;opacity:.95;text-align:center}
+.grid b{font-size:19px;letter-spacing:0;color:#fff;font-variant-numeric:tabular-nums}
+.h2{font-size:12px;font-weight:900;letter-spacing:.3em;opacity:.65;align-self:flex-start;margin-top:4px}
+.skins{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%}
+.skin{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.skin i{width:18px;height:18px;border-radius:50%;background:var(--c);box-shadow:0 0 12px 3px var(--c),0 0 3px #fff inset}
+.skin.sel{border-color:#fff;box-shadow:0 0 16px var(--a50)}
+.skin.locked i{background:rgba(255,255,255,.15);box-shadow:none}
+.skin.locked::after{content:'🔒';position:absolute;font-size:16px}
+.skin:active{transform:scale(.92)}
+.ach{list-style:none;width:100%;display:flex;flex-direction:column;gap:6px}
+.ach li{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:14px;background:rgba(255,255,255,.05);opacity:.45}
+.ach li.got{opacity:1;background:rgba(255,255,255,.09)}
+.ach .ic{font-size:20px;width:26px;text-align:center;filter:grayscale(1)}
+.ach li.got .ic{filter:none}
+.ach .tx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ach .tx b{font-size:14px;font-weight:900;letter-spacing:.04em}
+.ach .tx span{font-size:12px;font-weight:600;opacity:.7}
+#tut{justify-content:center;gap:16px;background:rgba(5,1,15,.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer;text-align:center;padding:24px}
+#tut .go{color:#fff;text-shadow:0 0 18px var(--a)}
+.demo{position:relative;width:150px;height:170px;margin:6px 0}
+.demo .lane{position:absolute;left:50%;width:2px;top:10px;bottom:10px;background:linear-gradient(var(--a),transparent 45%,transparent 55%,var(--a));opacity:.45;transform:translateX(-50%)}
+.demo .finger{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 0 22px var(--a),0 0 6px #fff;animation:swipe 2.4s ease-in-out infinite}
+@keyframes swipe{0%,8%{transform:translateY(0);opacity:0}14%{opacity:1}38%{transform:translateY(-58px);opacity:1}46%,54%{transform:translateY(-58px);opacity:0}54.1%{transform:translateY(0)}60%{opacity:1}84%{transform:translateY(58px);opacity:1}92%,100%{transform:translateY(58px);opacity:0}}
+.demo .lbl{position:absolute;left:0;right:0;font-size:15px;font-weight:900;letter-spacing:.16em}
+.demo .lbl.up{top:-8px;color:var(--a)} .demo .lbl.dn{bottom:-8px;color:var(--g)}
+.tutsub{font-size:14px;font-weight:700;opacity:.8;letter-spacing:.06em;max-width:300px;line-height:1.5}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
 </style>
 </head>
@@ -126,6 +165,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   </div>
   <div class="bottom-block">
     <button class="cta" id="playSolo">TAP TO PLAY</button>
+    <button class="daily" id="btnDaily"><b>☀ DAILY CHALLENGE</b><span id="dInfo">A new course every day</span></button>
     <div class="modes">
       <button class="btn" id="btnQuick">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
@@ -140,7 +180,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
         RANKS
       </button>
     </div>
-    <div class="best">BEST <b id="tBest">0</b></div>
+    <button id="pilotBtn" aria-label="Pilot stats, comets and achievements"><span class="best">BEST <b id="tBest">0</b></span><span class="pl">★ PILOT</span><span class="dot"></span></button>
     <div class="howto">Tap to switch orbit · dodge <i class="dz"></i> · grab <i class="gm"></i></div>
     <div class="legal"><a id="lnkPrivacy" target="_blank" rel="noopener">Privacy</a> · <a id="lnkSupport" target="_blank" rel="noopener">Support</a></div>
   </div>
@@ -194,6 +234,26 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   <button class="linkbtn" id="bForget">Delete my online data</button>
 </div>
 
+<div id="pilot" class="screen panel">
+  <div class="go">PILOT</div>
+  <div class="scroll">
+    <div class="grid" id="pStats"></div>
+    <div class="h2">COMET</div>
+    <div class="skins" id="pSkins"></div>
+    <div class="h2" id="pAchH">ACHIEVEMENTS</div>
+    <ul class="ach" id="pAch"></ul>
+  </div>
+  <button class="btn" id="pBack" style="width:min(320px,100%);flex:none">BACK</button>
+</div>
+
+<div id="tut" class="screen">
+  <div class="go">NEW ORBIT!</div>
+  <div class="sub">Controls are now <b style="color:var(--g)">SWIPE</b></div>
+  <div class="demo"><div class="lbl up">↑ OUT</div><div class="lane"></div><div class="finger"></div><div class="lbl dn">↓ IN</div></div>
+  <div class="tutsub">Swipe <b>up</b> to move out one orbit,<br>swipe <b>down</b> to move in toward the core.</div>
+  <div class="cta">SWIPE OR TAP TO CONTINUE</div>
+</div>
+
 <div id="banner"></div>
 
 <div id="over" class="screen">
@@ -202,7 +262,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   <div class="newbest" id="newBest">NEW BEST!</div>
   <div class="grank" id="oGlobal"></div>
   <div class="stats">
-    <div>BEST<b id="oBest">0</b></div>
+    <div><span id="oBestL">BEST</span><b id="oBest">0</b></div>
     <div>GEMS<b id="oGems">0</b></div>
     <div>COMBO<b id="oCombo">0</b></div>
     <div>LEVEL<b id="oLevel">1</b></div>
@@ -345,12 +405,24 @@ const gemSprite = color => cached('gem' + color, 96, (g, s) => {
   g.lineWidth = 1.5; g.strokeStyle = 'rgba(255,255,255,.6)'; g.stroke();
 });
 
+const shieldSprite = color => cached('shield' + color, 96, (g, s) => {
+  const c = s / 2;
+  g.beginPath(); g.arc(c, c, s * 0.42, 0, TAU);
+  g.fillStyle = hexA(color, 0.25); g.fill();
+  g.lineWidth = 4; g.strokeStyle = '#fff'; g.stroke();
+  g.beginPath();
+  g.moveTo(c, c - s * 0.26); g.lineTo(c + s * 0.2, c - s * 0.17); g.lineTo(c + s * 0.17, c + s * 0.08);
+  g.quadraticCurveTo(c + s * 0.1, c + s * 0.22, c, c + s * 0.28);
+  g.quadraticCurveTo(c - s * 0.1, c + s * 0.22, c - s * 0.17, c + s * 0.08);
+  g.lineTo(c - s * 0.2, c - s * 0.17); g.closePath();
+  g.fillStyle = color; g.fill(); g.lineWidth = 2.5; g.stroke();
+});
 let T, SPR;
 function applyTheme(i) {
   T = THEMES[i % THEMES.length];
   SPR = {
     a: glowSprite(T.a), b: glowSprite(T.b), g: glowSprite(T.g), w: glowSprite('#ffffff'),
-    spike: spikeSprite(T.b), gem: gemSprite(T.g),
+    spike: spikeSprite(T.b), gem: gemSprite(T.g), shield: shieldSprite(T.a),
   };
   const r = document.documentElement.style;
   r.setProperty('--a', T.a); r.setProperty('--b', T.b); r.setProperty('--g', T.g); r.setProperty('--bg', T.bg[1]);
@@ -363,8 +435,8 @@ function applyTheme(i) {
 applyTheme(0);
 // Build every theme's sprites up front so level-ups and new colors never hitch mid-run.
 setTimeout(() => {
-  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); }
-  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88']) glowSprite(c);
+  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); shieldSprite(th.a); }
+  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88', '#ffd84a', '#ff7a1a', '#ff4fd8', '#ff2d55']) glowSprite(c);
 }, 50);
 
 /* =========================================================
@@ -431,6 +503,10 @@ const SFX = {
   die() { noise(0.9, 0.5, 0, 3000, 'lowpass', 1, 80); tone(220, 0.7, 'sawtooth', 0.25, 0, 30); tone(110, 0.5, 'square', 0.15, 0, 25); },
   best() { if (!ok()) return; const t = A.ctx.currentTime; [0, 4, 7, 12, 16, 19, 24].forEach((n, i) => tone(523.25 * Math.pow(2, n / 12), 0.25, 'triangle', 0.12, t + i * 0.07)); },
   click() { tone(900, 0.05, 'sine', 0.1, 0, 1300); },
+  achieve() { if (!ok()) return; const t = A.ctx.currentTime; [0, 7, 12, 19].forEach((n, i) => tone(659.25 * Math.pow(2, n / 12), 0.3, 'triangle', 0.1, t + i * 0.08)); },
+  shield() { if (!ok()) return; const t = A.ctx.currentTime; [0, 5, 12].forEach((n, i) => tone(440 * Math.pow(2, n / 12), 0.2, 'triangle', 0.14, t + i * 0.05)); },
+  shieldBreak() { noise(0.5, 0.35, 0, 5000, 'highpass', 0.7, 400); tone(880, 0.35, 'square', 0.08, 0, 110); },
+  hop() { tone(300, 0.12, 'square', 0.05, 0, 900); noise(0.08, 0.05, 0, 3000, 'bandpass', 3); },
 };
 
 /* ----- generative music, intensity follows level ----- */
@@ -487,6 +563,7 @@ const S = {
   combo: 0, maxCombo: 0, gems: 0, mult: 1, next: 0,
   shake: 0, flash: 0, flashColor: '#fff', timeScale: 1, warp: 0, coreKick: 0,
   lastSwitch: -9, switchFrom: 0, demoT: 0, runT: 0, paused: false, card: null,
+  shield: 0, safeT: -9, nears: 0, saves: 0,
   mp: false, spawned: 0, cdSec: 0, sentScore: 0, sentT: 0, lastStanding: false, prevBest: 0,
 };
 const stars = Array.from({ length: 170 }, () => ({ a: rand(0, TAU), d: rand(0.02, 1), s: rand(0.3, 1) }));
@@ -535,6 +612,10 @@ function mulberry32(a) {
   };
 }
 let rng = Math.random;
+// Bump whenever spawn()/column() change what a seed produces. The server only puts
+// players with the same course version in a room, so mixed app versions never race
+// on different courses.
+const COURSE_V = 2;
 // Objects become visible/collidable only inside this window ahead of the player.
 // Patterns can be generated further ahead than a full lap would allow, and without
 // this they would sit (and collide) right behind the player on the circle.
@@ -542,8 +623,20 @@ const VIEW_AHEAD = 3.7;
 const inView = it => it.a - S.theta < VIEW_AHEAD;
 const omegaFor = L => Math.min(3.8, 1.9 + (L - 1) * 0.19);
 function addItem(type, a, ring) {
-  S.items.push({ type, a, ring, born: S.t, fade: 0, passed: false, spin: rng() * 2 - 1 });
+  const it = { type, a, ring, born: S.t, fade: 0, passed: false, spin: rng() * 2 - 1 };
+  S.items.push(it);
+  return it;
 }
+/* Hoppers are spikes that start on orbit `from` and slide to their real orbit
+   `ring` while the player is between hopA - HOP and hopA (course angle, so it is
+   deterministic and every player/ghost sees the same hop at the same place). */
+const HOP = 0.35;
+function itemRing(it, th = S.theta) {
+  if (it.from === undefined) return it.ring;
+  const k = clamp((th - (it.hopA - HOP)) / HOP, 0, 1);
+  return lerp(it.from, it.ring, k * k * (3 - 2 * k));
+}
+const itemPos = it => pos(it.a, radiusAt(itemRing(it)));
 // Place a column of spikes at angle `a`, pushed forward if needed so that every
 // orbit the player could be on after the previous column can reach a free orbit
 // in time (one extra gap per orbit to cross).
@@ -575,7 +668,22 @@ function spawn() {
     const step = (r, i) => (n === 2 ? (r + i) % 2 : clamp(r + (rng() < 0.5 ? -1 : 1), 0, n - 1));
     let a = S.next, r = (rng() * n) | 0;
     let roll = rng();
-    if (n >= 3 && roll < 0.24) {                     // gates: every orbit blocked but one
+    if (L >= 2 && rng() < 0.15) {                    // hoppers: spikes that jump orbit as you close in
+      const cnt = 1 + ((rng() * Math.min(3, L - 1)) | 0);
+      for (let i = 0; i < cnt; i++) {
+        const to = i ? step(r, 1) : r, prevA = S.prevA;
+        const from = n === 2 ? 1 - to : to === 0 ? 1 : to === n - 1 ? n - 2 : to + (rng() < 0.5 ? -1 : 1);
+        let gem = -1;                                // never under the spike before it hops
+        if (n >= 3) { gem = other(to); if (gem === from) gem = other(to); if (gem === from) gem = -1; }
+        a = column(a + g * 0.2, [to], gem, n, g);
+        const it = S.items.find(x => x.type === 'spike' && x.a === a);
+        // The hop finishes before the player reaches the previous column, so there is
+        // at least as much time to react as for a normal column.
+        it.from = from; it.hopA = a - clamp(a - prevA + 0.3, 0.9, 3.0);
+        r = to; a += g * 0.9;
+      }
+      a += g * 0.3;
+    } else if (n >= 3 && roll < 0.24) {              // gates: every orbit blocked but one
       const cnt = 2 + ((rng() * Math.min(3, L - 1)) | 0);
       let hole = r;
       for (let i = 0; i < cnt; i++) {
@@ -603,8 +711,10 @@ function spawn() {
         a += g * 0.6;
       } else {                                       // gem river with a spike guard
         const cnt = 4 + ((rng() * 3) | 0);
+        const shield = L >= 3 && rng() < 0.5;        // ...ending in a shield now and then
         for (let i = 0; i < cnt; i++) {
           a = i === ((cnt / 2) | 0) ? column(a, [other(r)], r, n, g) : column(a, [], r, n, g);
+          if (shield && i === cnt - 1) S.items[S.items.length - 1].type = 'shield';
           a += 0.19;
         }
         a += g * 0.4;
@@ -617,21 +727,145 @@ function unlockRing(n) {
   S.rings = n;
   if (S.mode !== 'playing') return;
   S.ringHintT = S.t;
+  if (n === 3) {
+    const seen = store.get('swipeTut', 0);
+    // Solo: pause and teach swipes the first two times ever. Multiplayer never pauses.
+    if (!S.mp && seen < 2) { store.set('swipeTut', seen + 1); showSwipeTutorial(); }
+    else banner(S.mp ? 'NEW ORBIT! SWIPE ↑ OUT · ↓ IN' : 'NEW ORBIT · SWIPE ↑ OUT · ↓ IN', S.mp ? 3500 : 2200);
+  }
   popText('+1 ORBIT', CX, CY + R_OUT + 40 * U, T.a, 30, 1.6);
   wave(CX, CY, T.a, R_OUT * innerFrac(n) / U, 6, 0.9);
   tone(330, 0.5, 'sine', 0.15, 0, 660);
+}
+
+/* ----- pilot profile: lifetime stats, achievements, comet skins (all local) ----- */
+const STAT0 = { runs: 0, time: 0, gems: 0, spikes: 0, nears: 0, saves: 0, bestCombo: 0, bestLevel: 1, wins: 0, dailies: 0 };
+const loadStats = () => Object.assign({}, STAT0, store.get('stats', {}));
+const saveStats = st => store.set('stats', st);
+function recordRun() {
+  const st = loadStats();
+  st.runs++; st.time += S.runT; st.gems += S.gems; st.spikes += S.passed; st.nears += S.nears; st.saves += S.saves;
+  st.bestCombo = Math.max(st.bestCombo, S.maxCombo); st.bestLevel = Math.max(st.bestLevel, S.level);
+  if (S.daily) st.dailies++;
+  saveStats(st);
+  checkAchievements();
+}
+// r = this run (S), st = lifetime stats
+const ACH = [
+  { id: 'first', ic: '🚀', name: 'Liftoff', desc: 'Finish your first run', ok: (r, st) => st.runs >= 1 },
+  { id: 's50', ic: '⭐', name: 'Warming Up', desc: 'Score 50 in one run', ok: () => S.best >= 50 },
+  { id: 's150', ic: '🌟', name: 'Star Pilot', desc: 'Score 150 in one run', ok: () => S.best >= 150 },
+  { id: 's300', ic: '💫', name: 'Supernova', desc: 'Score 300 in one run', ok: () => S.best >= 300 },
+  { id: 's600', ic: '🌌', name: 'Event Horizon', desc: 'Score 600 in one run', ok: () => S.best >= 600 },
+  { id: 'lv5', ic: '🪐', name: 'Third Orbit', desc: 'Reach level 5', ok: (r, st) => st.bestLevel >= 5 },
+  { id: 'lv10', ic: '🌀', name: 'Deep Space', desc: 'Reach level 10', ok: (r, st) => st.bestLevel >= 10 },
+  { id: 'x6', ic: '🔥', name: 'On Fire', desc: 'Reach a x6 combo', ok: (r, st) => st.bestCombo >= 25 },
+  { id: 'clutch', ic: '😮', name: 'Clutch King', desc: '100 near misses in total', ok: (r, st) => st.nears >= 100 },
+  { id: 'gems', ic: '💎', name: 'Gem Hoarder', desc: 'Collect 1,000 gems in total', ok: (r, st) => st.gems >= 1000 },
+  { id: 'saved', ic: '🛡️', name: 'Saved!', desc: 'Survive a hit with a shield', ok: (r, st) => st.saves >= 1 },
+  { id: 'streak', ic: '📅', name: 'Regular', desc: 'Play the daily 3 days in a row', ok: () => store.get('streak', { n: 0 }).n >= 3 },
+  { id: 'win', ic: '🏆', name: 'Last One Standing', desc: 'Win a match (online or vs bots)', ok: (r, st) => st.wins >= 1 },
+  { id: 'hour', ic: '⏱️', name: 'Frequent Flyer', desc: 'Fly for 30 minutes in total', ok: (r, st) => st.time >= 1800 },
+];
+// Comet skins: unlocked by achievements. `c` is the comet colour (null = theme colour).
+const RAINBOW = ['#ff2d55', '#ff9e2c', '#fff36b', '#7dff5a', '#22f3ff', '#b48cff'];
+const SKINS = [
+  { id: 'classic', name: 'Classic', c: null },
+  { id: 'gold', name: 'Gold', c: '#ffd84a', need: 's150' },
+  { id: 'ghost', name: 'Ghost', c: '#ffffff', need: 'clutch' },
+  { id: 'ember', name: 'Ember', c: '#ff7a1a', need: 'x6' },
+  { id: 'toxic', name: 'Toxic', c: '#7dff5a', need: 'lv5' },
+  { id: 'void', name: 'Void', c: '#b48cff', need: 'streak' },
+  { id: 'rose', name: 'Champion', c: '#ff4fd8', need: 'win' },
+  { id: 'rainbow', name: 'Rainbow', c: 'rainbow', need: 's300' },
+];
+const unlocked = () => new Set(store.get('ach', []));
+function checkAchievements() {
+  const got = unlocked(), st = loadStats(), fresh = [];
+  for (const a of ACH) if (!got.has(a.id) && a.ok(S, st)) { got.add(a.id); fresh.push(a); }
+  if (!fresh.length) return;
+  store.set('ach', [...got]);
+  store.set('achNew', true); $('#pilotBtn').classList.add('new');
+  const skins = SKINS.filter(k => fresh.some(a => a.id === k.need));
+  setTimeout(() => {
+    toast(`🏆 ${fresh.map(a => a.name).join(' · ')}${skins.length ? ` — new comet: ${skins.map(k => k.name).join(', ')}` : ''}`);
+    SFX.achieve();
+  }, 1300);
+}
+let skin = SKINS.find(k => k.id === store.get('skin', 'classic')) || SKINS[0];
+// Comet colour for this frame; rainbow cycles through cached glow colours.
+const skinColor = () => skin.c === 'rainbow' ? RAINBOW[((S.t * 6) | 0) % RAINBOW.length] : skin.c || T.a;
+const trailColor = i => skin.c === 'rainbow' ? RAINBOW[(i + ((S.t * 12) | 0)) % RAINBOW.length] : skin.c || T.a;
+function renderPilot() {
+  const st = loadStats(), got = unlocked();
+  const mins = Math.floor(st.time / 60);
+  const cells = [['RUNS', st.runs], ['BEST', S.best], ['LEVEL', st.bestLevel], ['GEMS', st.gems], ['SPIKES', st.spikes], ['CLUTCH', st.nears],
+    ['TOP COMBO', st.bestCombo], ['WINS', st.wins], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+  $('#pStats').innerHTML = cells.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
+  $('#pSkins').innerHTML = SKINS.map(k => {
+    const lock = k.need && !got.has(k.need);
+    const c = k.c === 'rainbow' ? 'conic-gradient(' + RAINBOW.join(',') + ',' + RAINBOW[0] + ')' : k.c || 'var(--a)';
+    return `<button class="skin${lock ? ' locked' : ''}${k === skin ? ' sel' : ''}" data-id="${k.id}" aria-label="${k.name}" style="--c:${c}"><i style="background:${c}"></i></button>`;
+  }).join('');
+  $('#pAchH').textContent = `ACHIEVEMENTS ${ACH.filter(a => got.has(a.id)).length}/${ACH.length}`;
+  $('#pAch').innerHTML = ACH.map(a => {
+    const sk = SKINS.find(k => k.need === a.id);
+    return `<li class="${got.has(a.id) ? 'got' : ''}"><span class="ic">${a.ic}</span><span class="tx"><b>${a.name}</b><span>${a.desc}${sk ? ` · unlocks ${sk.name} comet` : ''}</span></span></li>`;
+  }).join('');
+}
+function openPilot() {
+  audioInit(); SFX.click();
+  store.set('achNew', false); $('#pilotBtn').classList.remove('new');
+  renderPilot(); showScreen('pilot');
+}
+
+/* ----- daily challenge: one fixed course per (local) day ----- */
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function daySeed(key) {
+  let h = 0x811c9dc5;
+  for (const c of 'orbital-daily-' + key) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193); }
+  return h >>> 1;
+}
+function dailyState() {
+  const today = dayKey();
+  let d = store.get('daily', null);
+  if (!d || d.key !== today) d = { key: today, best: 0, tries: 0 };
+  return d;
+}
+function syncDaily() {
+  const d = dailyState(), st = store.get('streak', { last: '', n: 0 });
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const streak = st.last === d.key || st.last === dayKey(y) ? st.n : 0;
+  $('#dInfo').textContent = d.tries
+    ? `Today's best ${d.best}${streak > 1 ? ` · 🔥 ${streak}` : ''}`
+    : streak > 0 ? `🔥 ${streak} day streak · play today` : 'A new course every day';
+}
+function startDaily() {
+  const d = dailyState();
+  d.tries++; store.set('daily', d);
+  const st = store.get('streak', { last: '', n: 0 });
+  if (st.last !== d.key) {
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    st.n = st.last === dayKey(y) ? st.n + 1 : 1; st.last = d.key;
+    store.set('streak', st);
+  }
+  start(daySeed(d.key), false, true);
+  S.dailyBest = d.best;
+  banner('☀ DAILY CHALLENGE · ' + d.key, 2200);
 }
 
 /* ----- flow ----- */
 function hideScreens() {
   document.querySelectorAll('.screen.show').forEach(el => el.classList.remove('show'));
 }
-function start(seed) {
+// start(): a random solo run. start(seed): a solo run on a fixed course.
+// start(seed, true): a multiplayer run (the seed comes from the match).
+function start(seed, mp = false, daily = false) {
   audioInit();
-  const mp = seed !== undefined;
-  S.mp = mp;
-  rng = mulberry32(mp ? seed : (Math.random() * 2 ** 31) | 0);
-  S.mode = 'playing'; S.paused = false;
+  S.mp = mp; S.daily = daily;
+  rng = mulberry32(seed !== undefined ? seed : (Math.random() * 2 ** 31) | 0);
+  S.mode = 'playing'; S.paused = false; S.tutorial = false;
+  S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0;
   S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
   S.omega = S.omegaT = omegaFor(1); S.timeScale = 1; S.runT = 0;
   S.items.length = 0; S.trail.length = 0;
@@ -670,7 +904,7 @@ function onPassSpike(it, p) {
   const newCol = Math.abs(it.a - S.lastPassA) > 0.01;
   if (newCol) { S.lastPassA = it.a; S.passed++; addScore(1); }
   if (Math.abs(it.a - S.lastNearA) > 0.01 && S.t - S.lastSwitch < 0.3 && S.switchFrom === it.ring && S.ring !== it.ring) {
-    S.lastNearA = it.a;
+    S.lastNearA = it.a; S.nears++;
     addScore(2);
     popText(['CLOSE!', 'WHOA!', 'NICE!', 'CLUTCH!', 'INSANE!'][(Math.random() * 5) | 0] + ' +2', p.x, p.y - 30 * U, '#ffffff', 22);
     wave(p.x, p.y, '#ffffff', 50, 3, 0.35);
@@ -693,6 +927,26 @@ function collect(it, p) {
     wave(CX, CY, T.g, R_OUT / U + 30, 5, 0.6);
     SFX.combo(S.mult);
   }
+}
+
+function getShield(p) {
+  const had = S.shield;
+  S.shield = 1;
+  popText(had ? 'SHIELD +5' : 'SHIELD!', p.x, p.y - 22 * U, T.a, 22, 0.9);
+  if (had) addScore(5);
+  burst(p.x, p.y, 16, [T.a, '#ffffff'], 220, 0.6, 12);
+  wave(p.x, p.y, T.a, 60, 4, 0.5);
+  SFX.shield(); haptic('medium');
+}
+// The shield eats one hit: the spike shatters and you get a short grace period.
+function shieldBreak(it, p) {
+  S.shield = 0; S.safeT = S.t + 0.6; S.saves++;
+  it.passed = true; it.fade = 0.001;
+  burst(p.x, p.y, 40, [T.a, T.b, '#ffffff'], 420, 0.8, 14);
+  wave(p.x, p.y, T.a, 140, 8, 0.6);
+  popText('SHIELD SAVED YOU', CX, CY + R_OUT + 46 * U, T.a, 24, 1.2);
+  S.shake = Math.max(S.shake, 0.5); S.flash = 0.3; S.flashColor = T.a; S.timeScale = 0.35;
+  SFX.shieldBreak(); haptic('error');
 }
 
 function missGem(it) {
@@ -723,6 +977,7 @@ function die(p) {
   S.shake = 1; S.flash = 0.75; S.flashColor = T.b;
   SFX.die(); haptic('error'); musicStop();
   if (S.score > S.best) { S.best = S.score; store.set('best', S.best); $('#tBest').textContent = S.best; }
+  recordRun();
   if (S.mp) {
     Net.send({ t: 'dead', s: S.score, th: +S.theta.toFixed(4) });
     submitScore(S.score, '#mGlobal');
@@ -739,6 +994,15 @@ function gameOver() {
   S.items.forEach(it => { if (!it.fade) it.fade = 0.001; });
   $('#oTitle').textContent = isBest ? 'LEGENDARY' : ROAST[(Math.random() * ROAST.length) | 0];
   $('#oBest').textContent = S.best; $('#oGems').textContent = S.gems;
+  $('#oBestL').textContent = 'BEST';
+  if (S.daily) {
+    const d = dailyState(), dBest = S.score > d.best;
+    if (dBest) { d.best = S.score; store.set('daily', d); }
+    S.dailyBest = d.best;
+    if (!isBest) $('#oTitle').textContent = dBest ? 'DAILY BEST!' : 'DAILY CHALLENGE';
+    $('#oBestL').textContent = 'TODAY'; $('#oBest').textContent = d.best;
+    syncDaily();
+  }
   $('#oCombo').textContent = S.maxCombo; $('#oLevel').textContent = S.level;
   $('#tBest').textContent = S.best;
   const nb = $('#newBest'); nb.classList.remove('on');
@@ -768,11 +1032,24 @@ function countUp(el, to, ms) {
   requestAnimationFrame(step);
 }
 
+function showSwipeTutorial() {
+  S.paused = true; S.tutorial = true; musicStop();
+  $('#tut').classList.add('show');
+  haptic('medium');
+}
+function endSwipeTutorial() {
+  if (!S.tutorial) return;
+  S.tutorial = false; S.paused = false;
+  $('#tut').classList.remove('show');
+  S.safeT = S.t + 1.2;                      // short grace so nothing hits right away
+  audioInit(); musicStart(); SFX.click();
+}
 function pause() {
   if (S.mode !== 'playing' || S.paused || S.mp) return;
   S.paused = true; musicStop(); $('#pause').classList.add('show');
 }
 function resume() {
+  if (S.tutorial) { $('#pause').classList.remove('show'); return; }
   S.paused = false; $('#pause').classList.remove('show'); audioInit(); musicStart();
 }
 
@@ -805,7 +1082,7 @@ async function makeCard(isBest) {
   g.fillText(String(S.score), m, m * 1.08);
   g.shadowBlur = 0;
   g.font = `800 38px ${FONT}`; g.fillStyle = T.g;
-  g.fillText(isBest ? '★ NEW PERSONAL BEST ★' : `LEVEL ${S.level}  ·  ${S.gems} GEMS`, m, m * 1.08 + 150);
+  g.fillText(isBest ? '★ NEW PERSONAL BEST ★' : S.daily ? `DAILY CHALLENGE  ·  ${dayKey()}` : `LEVEL ${S.level}  ·  ${S.gems} GEMS`, m, m * 1.08 + 150);
   g.font = `900 54px ${FONT}`; g.fillStyle = '#fff';
   g.fillText('CAN YOU BEAT ME?', m, s - 90);
   return c;
@@ -818,7 +1095,8 @@ function toast(msg) {
 
 async function share() {
   SFX.click(); haptic('light');
-  const text = `I scored ${S.score} on ORBITAL 🪐 Can you beat me?`;
+  const text = S.daily && !S.mp ? `I scored ${S.score} on today's ORBITAL daily challenge 🪐 Same course for everyone. Can you beat me?`
+    : `I scored ${S.score} on ORBITAL 🪐 Can you beat me?`;
   const url = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : '';
   const card = S.card || await makeCard(false);
   if (native && native.share) {
@@ -856,11 +1134,22 @@ function update(dt) {
       const it = S.items[i];
       if (it.fade > 0) { it.fade += gdt * 4; if (it.fade >= 1) S.items.splice(i, 1); continue; }
       if (!inView(it)) continue;
-      const ip = pos(it.a, ringR(it.ring));
+      if (it.from !== undefined && !it.hopped && S.theta > it.hopA - HOP) {
+        it.hopped = true;
+        const hp = pos(it.a, radiusAt(it.from));
+        burst(hp.x, hp.y, 8, [T.b, '#ffffff'], 140, 0.35, 9);
+        SFX.hop();
+      }
+      const ip = itemPos(it);
       const d = Math.hypot(ip.x - pp.x, ip.y - pp.y);
       if (it.type === 'spike') {
-        if (d < (P_R + SPIKE_R * 0.72) * U) { die(pp); break; }
+        if (d < (P_R + SPIKE_R * 0.72) * U && S.t > S.safeT) {
+          if (S.shield) { shieldBreak(it, ip); continue; }
+          die(pp); break;
+        }
         if (!it.passed && S.theta > it.a + 0.05) { it.passed = true; onPassSpike(it, pp); }
+      } else if (it.type === 'shield') {
+        if (d < (P_R + GEM_R + 7) * U) { getShield(ip); S.items.splice(i, 1); continue; }
       } else {
         if (d < (P_R + GEM_R + 5) * U) { collect(it, ip); S.items.splice(i, 1); continue; }
         if (!it.passed && S.theta > it.a + 0.25) { it.passed = true; missGem(it); }
@@ -886,7 +1175,7 @@ function update(dt) {
     const left = Net.localStart - Date.now();
     const sec = Math.ceil(left / 1000);
     if (sec !== S.cdSec && sec >= 1 && sec <= 3) { S.cdSec = sec; tone(440, 0.12, 'square', 0.08); S.coreKick = 1; haptic('light'); }
-    if (left <= 0) { S.cdSec = 0; tone(880, 0.3, 'square', 0.1); start(Net.seed); }
+    if (left <= 0) { S.cdSec = 0; tone(880, 0.3, 'square', 0.1); start(Net.seed, true); }
   } else {
     // attract mode: the player orbits and hops by itself
     S.theta += (S.mode === 'dying' ? S.omega : 1.3) * gdt;
@@ -1020,6 +1309,9 @@ function render() {
     ctx.shadowColor = T.a; ctx.shadowBlur = 18 * U;
     txt(label, CX, CY + 2 * U, RC * (1 + S.coreKick * 0.35), '#ffffff', 1);
     ctx.shadowBlur = 0;
+    const yy = Math.min(H - SAFE_BOT - 60, CY + R_OUT + 56 * U);
+    txt('TAP TO SWITCH ORBIT', CX, yy, 14, '#ffffff', 0.85, 800);
+    txt('FROM 3 ORBITS: SWIPE ↑ OUT · ↓ IN', CX, yy + 22, 13, T.a, 0.85, 800);
   } else if (S.mode !== 'title' && !(S.mp && S.mode === 'over')) {
     const sz = RC * (S.score > 999 ? 0.62 : S.score > 99 ? 0.8 : 1) * (1 + S.coreKick * 0.28);
     ctx.shadowColor = T.a; ctx.shadowBlur = 18 * U;
@@ -1036,26 +1328,30 @@ function render() {
   for (const it of S.items) {
     if (!inView(it)) continue;
     if (!it.shown) { it.shown = true; it.born = S.t; }   // fade in as it enters the view
-    const p = pos(it.a, ringR(it.ring));
+    const p = itemPos(it);
     const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     if (it.type === 'spike') {
       const ahead = it.a - S.theta;
-      const danger = ahead > -0.1 && ahead < 1.2 && Math.abs(ringR(it.ring) - prr) < 12 * U ? 1 - Math.max(0, ahead) / 1.2 : 0;
+      const danger = ahead > -0.1 && ahead < 1.2 && Math.abs(radiusAt(itemRing(it)) - prr) < 12 * U ? 1 - Math.max(0, ahead) / 1.2 : 0;
       drawImg(SPR.b, p.x, p.y, SPIKE_R * U * (5 + danger * 3 + beat), al * (0.45 + danger * 0.45));
     } else {
-      drawImg(SPR.g, p.x, p.y, GEM_R * U * 4.5, al * 0.5);
+      drawImg(it.type === 'shield' ? SPR.a : SPR.g, p.x, p.y, GEM_R * U * (it.type === 'shield' ? 6 : 4.5), al * 0.5);
     }
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const it of S.items) {
     if (!it.shown) continue;
-    const p = pos(it.a, ringR(it.ring));
+    if (it.from !== undefined && S.theta < it.hopA) drawHopTarget(it);
+    const p = itemPos(it);
     const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     ctx.save(); ctx.translate(p.x, p.y); ctx.globalAlpha = al;
     if (it.type === 'spike') {
       ctx.rotate(S.t * (3 + it.spin) + it.a);
       const s = SPIKE_R * 2.4 * U * app * (1 + beat * 0.08);
       ctx.drawImage(SPR.spike, -s / 2, -s / 2, s, s);
+    } else if (it.type === 'shield') {
+      const s = GEM_R * 4 * U * app * (1 + Math.sin(S.t * 6) * 0.08);
+      ctx.drawImage(SPR.shield, -s / 2, -s / 2, s, s);
     } else {
       ctx.rotate(Math.sin(S.t * 3 + it.a * 5) * 0.4);
       const s = GEM_R * 2.6 * U * app * (1 + Math.sin(S.t * 7 + it.a * 3) * 0.1);
@@ -1075,9 +1371,10 @@ function render() {
   // trail
   const tr = S.trail;
   if (tr.length > 1) {
-    ctx.strokeStyle = T.a; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = trailColor(0); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     for (let i = 1; i < tr.length; i++) {
       const k = 1 - i / tr.length;
+      if (skin.c === 'rainbow') ctx.strokeStyle = trailColor(i >> 2);
       ctx.globalAlpha = k * 0.75; ctx.lineWidth = P_R * 2 * U * k;
       ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
     }
@@ -1086,10 +1383,16 @@ function render() {
   // player
   if (S.mode !== 'dying' && S.mode !== 'spectate') {
     const p = playerPos();
-    drawImg(SPR.a, p.x, p.y, P_R * U * (7 + beat * 2), 0.9);
+    drawImg(skin.c ? glowSprite(skinColor()) : SPR.a, p.x, p.y, P_R * U * (7 + beat * 2), 0.9);
     drawImg(SPR.w, p.x, p.y, P_R * U * 3, 1);
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.75, 0, TAU); ctx.fill();
+    if (S.shield || S.t < S.safeT) {
+      const blink = S.shield ? 1 : (Math.sin(S.t * 40) > 0 ? 0.8 : 0.2);
+      ctx.globalAlpha = (0.55 + 0.25 * Math.sin(S.t * 6)) * blink; ctx.strokeStyle = T.a; ctx.lineWidth = 2.2 * U;
+      ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 2.1, 0, TAU); ctx.stroke();
+      ctx.globalAlpha = 0.18 * blink; ctx.fillStyle = T.a; ctx.fill();
+    }
     ctx.globalCompositeOperation = 'lighter';
   }
   // particles
@@ -1116,7 +1419,8 @@ function render() {
     const y = SAFE_TOP + 34;
     ctx.textAlign = 'left';
     txt('LV ' + S.level, 18, y, 15, '#ffffff', 0.75, 800);
-    txt('BEST ' + S.best, 18, y + 20, 11, '#ffffff', 0.45, 800);
+    txt(S.daily ? 'DAILY · BEST ' + S.dailyBest : 'BEST ' + S.best, 18, y + 20, 11, S.daily ? T.g : '#ffffff', S.daily ? 0.7 : 0.45, 800);
+    if (S.shield) drawImg(SPR.shield, 30, y + 44, 22, 0.9 + 0.1 * Math.sin(S.t * 6));
     ctx.textAlign = 'center';
     if (S.combo > 0) {
       const bw = Math.min(150, W * 0.36), bx = CX - bw / 2, by = y + 14;
@@ -1134,15 +1438,32 @@ function render() {
     if (S.t - S.ringHintT < 4 && S.mode === 'playing') {
       const a = Math.min(1, 4 - (S.t - S.ringHintT)) * (0.7 + 0.3 * Math.sin(S.t * 8));
       const yy = Math.min(H - SAFE_BOT - 52, CY + R_OUT + 76 * U);
-      txt('NEW ORBIT! TAP LEFT TO MOVE IN', CX, yy, 14, '#ffffff', a, 800);
-      txt('TAP RIGHT TO MOVE OUT', CX, yy + 20, 14, '#ffffff', a, 800);
+      txt('SWIPE ↑ TO MOVE OUT', CX, yy, 14, '#ffffff', a, 800);
+      txt('SWIPE ↓ TO MOVE IN', CX, yy + 20, 14, '#ffffff', a, 800);
     }
-    if (S.rings > 2 && S.mode === 'playing') drawPads();
+    if (S.rings > 2 && S.mode === 'playing') drawSwipeHint();
   }
 
   // flash
   if (S.flash > 0.01) { ctx.globalAlpha = S.flash; ctx.fillStyle = S.flashColor; ctx.fillRect(0, 0, W, H); }
   ctx.globalAlpha = 1;
+}
+// Hopper telegraph: a dashed target on the orbit the spike is about to jump to,
+// plus a chevron pointing the way.
+function drawHopTarget(it) {
+  const k = clamp((S.theta - (it.hopA - HOP)) / HOP, 0, 1);
+  const tp = pos(it.a, radiusAt(it.ring)), fp = pos(it.a, radiusAt(it.from));
+  const al = (1 - it.fade) * (1 - k) * (0.55 + 0.35 * Math.sin(S.t * 14));
+  ctx.save();
+  ctx.globalAlpha = al; ctx.strokeStyle = T.b; ctx.lineWidth = 2 * U;
+  ctx.setLineDash([3 * U, 3 * U]); ctx.lineDashOffset = -S.t * 20 * U;
+  ctx.beginPath(); ctx.arc(tp.x, tp.y, SPIKE_R * U * 1.25, 0, TAU); ctx.stroke();
+  ctx.setLineDash([]);
+  const dx = tp.x - fp.x, dy = tp.y - fp.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+  const mx = (fp.x + tp.x) / 2 + ux * Math.sin(S.t * 10) * 2 * U, my = (fp.y + tp.y) / 2 + uy * Math.sin(S.t * 10) * 2 * U, w = 5 * U;
+  ctx.lineWidth = 2.5 * U; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(mx - ux * w - uy * w, my - uy * w + ux * w); ctx.lineTo(mx, my); ctx.lineTo(mx - ux * w + uy * w, my - uy * w - ux * w); ctx.stroke();
+  ctx.restore();
 }
 const BG = { c: document.createElement('canvas') };
 BG.g = BG.c.getContext('2d');
@@ -1166,19 +1487,22 @@ function drawBackdrop() {
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
   g.fillStyle = vg; g.fillRect(0, 0, w, h);
 }
-// IN / OUT touch pads shown at the bottom once there are 3+ orbits.
-function drawPads() {
-  const vis = clamp(S.ringsF - 2, 0, 1);
-  const h = 54, y = H - SAFE_BOT - h - 14, w = Math.min(150, W * 0.4), m = 14;
-  const pads = [{ dir: 1, x: m, label: '◀  IN' }, { dir: -1, x: W - m - w, label: 'OUT  ▶' }];
-  for (const p of pads) {
-    const hit = S.padFlash && S.padFlash.dir === p.dir ? Math.max(0, 1 - (S.t - S.padFlash.t) / 0.25) : 0;
-    ctx.globalAlpha = (0.1 + 0.25 * hit) * vis; ctx.fillStyle = T.a;
-    roundRect(p.x, y, w, h, 18); ctx.fill();
-    ctx.globalAlpha = (0.45 + 0.4 * hit) * vis; ctx.strokeStyle = T.a; ctx.lineWidth = 1.5;
-    roundRect(p.x, y, w, h, 18); ctx.stroke();
-    txt(p.label, p.x + w / 2, y + h / 2 + 1, 17, '#ffffff', (0.75 + 0.25 * hit) * vis, 900);
+// Subtle swipe reminder at the bottom once there are 3+ orbits: two chevrons that
+// drift up/down, and the one you just swiped lights up.
+function drawSwipeHint() {
+  const vis = clamp(S.ringsF - 2, 0, 1), y = H - SAFE_BOT - 44, x = W - 34;
+  const sw = S.swipeFlash && S.t - S.swipeFlash.t < 0.3 ? S.swipeFlash.dir : 0;
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = T.a;
+  for (const d of [-1, 1]) {                // -1 = up (out), 1 = down (in)
+    const k = (S.t * 0.9 + (d < 0 ? 0 : 0.5)) % 1, off = d * (6 + k * 10);
+    ctx.globalAlpha = vis * (sw === d ? 1 : 0.22 + 0.25 * Math.sin(k * Math.PI));
+    const cy = y + d * 12 + off * 0.5;
+    ctx.beginPath(); ctx.moveTo(x - 9, cy - d * 5); ctx.lineTo(x, cy + d * 4); ctx.lineTo(x + 9, cy - d * 5); ctx.stroke();
   }
+  ctx.restore();
+  ctx.textAlign = 'right';
+  txt('SWIPE', x - 18, y, 11, '#ffffff', 0.35 * vis, 900);
+  ctx.textAlign = 'center';
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath();
@@ -1244,7 +1568,8 @@ function banner(text, ms) {
   if (ms) banner.h = setTimeout(() => b.classList.remove('show'), ms);
 }
 function backToTitle() {
-  S.mp = false; S.mode = 'title'; S.paused = false;
+  S.mp = false; S.daily = false; S.mode = 'title'; S.paused = false; S.tutorial = false;
+  syncDaily();
   musicStop(); banner('');
   showScreen('title');
 }
@@ -1281,7 +1606,7 @@ async function quickMatch() {
   Net.quick = true; Net.phase = 'connecting'; Net.players = [];
   showScreen('lobby'); renderLobby();
   try {
-    const r = await api('/api/quick');
+    const r = await api('/api/quick?v=' + COURSE_V);
     if (Net.phase !== 'connecting') return; // user backed out
     Net.connect(r.room, true);
   } catch (e) { toast('Server unreachable: racing bots instead'); startBotMatch(); }
@@ -1345,6 +1670,7 @@ function showResults() {
   ).join('');
   showScreen('mpOver');
   if (won && r.length > 1) {
+    const st = loadStats(); st.wins++; saveStats(st); checkAchievements();
     for (let i = 0; i < 140; i++) {
       S.parts.push({ x: rand(0, W), y: rand(-60, -10), vx: rand(-60, 60) * U, vy: rand(80, 300) * U, life: rand(1.5, 2.8), max: 2.8,
         size: rand(8, 16) * U, img: glowSprite([T.a, T.b, T.g, '#ffffff'][i % 4]), grav: 180 * U, drag: 0.6 });
@@ -1405,7 +1731,7 @@ function botThink(g, phi) {
   const a0 = ahead[0].a;
   if (b.lastCol !== a0) { b.lastCol = a0; b.miss = Math.random() < b.err * (1 + S.level * 0.35) * (S.mode === 'playing' ? 1 : 4); }
   if (b.miss || S.t < b.nextMove) return;
-  const blocked = new Set(ahead.filter(it => Math.abs(it.a - a0) < 0.02).map(it => it.ring));
+  const blocked = new Set(ahead.filter(it => Math.abs(it.a - a0) < 0.02).map(it => Math.round(itemRing(it, phi))));
   let best = -1;
   for (let k = 0; k < S.rings; k++) if (!blocked.has(k) && (best < 0 || Math.abs(k - g.ring) < Math.abs(best - g.ring))) best = k;
   if (best >= 0 && best !== g.ring) {
@@ -1451,7 +1777,7 @@ const Net = {
     this.players = []; this.ghosts.clear(); this.ranking = null; this.me = null;
     showScreen('lobby'); syncNames(); renderLobby();
     const url = SERVER.replace(/^http/, 'ws') + '/ws?room=' + encodeURIComponent(code) +
-      '&name=' + encodeURIComponent(myName) + '&pid=' + encodeURIComponent(PID) + (quick ? '&quick=1' : '');
+      '&name=' + encodeURIComponent(myName) + '&pid=' + encodeURIComponent(PID) + '&v=' + COURSE_V + (quick ? '&quick=1' : '');
     let ws;
     try { ws = new WebSocket(url); } catch (e) { toast('Could not connect'); backToTitle(); return; }
     this.ws = ws;
@@ -1459,7 +1785,7 @@ const Net = {
     ws.onclose = () => {
       if (this.ws !== ws) return;
       this.ws = null; this.phase = 'off';
-      toast('Disconnected from the room');
+      if (Date.now() - (this.errorAt || 0) > 1500) toast('Disconnected from the room');
       if (S.mode !== 'playing') backToTitle();
     };
     this.pinger = setInterval(() => this.send({ t: 'ping' }), 25000);
@@ -1530,6 +1856,7 @@ const Net = {
         else if (S.mode === 'playing') { S.mode = 'over'; showResults(); }
         break;
       case 'error':
+        this.errorAt = Date.now();
         toast(m.msg || 'Server error');
         break;
     }
@@ -1616,17 +1943,37 @@ const Net = {
   },
 };
 
+/* 2 orbits: any tap switches (on touch-down, for speed).
+   3+ orbits: swipe up = out one orbit, swipe down = in one orbit; one move per
+   swipe, fired as soon as the finger has travelled SWIPE_PX vertically. */
+const SWIPE_PX = 26;
+const swipes = new Map();                  // pointerId -> { x, y, done }
 function onTap(e) {
   if (e) e.preventDefault();
   audioInit();
   if (S.mode !== 'playing' || S.paused) return;
-  // 2 orbits: any tap switches. 3+ orbits: left half = IN (toward the core), right half = OUT.
-  if (S.rings <= 2 || !e || e.clientX === undefined) { switchRing(0); return; }
-  const dir = e.clientX < W / 2 ? 1 : -1;
-  S.padFlash = { dir, t: S.t };
+  if (e && e.pointerId !== undefined) swipes.set(e.pointerId, { x: e.clientX, y: e.clientY, done: false });
+  if (S.rings <= 2) switchRing(0);
+}
+function onSwipeMove(e) {
+  const sw = swipes.get(e.pointerId);
+  if (!sw || sw.done) return;
+  const dy = e.clientY - sw.y, dx = e.clientX - sw.x;
+  if (Math.abs(dy) < SWIPE_PX || Math.abs(dy) < Math.abs(dx)) return;
+  sw.done = true;
+  if (S.tutorial) { endSwipeTutorial(); return; }
+  if (S.mode !== 'playing' || S.paused || S.rings <= 2) return;
+  const dir = dy < 0 ? -1 : 1;
+  S.swipeFlash = { dir, t: S.t };
   switchRing(dir, true);
 }
+const endSwipe = e => swipes.delete(e.pointerId);
 cvs.addEventListener('pointerdown', onTap);
+window.addEventListener('pointermove', onSwipeMove);
+window.addEventListener('pointerup', endSwipe);
+window.addEventListener('pointercancel', endSwipe);
+$('#tut').addEventListener('pointerdown', e => { e.preventDefault(); swipes.set(e.pointerId, { x: e.clientX, y: e.clientY, done: false }); });
+$('#tut').addEventListener('pointerup', e => { const sw = swipes.get(e.pointerId); if (sw && !sw.done) endSwipeTutorial(); });
 $('#playSolo').addEventListener('click', () => start());
 $('#btnQuick').addEventListener('click', () => { SFX.click(); quickMatch(); });
 $('#btnFriends').addEventListener('click', () => { audioInit(); SFX.click(); syncNames(); showScreen('friends'); });
@@ -1659,6 +2006,15 @@ $('#mNext').addEventListener('click', () => {
 });
 $('#lBots').addEventListener('click', () => { SFX.click(); startBotMatch(); });
 $('#bForget').addEventListener('click', forgetMe);
+$('#pilotBtn').addEventListener('click', openPilot);
+$('#pBack').addEventListener('click', () => { SFX.click(); backToTitle(); });
+$('#pSkins').addEventListener('click', e => {
+  const b = e.target.closest('.skin'); if (!b) return;
+  const k = SKINS.find(x => x.id === b.dataset.id);
+  if (k.need && !unlocked().has(k.need)) { tone(160, 0.1, 'square', 0.05); toast(`🔒 ${ACH.find(a => a.id === k.need).desc} to unlock`); return; }
+  skin = k; store.set('skin', k.id); SFX.click(); haptic('light'); renderPilot();
+});
+if (store.get('achNew', false)) $('#pilotBtn').classList.add('new');
 const webBase = SERVER ? SERVER + '/' : '';
 $('#lnkPrivacy').href = webBase + 'privacy.html';
 $('#lnkSupport').href = webBase + 'support.html';
@@ -1667,14 +2023,17 @@ $('#mLeave').addEventListener('click', () => { SFX.click(); Net.leave(); backToT
 $('#mShare').addEventListener('click', share);
 $('#menu').addEventListener('click', () => { SFX.click(); backToTitle(); });
 $('#pause').addEventListener('pointerdown', e => { e.preventDefault(); resume(); });
-$('#again').addEventListener('click', () => start());
+const again = () => (S.daily ? startDaily() : start());
+$('#again').addEventListener('click', again);
+$('#btnDaily').addEventListener('click', () => { SFX.click(); startDaily(); });
 $('#share').addEventListener('click', share);
 window.addEventListener('keydown', e => {
   if (e.repeat || (e.target && e.target.tagName === 'INPUT')) return;
   if (e.code === 'Space' || e.code === 'Enter' || e.code.startsWith('Arrow')) {
     e.preventDefault(); audioInit();
     if (S.mode === 'title' && $('#title').classList.contains('show')) start();
-    else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) start();
+    else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) again();
+    else if (S.tutorial) endSwipeTutorial();
     else if (S.paused) resume();
     else if (S.mode === 'playing') switchRing(e.code === 'ArrowUp' || e.code === 'ArrowRight' ? -1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' ? 1 : 0, e.code.startsWith('Arrow') && S.rings > 2);
   } else if (e.code === 'KeyP' || e.code === 'Escape') pause();
@@ -1692,6 +2051,7 @@ syncMute();
 
 $('#logo').innerHTML = 'ORBITAL'.split('').map((c, i) => `<span style="--i:${i}">${c}</span>`).join('');
 $('#tBest').textContent = S.best;
+syncDaily();
 
 let last = performance.now();
 function frame(now) {
@@ -1707,7 +2067,9 @@ requestAnimationFrame(frame);
 const linkRoom = cleanCode(new URLSearchParams(location.search).get('room'));
 if (linkRoom.length >= 4 && SERVER) Net.connect(linkRoom, false);
 
-window.__orbital = { S, start, switchRing, Net };
+// blockers(): the spike orbits a player can currently see (hoppers where they are now).
+const blockers = () => S.items.filter(it => it.type === 'spike' && inView(it)).map(it => ({ a: it.a, ring: Math.round(itemRing(it)) }));
+window.__orbital = { S, start, switchRing, Net, blockers };
 })();
 </script>
 </body>
