@@ -112,6 +112,10 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .namebtn:active{transform:scale(.97)}
 .legal{font-size:12px;font-weight:700;opacity:.55;letter-spacing:.05em}
 .legal a{color:#fff;text-decoration:none;cursor:pointer;padding:6px}
+.daily{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 26px;border-radius:18px;border:2px solid var(--g);background:rgba(255,255,255,.05);color:#fff;font-family:var(--font);cursor:pointer;box-shadow:0 0 16px rgba(0,0,0,.3),inset 0 0 14px rgba(255,255,255,.04);transition:transform .12s ease}
+.daily:active{transform:scale(.95)}
+.daily b{font-size:15px;font-weight:900;letter-spacing:.18em;color:var(--g);text-shadow:0 0 10px var(--g)}
+.daily span{font-size:11px;font-weight:700;letter-spacing:.1em;opacity:.7;text-transform:uppercase;white-space:nowrap}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
 </style>
 </head>
@@ -126,6 +130,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   </div>
   <div class="bottom-block">
     <button class="cta" id="playSolo">TAP TO PLAY</button>
+    <button class="daily" id="btnDaily"><b>☀ DAILY CHALLENGE</b><span id="dInfo">A new course every day</span></button>
     <div class="modes">
       <button class="btn" id="btnQuick">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
@@ -202,7 +207,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
   <div class="newbest" id="newBest">NEW BEST!</div>
   <div class="grank" id="oGlobal"></div>
   <div class="stats">
-    <div>BEST<b id="oBest">0</b></div>
+    <div><span id="oBestL">BEST</span><b id="oBest">0</b></div>
     <div>GEMS<b id="oGems">0</b></div>
     <div>COMBO<b id="oCombo">0</b></div>
     <div>LEVEL<b id="oLevel">1</b></div>
@@ -671,15 +676,50 @@ function unlockRing(n) {
   tone(330, 0.5, 'sine', 0.15, 0, 660);
 }
 
+/* ----- daily challenge: one fixed course per (local) day ----- */
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function daySeed(key) {
+  let h = 0x811c9dc5;
+  for (const c of 'orbital-daily-' + key) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193); }
+  return h >>> 1;
+}
+function dailyState() {
+  const today = dayKey();
+  let d = store.get('daily', null);
+  if (!d || d.key !== today) d = { key: today, best: 0, tries: 0 };
+  return d;
+}
+function syncDaily() {
+  const d = dailyState(), st = store.get('streak', { last: '', n: 0 });
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const streak = st.last === d.key || st.last === dayKey(y) ? st.n : 0;
+  $('#dInfo').textContent = d.tries
+    ? `Today's best ${d.best}${streak > 1 ? ` · 🔥 ${streak}` : ''}`
+    : streak > 0 ? `🔥 ${streak} day streak · play today` : 'A new course every day';
+}
+function startDaily() {
+  const d = dailyState();
+  d.tries++; store.set('daily', d);
+  const st = store.get('streak', { last: '', n: 0 });
+  if (st.last !== d.key) {
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    st.n = st.last === dayKey(y) ? st.n + 1 : 1; st.last = d.key;
+    store.set('streak', st);
+  }
+  start(daySeed(d.key), false, true);
+  S.dailyBest = d.best;
+  banner('☀ DAILY CHALLENGE · ' + d.key, 2200);
+}
+
 /* ----- flow ----- */
 function hideScreens() {
   document.querySelectorAll('.screen.show').forEach(el => el.classList.remove('show'));
 }
 // start(): a random solo run. start(seed): a solo run on a fixed course.
 // start(seed, true): a multiplayer run (the seed comes from the match).
-function start(seed, mp = false) {
+function start(seed, mp = false, daily = false) {
   audioInit();
-  S.mp = mp;
+  S.mp = mp; S.daily = daily;
   rng = mulberry32(seed !== undefined ? seed : (Math.random() * 2 ** 31) | 0);
   S.mode = 'playing'; S.paused = false;
   S.shield = 0; S.safeT = -9;
@@ -810,6 +850,15 @@ function gameOver() {
   S.items.forEach(it => { if (!it.fade) it.fade = 0.001; });
   $('#oTitle').textContent = isBest ? 'LEGENDARY' : ROAST[(Math.random() * ROAST.length) | 0];
   $('#oBest').textContent = S.best; $('#oGems').textContent = S.gems;
+  $('#oBestL').textContent = 'BEST';
+  if (S.daily) {
+    const d = dailyState(), dBest = S.score > d.best;
+    if (dBest) { d.best = S.score; store.set('daily', d); }
+    S.dailyBest = d.best;
+    if (!isBest) $('#oTitle').textContent = dBest ? 'DAILY BEST!' : 'DAILY CHALLENGE';
+    $('#oBestL').textContent = 'TODAY'; $('#oBest').textContent = d.best;
+    syncDaily();
+  }
   $('#oCombo').textContent = S.maxCombo; $('#oLevel').textContent = S.level;
   $('#tBest').textContent = S.best;
   const nb = $('#newBest'); nb.classList.remove('on');
@@ -876,7 +925,7 @@ async function makeCard(isBest) {
   g.fillText(String(S.score), m, m * 1.08);
   g.shadowBlur = 0;
   g.font = `800 38px ${FONT}`; g.fillStyle = T.g;
-  g.fillText(isBest ? '★ NEW PERSONAL BEST ★' : `LEVEL ${S.level}  ·  ${S.gems} GEMS`, m, m * 1.08 + 150);
+  g.fillText(isBest ? '★ NEW PERSONAL BEST ★' : S.daily ? `DAILY CHALLENGE  ·  ${dayKey()}` : `LEVEL ${S.level}  ·  ${S.gems} GEMS`, m, m * 1.08 + 150);
   g.font = `900 54px ${FONT}`; g.fillStyle = '#fff';
   g.fillText('CAN YOU BEAT ME?', m, s - 90);
   return c;
@@ -889,7 +938,8 @@ function toast(msg) {
 
 async function share() {
   SFX.click(); haptic('light');
-  const text = `I scored ${S.score} on ORBITAL 🪐 Can you beat me?`;
+  const text = S.daily && !S.mp ? `I scored ${S.score} on today's ORBITAL daily challenge 🪐 Same course for everyone. Can you beat me?`
+    : `I scored ${S.score} on ORBITAL 🪐 Can you beat me?`;
   const url = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : '';
   const card = S.card || await makeCard(false);
   if (native && native.share) {
@@ -1208,7 +1258,7 @@ function render() {
     const y = SAFE_TOP + 34;
     ctx.textAlign = 'left';
     txt('LV ' + S.level, 18, y, 15, '#ffffff', 0.75, 800);
-    txt('BEST ' + S.best, 18, y + 20, 11, '#ffffff', 0.45, 800);
+    txt(S.daily ? 'DAILY · BEST ' + S.dailyBest : 'BEST ' + S.best, 18, y + 20, 11, S.daily ? T.g : '#ffffff', S.daily ? 0.7 : 0.45, 800);
     if (S.shield) drawImg(SPR.shield, 30, y + 44, 22, 0.9 + 0.1 * Math.sin(S.t * 6));
     ctx.textAlign = 'center';
     if (S.combo > 0) {
@@ -1354,7 +1404,8 @@ function banner(text, ms) {
   if (ms) banner.h = setTimeout(() => b.classList.remove('show'), ms);
 }
 function backToTitle() {
-  S.mp = false; S.mode = 'title'; S.paused = false;
+  S.mp = false; S.daily = false; S.mode = 'title'; S.paused = false;
+  syncDaily();
   musicStop(); banner('');
   showScreen('title');
 }
@@ -1778,14 +1829,16 @@ $('#mLeave').addEventListener('click', () => { SFX.click(); Net.leave(); backToT
 $('#mShare').addEventListener('click', share);
 $('#menu').addEventListener('click', () => { SFX.click(); backToTitle(); });
 $('#pause').addEventListener('pointerdown', e => { e.preventDefault(); resume(); });
-$('#again').addEventListener('click', () => start());
+const again = () => (S.daily ? startDaily() : start());
+$('#again').addEventListener('click', again);
+$('#btnDaily').addEventListener('click', () => { SFX.click(); startDaily(); });
 $('#share').addEventListener('click', share);
 window.addEventListener('keydown', e => {
   if (e.repeat || (e.target && e.target.tagName === 'INPUT')) return;
   if (e.code === 'Space' || e.code === 'Enter' || e.code.startsWith('Arrow')) {
     e.preventDefault(); audioInit();
     if (S.mode === 'title' && $('#title').classList.contains('show')) start();
-    else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) start();
+    else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) again();
     else if (S.paused) resume();
     else if (S.mode === 'playing') switchRing(e.code === 'ArrowUp' || e.code === 'ArrowRight' ? -1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' ? 1 : 0, e.code.startsWith('Arrow') && S.rings > 2);
   } else if (e.code === 'KeyP' || e.code === 'Escape') pause();
@@ -1803,6 +1856,7 @@ syncMute();
 
 $('#logo').innerHTML = 'ORBITAL'.split('').map((c, i) => `<span style="--i:${i}">${c}</span>`).join('');
 $('#tBest').textContent = S.best;
+syncDaily();
 
 let last = performance.now();
 function frame(now) {
