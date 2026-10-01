@@ -16,10 +16,14 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 
 ## Play
 
+### 🌐 Play now in your browser: **https://orbital-server.dummiesbuild26.workers.dev/**
+
+Works on phones and desktops. Multiplayer, private rooms and the leaderboard all work there, and invite links open it too.
+
 | Platform | How |
 |---|---|
 | **iPhone / iPad (IPA)** | Download `Orbital.ipa` from [Releases](../../releases/latest) and sideload it with [Sideloadly](https://sideloadly.io), [AltStore](https://altstore.io) or TrollStore |
-| **Web** | The Cloudflare Worker URL (shown in the release notes and on the Actions run summary), or open `web/index.html` locally for single-player |
+| **Web** | **https://orbital-server.dummiesbuild26.workers.dev/** |
 | **Add to Home Screen** | Open the web version in Safari → Share → *Add to Home Screen* for a full-screen app |
 
 Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: tap the **left** half of the screen to move **in** toward the core and the **right** half to move **out**; IN / OUT pads at the bottom show which side is which. On a keyboard, use ← / → (or ↓ / ↑). **P** / **Esc** pauses.
@@ -28,23 +32,11 @@ Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From l
 
 Everything is prepared for App Review. **[APP_STORE.md](APP_STORE.md)** has the step-by-step submission guide, ready-to-paste listing text, privacy and age-rating answers, and the review notes. Screenshots at Apple's sizes are in `appstore/screenshots/`. The **Upload to App Store Connect** workflow signs and uploads builds once your Apple Developer secrets are set.
 
-## Free multiplayer server (one-time setup, about 5 minutes)
+## Multiplayer server
 
-The server runs on **Cloudflare Workers + Durable Objects**. Both are included in Cloudflare's **free plan**, with no credit card required. The same Worker also hosts the web version of the game.
+The server (rooms, matchmaking and the leaderboard) and the web version run on Cloudflare's free plan at the URL above. Every push to `main` redeploys it automatically.
 
-1. Create a free account at [dash.cloudflare.com](https://dash.cloudflare.com/sign-up). Open **Workers & Pages** once so Cloudflare gives you a `*.workers.dev` subdomain.
-2. **My Profile → API Tokens → Create Token** → use the **"Edit Cloudflare Workers"** template → create it and copy the token.
-3. Copy your **Account ID**. It's on the right side of the Workers & Pages overview page.
-4. In this GitHub repo, go to **Settings → Secrets and variables → Actions → New repository secret** and add:
-   - `CLOUDFLARE_API_TOKEN`: the token
-   - `CLOUDFLARE_ACCOUNT_ID`: the account ID
-5. Re-run the **Deploy server & build iOS IPA** workflow, or push any commit.
-
-The workflow deploys the server, injects its URL into the app, and builds the IPA. The release notes then include the link to play online. Until the secrets exist, the server step is skipped and the game works single-player only.
-
-Free-plan limits (100k requests/day; WebSocket messages count 20:1) cover thousands of matches a day. The protocol only sends orbit-switch events, not positions, and idle rooms hibernate at no cost.
-
-### How multiplayer works
+### How it works
 
 - Every match has a **shared random seed**. The course is generated purely from that seed, so every player gets the exact same course with no position streaming.
 - Clients send only `switch orbit at angle θ`, `score` and `crashed` events. Rivals are replayed at the exact course angle where each event happened, so ghosts stay accurate despite lag.
@@ -71,13 +63,13 @@ appstore/screenshots/  App Store screenshots (iPhone 6.9", iPad 13")
 
 Each push to `main` (or a `v*` tag, or a manual run from the Actions tab) runs `release.yml`. The workflow:
 
-1. deploys the server (if the Cloudflare secrets are set) and writes its URL into `web/config.js`
+1. deploys the server and web version and writes the server URL into `web/config.js`
 2. generates `Orbital.xcodeproj` with XcodeGen
 3. builds an **unsigned** Release `.app` that bundles `web/`
 4. zips it into `Orbital.ipa`
 5. publishes a GitHub Release (`v1.1.<run>`, or your tag) with the IPA attached
 
-The IPA is unsigned on purpose, because signing needs an Apple account. Sideloading tools re-sign it with your Apple ID when they install it. To publish to the App Store or TestFlight, you would add signing certificates as repository secrets and switch the build step to `xcodebuild archive` + `-exportArchive`.
+This IPA is unsigned on purpose: sideloading tools re-sign it with your Apple ID when they install it. App Store and TestFlight builds go through the separate **Upload to App Store Connect** workflow (see [APP_STORE.md](APP_STORE.md)).
 
 Build locally on a Mac:
 
