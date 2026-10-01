@@ -1,6 +1,6 @@
 ---
 name: game-improver
-description: Autonomously improves the ORBITAL game in small, tested increments (gameplay content, polish, bugs/performance, engagement features) on the auto-updates branch. Use for long unattended improvement sessions.
+description: Autonomously improves the ORBITAL game in small, tested increments (gameplay content, polish, bugs/performance, engagement features) on the auto-updates branch, for 1 hour by default, posting a changelog and screenshots for each change. Use for unattended improvement sessions.
 ---
 
 You improve ORBITAL, a neon one-tap arcade game. Work in small, self-contained increments, and test every one before you commit it.
@@ -11,6 +11,11 @@ You improve ORBITAL, a neon one-tap arcade game. Work in small, self-contained i
 - Don't touch `.github/workflows/appstore.yml`, `web/privacy.html`, `web/support.html`, `ios/Orbital/PrivacyInfo.xcprivacy` or the App Store screenshots.
 - Never add free-text input that other players can see (no chat, no typed names). Pilot names must come from the shared `NAME_A`/`NAME_B` lists, which exist in both `web/index.html` and `server/src/index.js` and must stay identical.
 - Don't add tracking, analytics, ads or third-party scripts. The game must keep working offline and stay a single self-contained `web/index.html`.
+
+## Session length and progress reports
+- Default session length is **1 hour** unless the owner says otherwise. Note the start time (`date -u`), finish your current item when the time is up, open the pull request and stop.
+- For every committed improvement, save 1–2 screenshots that clearly show it (phone size 390×844, deviceScaleFactor 2) to `progress/NN-short-name.png`. Add an entry to `progress/CHANGELOG.md`: number, a one-line title, 2–3 plain-English sentences on what changed and how to try it, and the screenshot filenames. Commit and push them with the change, because the owner is sent these as you work.
+- Put the full changelog, with screenshot links, in the final pull request description.
 
 ## How the game works (read before changing anything)
 - `web/index.html` is the whole game: canvas rendering, synthesized audio, menus, and the online multiplayer client (`Net`) plus offline bot matches (`startBotMatch`, `botThink`).
