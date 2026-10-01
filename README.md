@@ -34,7 +34,7 @@ Everything is prepared for App Review. **[APP_STORE.md](APP_STORE.md)** has the 
 
 ## Multiplayer server
 
-The server (rooms, matchmaking and the leaderboard) and the web version run on Cloudflare's free plan at the URL above. Every push to `main` redeploys it automatically.
+The server (rooms, matchmaking and the leaderboard) and the web version are live at the URL above. Every push to `main` redeploys them automatically.
 
 ### How it works
 
@@ -43,15 +43,13 @@ The server (rooms, matchmaking and the leaderboard) and the web version run on C
 - The `Room` Durable Object runs one lobby/match (WebSocket hibernation API). The `Hub` Durable Object handles matchmaking and stores the leaderboard in SQLite.
 - Scores are reported by the clients, so a determined cheater could fake one. That's fine for a casual game.
 
-Run the server locally: `cd server && npm install && npx wrangler dev`, then open http://localhost:8787.
-
 ## Project layout
 
 ```
 web/                 the whole game: one self-contained index.html (no dependencies)
 ios/project.yml      XcodeGen spec for the native iOS wrapper
 ios/Orbital/         Swift WKWebView shell (haptics + native share sheet bridge)
-server/              Cloudflare Worker: multiplayer rooms, matchmaking, leaderboard
+server/              multiplayer server: rooms, matchmaking, leaderboard
 tools/render-icon.mjs  regenerates the app icon (node + playwright)
 tools/screenshots.mjs  regenerates App Store screenshots
 appstore/screenshots/  App Store screenshots (iPhone 6.9", iPad 13")
