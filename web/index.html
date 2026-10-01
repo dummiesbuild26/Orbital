@@ -104,7 +104,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .row .btn{flex:1}
 .or{font-size:12px;font-weight:800;letter-spacing:.3em;opacity:.45}
 .grank{font-size:14px;font-weight:900;letter-spacing:.2em;color:var(--g);min-height:18px}
-#banner{position:fixed;left:50%;top:calc(var(--top) + min(205px, 24vh));transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;white-space:nowrap;z-index:4}
+#banner{position:fixed;left:50%;top:calc(var(--top) + min(205px, 24vh));transform:translate(-50%,-10px);font-weight:900;letter-spacing:.14em;font-size:15px;padding:10px 18px;border-radius:999px;background:rgba(0,0,0,.55);border:1.5px solid var(--a);box-shadow:0 0 18px var(--a50);opacity:0;transition:all .3s ease;pointer-events:none;width:max-content;max-width:calc(100vw - 24px);text-align:center;z-index:4}
 #banner.show{opacity:1;transform:translate(-50%,0)}
 .hidden{display:none!important}
 .namebtn{display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
@@ -142,6 +142,15 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .ach .tx{display:flex;flex-direction:column;gap:2px;min-width:0}
 .ach .tx b{font-size:14px;font-weight:900;letter-spacing:.04em}
 .ach .tx span{font-size:12px;font-weight:600;opacity:.7}
+#tut{justify-content:center;gap:16px;background:rgba(5,1,15,.78);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer;text-align:center;padding:24px}
+#tut .go{color:#fff;text-shadow:0 0 18px var(--a)}
+.demo{position:relative;width:150px;height:170px;margin:6px 0}
+.demo .lane{position:absolute;left:50%;width:2px;top:10px;bottom:10px;background:linear-gradient(var(--a),transparent 45%,transparent 55%,var(--a));opacity:.45;transform:translateX(-50%)}
+.demo .finger{position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:0 0 22px var(--a),0 0 6px #fff;animation:swipe 2.4s ease-in-out infinite}
+@keyframes swipe{0%,8%{transform:translateY(0);opacity:0}14%{opacity:1}38%{transform:translateY(-58px);opacity:1}46%,54%{transform:translateY(-58px);opacity:0}54.1%{transform:translateY(0)}60%{opacity:1}84%{transform:translateY(58px);opacity:1}92%,100%{transform:translateY(58px);opacity:0}}
+.demo .lbl{position:absolute;left:0;right:0;font-size:15px;font-weight:900;letter-spacing:.16em}
+.demo .lbl.up{top:-8px;color:var(--a)} .demo .lbl.dn{bottom:-8px;color:var(--g)}
+.tutsub{font-size:14px;font-weight:700;opacity:.8;letter-spacing:.06em;max-width:300px;line-height:1.5}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
 </style>
 </head>
@@ -235,6 +244,14 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
     <ul class="ach" id="pAch"></ul>
   </div>
   <button class="btn" id="pBack" style="width:min(320px,100%);flex:none">BACK</button>
+</div>
+
+<div id="tut" class="screen">
+  <div class="go">NEW ORBIT!</div>
+  <div class="sub">Controls are now <b style="color:var(--g)">SWIPE</b></div>
+  <div class="demo"><div class="lbl up">↑ OUT</div><div class="lane"></div><div class="finger"></div><div class="lbl dn">↓ IN</div></div>
+  <div class="tutsub">Swipe <b>up</b> to move out one orbit,<br>swipe <b>down</b> to move in toward the core.</div>
+  <div class="cta">SWIPE OR TAP TO CONTINUE</div>
 </div>
 
 <div id="banner"></div>
@@ -710,6 +727,12 @@ function unlockRing(n) {
   S.rings = n;
   if (S.mode !== 'playing') return;
   S.ringHintT = S.t;
+  if (n === 3) {
+    const seen = store.get('swipeTut', 0);
+    // Solo: pause and teach swipes the first two times ever. Multiplayer never pauses.
+    if (!S.mp && seen < 2) { store.set('swipeTut', seen + 1); showSwipeTutorial(); }
+    else banner(S.mp ? 'NEW ORBIT! SWIPE ↑ OUT · ↓ IN' : 'NEW ORBIT · SWIPE ↑ OUT · ↓ IN', S.mp ? 3500 : 2200);
+  }
   popText('+1 ORBIT', CX, CY + R_OUT + 40 * U, T.a, 30, 1.6);
   wave(CX, CY, T.a, R_OUT * innerFrac(n) / U, 6, 0.9);
   tone(330, 0.5, 'sine', 0.15, 0, 660);
@@ -841,7 +864,7 @@ function start(seed, mp = false, daily = false) {
   audioInit();
   S.mp = mp; S.daily = daily;
   rng = mulberry32(seed !== undefined ? seed : (Math.random() * 2 ** 31) | 0);
-  S.mode = 'playing'; S.paused = false;
+  S.mode = 'playing'; S.paused = false; S.tutorial = false;
   S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0;
   S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
   S.omega = S.omegaT = omegaFor(1); S.timeScale = 1; S.runT = 0;
@@ -1009,11 +1032,24 @@ function countUp(el, to, ms) {
   requestAnimationFrame(step);
 }
 
+function showSwipeTutorial() {
+  S.paused = true; S.tutorial = true; musicStop();
+  $('#tut').classList.add('show');
+  haptic('medium');
+}
+function endSwipeTutorial() {
+  if (!S.tutorial) return;
+  S.tutorial = false; S.paused = false;
+  $('#tut').classList.remove('show');
+  S.safeT = S.t + 1.2;                      // short grace so nothing hits right away
+  audioInit(); musicStart(); SFX.click();
+}
 function pause() {
   if (S.mode !== 'playing' || S.paused || S.mp) return;
   S.paused = true; musicStop(); $('#pause').classList.add('show');
 }
 function resume() {
+  if (S.tutorial) { $('#pause').classList.remove('show'); return; }
   S.paused = false; $('#pause').classList.remove('show'); audioInit(); musicStart();
 }
 
@@ -1273,6 +1309,9 @@ function render() {
     ctx.shadowColor = T.a; ctx.shadowBlur = 18 * U;
     txt(label, CX, CY + 2 * U, RC * (1 + S.coreKick * 0.35), '#ffffff', 1);
     ctx.shadowBlur = 0;
+    const yy = Math.min(H - SAFE_BOT - 60, CY + R_OUT + 56 * U);
+    txt('TAP TO SWITCH ORBIT', CX, yy, 14, '#ffffff', 0.85, 800);
+    txt('FROM 3 ORBITS: SWIPE ↑ OUT · ↓ IN', CX, yy + 22, 13, T.a, 0.85, 800);
   } else if (S.mode !== 'title' && !(S.mp && S.mode === 'over')) {
     const sz = RC * (S.score > 999 ? 0.62 : S.score > 99 ? 0.8 : 1) * (1 + S.coreKick * 0.28);
     ctx.shadowColor = T.a; ctx.shadowBlur = 18 * U;
@@ -1399,10 +1438,10 @@ function render() {
     if (S.t - S.ringHintT < 4 && S.mode === 'playing') {
       const a = Math.min(1, 4 - (S.t - S.ringHintT)) * (0.7 + 0.3 * Math.sin(S.t * 8));
       const yy = Math.min(H - SAFE_BOT - 52, CY + R_OUT + 76 * U);
-      txt('NEW ORBIT! TAP LEFT TO MOVE IN', CX, yy, 14, '#ffffff', a, 800);
-      txt('TAP RIGHT TO MOVE OUT', CX, yy + 20, 14, '#ffffff', a, 800);
+      txt('SWIPE ↑ TO MOVE OUT', CX, yy, 14, '#ffffff', a, 800);
+      txt('SWIPE ↓ TO MOVE IN', CX, yy + 20, 14, '#ffffff', a, 800);
     }
-    if (S.rings > 2 && S.mode === 'playing') drawPads();
+    if (S.rings > 2 && S.mode === 'playing') drawSwipeHint();
   }
 
   // flash
@@ -1448,19 +1487,22 @@ function drawBackdrop() {
   vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.55)');
   g.fillStyle = vg; g.fillRect(0, 0, w, h);
 }
-// IN / OUT touch pads shown at the bottom once there are 3+ orbits.
-function drawPads() {
-  const vis = clamp(S.ringsF - 2, 0, 1);
-  const h = 54, y = H - SAFE_BOT - h - 14, w = Math.min(150, W * 0.4), m = 14;
-  const pads = [{ dir: 1, x: m, label: '◀  IN' }, { dir: -1, x: W - m - w, label: 'OUT  ▶' }];
-  for (const p of pads) {
-    const hit = S.padFlash && S.padFlash.dir === p.dir ? Math.max(0, 1 - (S.t - S.padFlash.t) / 0.25) : 0;
-    ctx.globalAlpha = (0.1 + 0.25 * hit) * vis; ctx.fillStyle = T.a;
-    roundRect(p.x, y, w, h, 18); ctx.fill();
-    ctx.globalAlpha = (0.45 + 0.4 * hit) * vis; ctx.strokeStyle = T.a; ctx.lineWidth = 1.5;
-    roundRect(p.x, y, w, h, 18); ctx.stroke();
-    txt(p.label, p.x + w / 2, y + h / 2 + 1, 17, '#ffffff', (0.75 + 0.25 * hit) * vis, 900);
+// Subtle swipe reminder at the bottom once there are 3+ orbits: two chevrons that
+// drift up/down, and the one you just swiped lights up.
+function drawSwipeHint() {
+  const vis = clamp(S.ringsF - 2, 0, 1), y = H - SAFE_BOT - 44, x = W - 34;
+  const sw = S.swipeFlash && S.t - S.swipeFlash.t < 0.3 ? S.swipeFlash.dir : 0;
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = T.a;
+  for (const d of [-1, 1]) {                // -1 = up (out), 1 = down (in)
+    const k = (S.t * 0.9 + (d < 0 ? 0 : 0.5)) % 1, off = d * (6 + k * 10);
+    ctx.globalAlpha = vis * (sw === d ? 1 : 0.22 + 0.25 * Math.sin(k * Math.PI));
+    const cy = y + d * 12 + off * 0.5;
+    ctx.beginPath(); ctx.moveTo(x - 9, cy - d * 5); ctx.lineTo(x, cy + d * 4); ctx.lineTo(x + 9, cy - d * 5); ctx.stroke();
   }
+  ctx.restore();
+  ctx.textAlign = 'right';
+  txt('SWIPE', x - 18, y, 11, '#ffffff', 0.35 * vis, 900);
+  ctx.textAlign = 'center';
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath();
@@ -1526,7 +1568,7 @@ function banner(text, ms) {
   if (ms) banner.h = setTimeout(() => b.classList.remove('show'), ms);
 }
 function backToTitle() {
-  S.mp = false; S.daily = false; S.mode = 'title'; S.paused = false;
+  S.mp = false; S.daily = false; S.mode = 'title'; S.paused = false; S.tutorial = false;
   syncDaily();
   musicStop(); banner('');
   showScreen('title');
@@ -1901,17 +1943,37 @@ const Net = {
   },
 };
 
+/* 2 orbits: any tap switches (on touch-down, for speed).
+   3+ orbits: swipe up = out one orbit, swipe down = in one orbit; one move per
+   swipe, fired as soon as the finger has travelled SWIPE_PX vertically. */
+const SWIPE_PX = 26;
+const swipes = new Map();                  // pointerId -> { x, y, done }
 function onTap(e) {
   if (e) e.preventDefault();
   audioInit();
   if (S.mode !== 'playing' || S.paused) return;
-  // 2 orbits: any tap switches. 3+ orbits: left half = IN (toward the core), right half = OUT.
-  if (S.rings <= 2 || !e || e.clientX === undefined) { switchRing(0); return; }
-  const dir = e.clientX < W / 2 ? 1 : -1;
-  S.padFlash = { dir, t: S.t };
+  if (e && e.pointerId !== undefined) swipes.set(e.pointerId, { x: e.clientX, y: e.clientY, done: false });
+  if (S.rings <= 2) switchRing(0);
+}
+function onSwipeMove(e) {
+  const sw = swipes.get(e.pointerId);
+  if (!sw || sw.done) return;
+  const dy = e.clientY - sw.y, dx = e.clientX - sw.x;
+  if (Math.abs(dy) < SWIPE_PX || Math.abs(dy) < Math.abs(dx)) return;
+  sw.done = true;
+  if (S.tutorial) { endSwipeTutorial(); return; }
+  if (S.mode !== 'playing' || S.paused || S.rings <= 2) return;
+  const dir = dy < 0 ? -1 : 1;
+  S.swipeFlash = { dir, t: S.t };
   switchRing(dir, true);
 }
+const endSwipe = e => swipes.delete(e.pointerId);
 cvs.addEventListener('pointerdown', onTap);
+window.addEventListener('pointermove', onSwipeMove);
+window.addEventListener('pointerup', endSwipe);
+window.addEventListener('pointercancel', endSwipe);
+$('#tut').addEventListener('pointerdown', e => { e.preventDefault(); swipes.set(e.pointerId, { x: e.clientX, y: e.clientY, done: false }); });
+$('#tut').addEventListener('pointerup', e => { const sw = swipes.get(e.pointerId); if (sw && !sw.done) endSwipeTutorial(); });
 $('#playSolo').addEventListener('click', () => start());
 $('#btnQuick').addEventListener('click', () => { SFX.click(); quickMatch(); });
 $('#btnFriends').addEventListener('click', () => { audioInit(); SFX.click(); syncNames(); showScreen('friends'); });
@@ -1971,6 +2033,7 @@ window.addEventListener('keydown', e => {
     e.preventDefault(); audioInit();
     if (S.mode === 'title' && $('#title').classList.contains('show')) start();
     else if (S.mode === 'over' && !S.mp && $('#over').classList.contains('show')) again();
+    else if (S.tutorial) endSwipeTutorial();
     else if (S.paused) resume();
     else if (S.mode === 'playing') switchRing(e.code === 'ArrowUp' || e.code === 'ArrowRight' ? -1 : e.code === 'ArrowDown' || e.code === 'ArrowLeft' ? 1 : 0, e.code.startsWith('Arrow') && S.rings > 2);
   } else if (e.code === 'KeyP' || e.code === 'Escape') pause();

@@ -29,7 +29,7 @@ Works on phones and desktops. Multiplayer, private rooms and the leaderboard all
 | **Web** | **https://orbital-server.dummiesbuild26.workers.dev/** |
 | **Add to Home Screen** | Open the web version in Safari → Share → *Add to Home Screen* for a full-screen app |
 
-Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: tap the **left** half of the screen to move **in** toward the core and the **right** half to move **out**; IN / OUT pads at the bottom show which side is which. On a keyboard, use ← / → (or ↓ / ↑). **P** / **Esc** pauses.
+Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From level 3 there are 3–4 orbits: **swipe up** to move **out** one orbit and **swipe down** to move **in** toward the core (taps do nothing then). The first time a third orbit appears in solo play, the game pauses and shows a short swipe tutorial. On a keyboard, use ↑ (out) / ↓ (in). **P** / **Esc** pauses.
 
 ## Multiplayer server
 
