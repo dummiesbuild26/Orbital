@@ -152,9 +152,60 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .demo .lbl.up{top:-8px;color:var(--a)} .demo .lbl.dn{bottom:-8px;color:var(--g)}
 .tutsub{font-size:14px;font-weight:700;opacity:.8;letter-spacing:.06em;max-width:300px;line-height:1.5}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
+/* ---------- boot / loading ---------- */
+#boot{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;background:radial-gradient(circle at 50% 45%,#12063a 0,var(--bg) 70%);transition:opacity .45s ease,visibility .45s;touch-action:none}
+#boot.done{opacity:0;visibility:hidden;pointer-events:none}
+.bt-sys{position:relative;width:150px;height:150px}
+.bt-ring{position:absolute;left:50%;top:50%;border-radius:50%;border:1.5px solid var(--a40);transform:translate(-50%,-50%);box-shadow:0 0 12px var(--a22),inset 0 0 12px var(--a22)}
+.bt-ring.r1{width:84px;height:84px}
+.bt-ring.r2{width:146px;height:146px;border-color:var(--b50);box-shadow:0 0 12px var(--b50)}
+.bt-core{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:radial-gradient(circle,#fff 0,var(--a) 55%,transparent 72%);box-shadow:0 0 26px var(--a);animation:btcore 1.1s ease-in-out infinite}
+@keyframes btcore{0%,100%{transform:scale(.85)}50%{transform:scale(1.12)}}
+.bt-arm{position:absolute;inset:0;animation:btspin 1.4s linear infinite}
+.bt-arm.o{animation-duration:2.3s;animation-direction:reverse}
+.bt-arm i{position:absolute;left:50%;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;box-shadow:0 0 10px #fff,0 0 22px var(--a),0 0 34px var(--a)}
+.bt-arm:not(.o) i{top:33px}
+.bt-arm.o i{top:2px;box-shadow:0 0 10px #fff,0 0 22px var(--b),0 0 34px var(--b)}
+@keyframes btspin{to{transform:rotate(360deg)}}
+.bt-name{font-size:clamp(30px,9vw,44px);font-weight:900;letter-spacing:.22em;padding-left:.22em;background:linear-gradient(180deg,#fff 10%,var(--a) 55%,var(--b) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px var(--a))}
+.bt-bar{width:min(220px,60vw);height:4px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.bt-bar b{display:block;height:100%;width:var(--p,8%);border-radius:4px;background:linear-gradient(90deg,var(--a),var(--b));box-shadow:0 0 12px var(--a);transition:width .35s ease}
+.bt-tip{font-size:12px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;opacity:.55;text-align:center;padding:0 16px;min-height:1.4em}
+@media (prefers-reduced-motion:reduce){.bt-arm,.bt-core{animation:none}}
 </style>
 </head>
 <body>
+<div id="boot" aria-live="polite" aria-label="Loading ORBITAL">
+  <div class="bt-sys">
+    <div class="bt-ring r1"></div><div class="bt-ring r2"></div><div class="bt-core"></div>
+    <div class="bt-arm"><i></i></div><div class="bt-arm o"><i></i></div>
+  </div>
+  <div class="bt-name">ORBITAL</div>
+  <div class="bt-bar"><b id="btBar"></b></div>
+  <div class="bt-tip" id="btTip">Spinning up the core…</div>
+</div>
+<script>
+// Loading screen: shown until the game has drawn its first frame and the page has finished loading.
+(function () {
+  var boot = document.getElementById('boot'), bar = document.getElementById('btBar'), tip = document.getElementById('btTip');
+  var t0 = Date.now(), want = { ready: 0, load: 0 }, closed = false;
+  function progress(p, msg) { bar.style.setProperty('--p', p + '%'); if (msg) tip.textContent = msg; }
+  function close() {
+    if (closed) return; closed = true;
+    progress(100, 'Ready');
+    setTimeout(function () { boot.classList.add('done'); setTimeout(function () { boot.remove(); }, 500); }, Math.max(150, 700 - (Date.now() - t0)));
+  }
+  function step(k) { want[k] = 1; if (want.ready && want.load) close(); }
+  window.__boot = {
+    progress: progress,
+    ready: function () { progress(85, 'Charging comet…'); step('ready'); }
+  };
+  if (document.readyState === 'complete') want.load = 1;
+  else window.addEventListener('load', function () { progress(60); step('load'); });
+  setTimeout(close, 8000); // never trap the player behind the loader
+  progress(20);
+})();
+</script>
 <canvas id="game"></canvas>
 <div id="safe"></div>
 
@@ -291,6 +342,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 <div id="toast"></div>
 
 <script src="config.js"></script>
+<script>window.__boot && __boot.progress(45, 'Tuning the synths…');</script>
 <script>
 (() => {
 'use strict';
@@ -2062,6 +2114,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+requestAnimationFrame(() => window.__boot && window.__boot.ready());
 
 // tiny hook for automated tests
 const linkRoom = cleanCode(new URLSearchParams(location.search).get('room'));
