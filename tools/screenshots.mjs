@@ -49,7 +49,8 @@ for (const dev of DEVICES) {
   const shot = async name => { await calm(); await page.screenshot({ path: path.join(dir, name + '.png') }); console.log('wrote', dev.name, name); };
 
   await page.goto(gameUrl);
-  await page.waitForTimeout(1200);
+  await page.waitForFunction(() => !document.getElementById('boot'), null, { timeout: 15000 });
+  await page.waitForTimeout(600);
   await shot('01-title');
 
   // classic two-orbit run with a combo going
