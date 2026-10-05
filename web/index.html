@@ -942,7 +942,8 @@ function startDaily() {
 }
 
 /* ----- power-ups: bought with stardust before a solo or daily run ----- */
-// Every run earns 1 stardust per point (2 with Dust x2). Power-ups last one run.
+// Every run earns 1 stardust per DUST_RATE points (double with Dust x2). Power-ups last one run.
+const DUST_RATE = 5;
 const POWERUPS = [
   { id: 'shield', ic: '🛡️', name: 'SHIELD', desc: 'Start the run with a shield', cost: 60 },
   { id: 'slow', ic: '🐢', name: 'SLOW-MO', desc: 'Orbit 20% slower for 2 levels', cost: 80 },
@@ -958,7 +959,7 @@ const pickCost = () => POWERUPS.reduce((n, pw) => n + (luPick.has(pw.id) ? pw.co
 function renderLoadout() {
   const bal = dust(), left = bal - pickCost();
   $('#luDust').textContent = bal;
-  $('#luHint').textContent = bal < 50 && !luPick.size ? 'Earn 1 ✦ per point. Play a run to start saving!' : 'Pick any you can afford, then launch';
+  $('#luHint').textContent = bal < 50 && !luPick.size ? `Earn 1 ✦ for every ${DUST_RATE} points. Play runs to save up!` : 'Pick any you can afford, then launch';
   $('#luList').innerHTML = POWERUPS.map(pw => {
     const sel = luPick.has(pw.id), poor = !sel && pw.cost > left;
     const desc = pw.id === 'slow' ? `Orbit 20% slower for levels\u00a0${slowAt}\u2060–\u2060${slowAt + SLOW_LEN - 1}` : pw.desc;
@@ -1010,7 +1011,7 @@ function secondChance(it, p) {
   SFX.shieldBreak(); SFX.best(); haptic('error');
 }
 function earnDust() {
-  S.earned = S.score * (S.dust2 ? 2 : 1);
+  S.earned = Math.floor(S.score / DUST_RATE) * (S.dust2 ? 2 : 1);
   if (S.earned > 0) store.set('dust', dust() + S.earned);
 }
 

@@ -131,7 +131,7 @@ html,body{height:100%;background:#000;overflow:hidden;font-family:var(--font);co
   function trackDust(base) {
     clearInterval(dustTimer);
     dustTimer = setInterval(() => {
-      const n = base + O.S.score;
+      const n = base + Math.floor(O.S.score / 5);
       if (n !== dustShown) { dustShown = n; $('#dustN').textContent = n; const d = $('#dust'); d.classList.remove('bump'); void d.offsetWidth; d.classList.add('bump'); }
     }, 60);
   }
