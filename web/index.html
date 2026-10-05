@@ -398,9 +398,12 @@ function haptic(kind) {
   } catch (e) {}
 }
 
+// promo.html embeds the game with ?promo so its scripted run never touches the player's own save.
+const PROMO = new URLSearchParams(location.search).has('promo');
+const STORE_KEY = PROMO ? 'orbitalpromo.' : 'orbital.';
 const store = {
-  get(k, d) { try { const v = localStorage.getItem('orbital.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('orbital.' + k, JSON.stringify(v)); } catch (e) {} },
+  get(k, d) { try { const v = localStorage.getItem(STORE_KEY + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(STORE_KEY + k, JSON.stringify(v)); } catch (e) {} },
 };
 
 function hexA(hex, a) {
@@ -1125,8 +1128,8 @@ function levelUp() {
   wave(CX, CY, T.b, R_OUT / U + 40, 5, 0.7);
   popText('LEVEL ' + S.level, CX, CY - R_OUT - 50 * U, '#ffffff', 40, 1.6);
   popText(T.name, CX, CY - R_OUT - 22 * U, T.a, 16, 1.6);
-  if (S.slow && S.level === slowAt) popText('🐢 SLOW-MO ON', CX, CY + R_OUT + 46 * U, T.g, 22, 1.6);
-  if (S.slow && S.level === slowAt + SLOW_LEN) popText('SLOW-MO OVER', CX, CY + R_OUT + 46 * U, '#ffffff', 18, 1.4);
+  if (S.slow && S.level === slowAt) popText('🐢 SLOW-MO ON', CX, CY + R_OUT + 78 * U, T.g, 22, 1.8);
+  if (S.slow && S.level === slowAt + SLOW_LEN) popText('SLOW-MO OVER', CX, CY + R_OUT + 78 * U, '#ffffff', 18, 1.4);
   SFX.level(); haptic('success');
 }
 
@@ -1720,7 +1723,7 @@ async function api(path, body) {
 function submitScore(score, sel) {
   const el = $(sel);
   if (el) el.textContent = '';
-  if (!SERVER || score <= 0) return;
+  if (!SERVER || score <= 0 || PROMO) return;
   api('/api/score', { pid: PID, name: myName, score })
     .then(r => { if (el) el.textContent = `GLOBAL RANK #${r.rank} OF ${r.total}`; })
     .catch(() => {});
