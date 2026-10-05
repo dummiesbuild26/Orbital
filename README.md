@@ -36,6 +36,13 @@ Controls: with 2 orbits, **tap** anywhere (or **space**) to switch orbit. From l
 
 The server (rooms, matchmaking and the leaderboard) and the web version are live at the URL above. Every push to `main` redeploys them automatically.
 
+### Wiping the global leaderboard
+
+1. In the Cloudflare dashboard, open **Workers & Pages → orbital-server → Settings → Variables and Secrets** and add a **Secret** named `ADMIN_TOKEN` with a long random value (e.g. a password manager's 32+ character password).
+2. Open `/admin` on the server (https://orbital-server.dummiesbuild26.workers.dev/admin), paste the token and tap **WIPE LEADERBOARD**.
+
+This deletes every leaderboard entry for good. Players keep their local best, stardust and achievements. Without the secret, the reset is disabled.
+
 ### How it works
 
 - Every match has a **shared random seed**. The course is generated purely from that seed, so every player gets the exact same course with no position streaming.

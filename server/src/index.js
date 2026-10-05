@@ -5,6 +5,10 @@
 //   GET  /api/leaderboard                         global top 50
 //   POST /api/score  { pid, name, score }         submit a score, returns { rank, best, total }
 //   POST /api/forget { pid }                      delete this player's leaderboard entry
+//   GET  /admin                                   owner page for wiping the leaderboard
+//   POST /api/admin/reset                         wipe the whole leaderboard; needs
+//                                                 "Authorization: Bearer <ADMIN_TOKEN>"
+//                                                 (a Worker secret; unset = disabled)
 //   everything else                               static web game (../web)
 
 import { DurableObject } from 'cloudflare:workers';
@@ -47,6 +51,15 @@ export default {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
+    if (url.pathname === '/admin') return new Response(ADMIN_PAGE, { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
+
+    if (url.pathname.startsWith('/api/admin/')) {
+      if (req.method !== 'POST') return json({ error: 'method not allowed' }, 405);
+      if (!env.ADMIN_TOKEN) return json({ error: 'admin is disabled: set the ADMIN_TOKEN secret' }, 403);
+      const auth = req.headers.get('Authorization') || '';
+      if (!(await sameSecret(auth.replace(/^Bearer\s+/i, ''), env.ADMIN_TOKEN))) return json({ error: 'wrong token' }, 401);
+    }
+
     if (url.pathname.startsWith('/api/')) {
       const hub = env.HUB.get(env.HUB.idFromName('global'));
       return hub.fetch(req);
@@ -62,6 +75,41 @@ export default {
     return new Response('Not found', { status: 404 });
   },
 };
+
+// Compare secrets without leaking their length or contents through timing.
+async function sameSecret(given, expected) {
+  const enc = new TextEncoder();
+  const [a, b] = await Promise.all([given, expected].map(s => crypto.subtle.digest('SHA-256', enc.encode(String(s)))));
+  return crypto.subtle.timingSafeEqual(a, b);
+}
+
+// Owner-only page: the token is typed in and sent as a header, never stored or put in a URL.
+const ADMIN_PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>ORBITAL Admin</title><style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#05010f;color:#fff;font:16px -apple-system,system-ui,sans-serif}
+main{width:min(360px,100% - 32px);display:flex;flex-direction:column;gap:14px}
+h1{margin:0;font-size:22px;letter-spacing:.12em}p{margin:0;opacity:.7;line-height:1.4}
+input,button{font:inherit;padding:14px;border-radius:12px;border:2px solid #ffffff40;background:#ffffff10;color:#fff}
+button{border:none;background:#ff2d95;font-weight:800;letter-spacing:.08em;cursor:pointer}button:disabled{opacity:.5}
+#out{min-height:1.4em;font-weight:700}</style></head><body><main>
+<h1>ORBITAL ADMIN</h1><p>Wipes every entry from the global leaderboard. This can't be undone.</p>
+<input id="t" type="password" placeholder="Admin token" autocomplete="current-password">
+<button id="go">WIPE LEADERBOARD</button><div id="out"></div></main><script>
+const out = document.getElementById('out'), go = document.getElementById('go');
+go.onclick = async () => {
+  const t = document.getElementById('t').value.trim();
+  if (!t) { out.textContent = 'Enter the admin token.'; return; }
+  if (!confirm('Delete EVERY score on the global leaderboard?')) return;
+  go.disabled = true; out.textContent = 'Wiping...';
+  try {
+    const r = await fetch('/api/admin/reset', { method: 'POST', headers: { Authorization: 'Bearer ' + t } });
+    const d = await r.json();
+    out.textContent = r.ok ? 'Done: removed ' + d.removed + ' entries.' : 'Failed: ' + d.error;
+  } catch (e) { out.textContent = 'Failed: ' + e.message; }
+  go.disabled = false;
+};
+</script></body></html>`;
 
 /* ------------------------------------------------------------------ */
 /* Hub: matchmaking + global leaderboard (one instance, SQLite)        */
@@ -132,6 +180,13 @@ export class Hub extends DurableObject {
       if (!pid) return json({ error: 'invalid' }, 400);
       sql.exec('DELETE FROM scores WHERE pid = ?', pid);
       return json({ ok: true });
+    }
+
+    // Reached only through the Worker, which has already checked the admin token.
+    if (url.pathname === '/api/admin/reset' && req.method === 'POST') {
+      const removed = sql.exec('SELECT COUNT(*) AS n FROM scores').one().n;
+      sql.exec('DELETE FROM scores');
+      return json({ ok: true, removed });
     }
 
     return json({ error: 'not found' }, 404);
