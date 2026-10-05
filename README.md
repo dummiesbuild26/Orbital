@@ -9,6 +9,7 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 - A generative synth soundtrack that picks up as you level up (all audio is synthesized, with no asset files)
 - Combo multipliers up to x6, near-miss bonuses ("CLUTCH! +2"), roast messages on death
 - **Hopper spikes** that jump to another orbit as you close in (a dashed target shows where they'll land), and **shield** pickups that absorb one hit
+- **Power-ups:** every run earns ✦ Stardust (1 per point). Before each solo or daily run, spend it on Shield, Slow-Mo, Hot Start (x3 combo), Second Chance or Dust x2. Power-ups are off in multiplayer
 - **Daily challenge:** one fixed course per day, with today's best and a day streak
 - **Pilot screen:** lifetime stats, 14 achievements and 8 unlockable comet skins (saved on the device)
 - **Challenge a Friend** creates a 1080×1080 score card and opens the share sheet
