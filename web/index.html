@@ -166,6 +166,9 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .pw button.sel{border-color:var(--a);background:var(--a22);box-shadow:0 0 18px var(--a40)}
 .pw button.sel .pr::before{content:'✓ ';color:var(--a)}
 .pw button.poor{opacity:.38}
+.pw .lvl{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:6px;font-size:12px;font-weight:900;letter-spacing:.16em;opacity:.9}
+.pw .lvl button{width:38px;height:38px;padding:0;justify-content:center;border-radius:50%;font-size:20px;font-weight:900}
+.pw .lvl b{font-size:20px;min-width:28px;text-align:center;color:var(--a);font-variant-numeric:tabular-nums}
 .pw button.poor .pr{color:#fff}
 .oDust{font-size:14px;font-weight:900;letter-spacing:.16em;color:var(--g);text-shadow:0 0 10px var(--g);min-height:18px}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
@@ -939,12 +942,14 @@ function startDaily() {
 // Every run earns 1 stardust per point (2 with Dust x2). Power-ups last one run.
 const POWERUPS = [
   { id: 'shield', ic: '🛡️', name: 'SHIELD', desc: 'Start the run with a shield', cost: 60 },
-  { id: 'slow', ic: '🐢', name: 'SLOW-MO', desc: 'Orbit 20% slower for levels 1 and 2', cost: 80 },
+  { id: 'slow', ic: '🐢', name: 'SLOW-MO', desc: 'Orbit 20% slower for 2 levels', cost: 80 },
   { id: 'hot', ic: '🔥', name: 'HOT START', desc: 'Begin with a x3 combo', cost: 100 },
   { id: 'revive', ic: '💫', name: 'SECOND CHANCE', desc: 'Survive one fatal hit and clear the spikes ahead', cost: 150 },
   { id: 'dust2', ic: '✦', name: 'DUST x2', desc: 'Double the stardust from this run', cost: 50 },
 ];
 let luPick = new Set(), luRun = null, armed = null;   // picks on the screen, the run to start, picks for that run
+const SLOW_LEN = 2, SLOW_MAX = 20;                    // Slow-Mo lasts 2 levels, starting at a level the player picks
+let slowAt = clamp(store.get('slowAt', 1), 1, SLOW_MAX);
 const dust = () => store.get('dust', 0);
 const pickCost = () => POWERUPS.reduce((n, pw) => n + (luPick.has(pw.id) ? pw.cost : 0), 0);
 function renderLoadout() {
@@ -953,7 +958,9 @@ function renderLoadout() {
   $('#luHint').textContent = bal < 50 && !luPick.size ? 'Earn 1 ✦ per point. Play a run to start saving!' : 'Pick any you can afford, then launch';
   $('#luList').innerHTML = POWERUPS.map(pw => {
     const sel = luPick.has(pw.id), poor = !sel && pw.cost > left;
-    return `<li><button class="${sel ? 'sel' : ''}${poor ? ' poor' : ''}" data-id="${pw.id}" aria-pressed="${sel}"><span class="ic">${pw.ic}</span><span class="tx"><b>${pw.name}</b><span>${pw.desc}</span></span><span class="pr">✦ ${pw.cost}</span></button></li>`;
+    const desc = pw.id === 'slow' ? `Orbit 20% slower for levels\u00a0${slowAt}\u2060–\u2060${slowAt + SLOW_LEN - 1}` : pw.desc;
+    const lvl = pw.id === 'slow' && sel ? `<div class="lvl">STARTS AT LEVEL <button data-lv="-1" aria-label="Earlier level">−</button><b>${slowAt}</b><button data-lv="1" aria-label="Later level">+</button></div>` : '';
+    return `<li><button class="${sel ? 'sel' : ''}${poor ? ' poor' : ''}" data-id="${pw.id}" aria-pressed="${sel}"><span class="ic">${pw.ic}</span><span class="tx"><b>${pw.name}</b><span>${desc}</span></span><span class="pr">✦ ${pw.cost}</span></button>${lvl}</li>`;
   }).join('');
   const cost = pickCost();
   $('#luGo').textContent = cost ? `LAUNCH · ✦ ${cost}` : 'LAUNCH';
@@ -987,7 +994,8 @@ function applyPowerups() {
   if (pw.has('hot')) { S.combo = 10; S.mult = 3; }
   if (pw.size) banner([...pw].map(id => POWERUPS.find(x => x.id === id).ic).join(' ') + '  POWERED UP', 1800);
 }
-const runOmega = L => omegaFor(L) * (S.slow && L <= 2 ? 0.8 : 1);
+const slowOn = (L = S.level) => S.slow && L >= slowAt && L < slowAt + SLOW_LEN;
+const runOmega = L => omegaFor(L) * (slowOn(L) ? 0.8 : 1);
 // Second Chance: the hit is forgiven and the spikes just ahead are cleared.
 function secondChance(it, p) {
   S.revive = 0; S.safeT = S.t + 1.5;
@@ -1117,6 +1125,8 @@ function levelUp() {
   wave(CX, CY, T.b, R_OUT / U + 40, 5, 0.7);
   popText('LEVEL ' + S.level, CX, CY - R_OUT - 50 * U, '#ffffff', 40, 1.6);
   popText(T.name, CX, CY - R_OUT - 22 * U, T.a, 16, 1.6);
+  if (S.slow && S.level === slowAt) popText('🐢 SLOW-MO ON', CX, CY + R_OUT + 46 * U, T.g, 22, 1.6);
+  if (S.slow && S.level === slowAt + SLOW_LEN) popText('SLOW-MO OVER', CX, CY + R_OUT + 46 * U, '#ffffff', 18, 1.4);
   SFX.level(); haptic('success');
 }
 
@@ -1576,7 +1586,7 @@ function render() {
     txt('LV ' + S.level, 18, y, 15, '#ffffff', 0.75, 800);
     txt(S.daily ? 'DAILY · BEST ' + S.dailyBest : 'BEST ' + S.best, 18, y + 20, 11, S.daily ? T.g : '#ffffff', S.daily ? 0.7 : 0.45, 800);
     if (S.shield) drawImg(SPR.shield, 30, y + 44, 22, 0.9 + 0.1 * Math.sin(S.t * 6));
-    const pwHud = (S.revive ? '💫' : '') + (S.dust2 ? '✦x2' : '') + (S.slow && S.level <= 2 ? '🐢' : '');
+    const pwHud = (S.revive ? '💫' : '') + (S.dust2 ? '✦x2' : '') + (slowOn() ? '🐢' : '');
     if (pwHud) txt(pwHud, 18, y + (S.shield ? 70 : 46), 13, T.g, 0.85, 800);
     ctx.textAlign = 'center';
     if (S.combo > 0) {
@@ -2185,6 +2195,10 @@ $('#again').addEventListener('click', again);
 $('#btnDaily').addEventListener('click', () => openLoadout(startDaily));
 $('#luList').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.lv) {
+    slowAt = clamp(slowAt + +b.dataset.lv, 1, SLOW_MAX); store.set('slowAt', slowAt);
+    SFX.click(); haptic('light'); renderLoadout(); return;
+  }
   const id = b.dataset.id, pw = POWERUPS.find(x => x.id === id);
   if (luPick.has(id)) luPick.delete(id);
   else if (pw.cost > dust() - pickCost()) { tone(160, 0.1, 'square', 0.05); toast(`Need ✦ ${pw.cost - (dust() - pickCost())} more stardust`); return; }
