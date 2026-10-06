@@ -13,7 +13,7 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 - **Hopper spikes** that jump to another orbit as you close in (a dashed target shows where they'll land), and **shield** pickups that absorb one hit
 - **Power-ups:** every run earns ✦ Stardust (1 for every 5 points). Before each solo or daily run, spend it on Shield, Slow-Mo (pick the level it starts at), Hot Start (x3 combo), Second Chance or Dust x2. Power-ups are off in multiplayer
 - **Missions:** three goals at a time that pay stardust and get harder each time you complete one
-- **Daily challenge:** one fixed course per day, with today's best and a day streak
+- **Daily challenge:** one fixed course per day, with today's best and a day streak, and a ghost of your best run that day to race
 - **Pilot screen:** lifetime stats, 15 achievements and 9 unlockable comet skins (saved on the device)
 - **Challenge a Friend** creates a 1080×1080 score card and opens the share sheet
 - Haptics on iOS, saved best score, pause on background
