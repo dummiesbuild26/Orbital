@@ -8,10 +8,12 @@ A neon one-tap arcade game. Your comet circles a pulsing core: tap anywhere to j
 - A new color theme every level (Neon → Toxic → Solar → Ultraviolet → …)
 - A generative synth soundtrack that picks up as you level up (all audio is synthesized, with no asset files)
 - Combo multipliers up to x6, near-miss bonuses ("CLUTCH! +2"), roast messages on death
+- **FEVER:** max out the x6 combo and every gem scores double for 8 seconds, with a rainbow trail and an extra music layer
+- **Magnet** pickups that pull in the gems from every orbit for 7 seconds
 - **Hopper spikes** that jump to another orbit as you close in (a dashed target shows where they'll land), and **shield** pickups that absorb one hit
 - **Power-ups:** every run earns ✦ Stardust (1 for every 5 points). Before each solo or daily run, spend it on Shield, Slow-Mo (pick the level it starts at), Hot Start (x3 combo), Second Chance or Dust x2. Power-ups are off in multiplayer
 - **Daily challenge:** one fixed course per day, with today's best and a day streak
-- **Pilot screen:** lifetime stats, 14 achievements and 8 unlockable comet skins (saved on the device)
+- **Pilot screen:** lifetime stats, 15 achievements and 9 unlockable comet skins (saved on the device)
 - **Challenge a Friend** creates a 1080×1080 score card and opens the share sheet
 - Haptics on iOS, saved best score, pause on background
 - **Online multiplayer:** in Quick Match, up to 8 players race the *identical* course live and the last comet alive wins. You see every rival as a glowing ghost on the orbit

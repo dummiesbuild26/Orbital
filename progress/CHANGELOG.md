@@ -25,3 +25,7 @@ Screenshot: `05-pilot-screen.png`
 ## 06. Swipe controls for 3+ orbits
 With 3 or more orbits, swipe up to move out and swipe down to move in; taps no longer move you. The IN/OUT pads are replaced by a small animated swipe hint. With 2 orbits, any tap still switches. In solo, the first two times the third orbit appears, the game pauses on a NEW ORBIT tutorial and resumes on a swipe or tap with a short grace period. Multiplayer and bot matches never pause: the countdown explains swipes and a banner appears instead.
 Screenshots: `06-swipe-tutorial.png`, `06-swipe-hint.png`
+
+## 07. FEVER mode and the gem magnet
+Reaching the maximum x6 combo (25 gems in a row) now starts **FEVER** for 8 seconds: every gem scores double (up to +12), the trail turns into a wide rainbow, the background pulses on the beat and the music adds a lead line. Every 15 more gems in the same combo triggers it again, and missing a gem ends it. A new **magnet** pickup can appear at the end of gem trails from level 2: for 7 seconds, gems on every orbit fly into your comet, which is the easiest way to reach FEVER. A new achievement, Fever Pitch, unlocks the Aurora comet. (The course changed, so the course version is now 3.)
+Screenshot: `07-fever-magnet.png` (FEVER running, magnet timer on the left)

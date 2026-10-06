@@ -501,12 +501,25 @@ const shieldSprite = color => cached('shield' + color, 96, (g, s) => {
   g.lineTo(c - s * 0.2, c - s * 0.17); g.closePath();
   g.fillStyle = color; g.fill(); g.lineWidth = 2.5; g.stroke();
 });
+const magnetSprite = color => cached('magnet' + color, 96, (g, s) => {
+  const c = s / 2;
+  g.beginPath(); g.arc(c, c, s * 0.42, 0, TAU);
+  g.fillStyle = hexA(color, 0.22); g.fill();
+  g.lineWidth = 4; g.strokeStyle = '#fff'; g.stroke();
+  // horseshoe: a thick U with white tips
+  g.lineCap = 'butt'; g.lineWidth = s * 0.13; g.strokeStyle = color;
+  g.beginPath(); g.moveTo(c - s * 0.15, c - s * 0.2); g.lineTo(c - s * 0.15, c + s * 0.02);
+  g.arc(c, c + s * 0.02, s * 0.15, Math.PI, 0, true); g.lineTo(c + s * 0.15, c - s * 0.2); g.stroke();
+  g.strokeStyle = '#fff';
+  g.beginPath(); g.moveTo(c - s * 0.15, c - s * 0.26); g.lineTo(c - s * 0.15, c - s * 0.17);
+  g.moveTo(c + s * 0.15, c - s * 0.26); g.lineTo(c + s * 0.15, c - s * 0.17); g.stroke();
+});
 let T, SPR;
 function applyTheme(i) {
   T = THEMES[i % THEMES.length];
   SPR = {
     a: glowSprite(T.a), b: glowSprite(T.b), g: glowSprite(T.g), w: glowSprite('#ffffff'),
-    spike: spikeSprite(T.b), gem: gemSprite(T.g), shield: shieldSprite(T.a),
+    spike: spikeSprite(T.b), gem: gemSprite(T.g), shield: shieldSprite(T.a), magnet: magnetSprite(T.g),
   };
   const r = document.documentElement.style;
   r.setProperty('--a', T.a); r.setProperty('--b', T.b); r.setProperty('--g', T.g); r.setProperty('--bg', T.bg[1]);
@@ -519,8 +532,8 @@ function applyTheme(i) {
 applyTheme(0);
 // Build every theme's sprites up front so level-ups and new colors never hitch mid-run.
 setTimeout(() => {
-  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); shieldSprite(th.a); }
-  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88', '#ffd84a', '#ff7a1a', '#ff4fd8', '#ff2d55']) glowSprite(c);
+  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); shieldSprite(th.a); magnetSprite(th.g); }
+  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88', '#ffd84a', '#ff7a1a', '#ff4fd8', '#ff2d55', '#9ff6ff', '#7dffe3']) glowSprite(c);
 }, 50);
 
 /* =========================================================
@@ -591,6 +604,13 @@ const SFX = {
   shield() { if (!ok()) return; const t = A.ctx.currentTime; [0, 5, 12].forEach((n, i) => tone(440 * Math.pow(2, n / 12), 0.2, 'triangle', 0.14, t + i * 0.05)); },
   shieldBreak() { noise(0.5, 0.35, 0, 5000, 'highpass', 0.7, 400); tone(880, 0.35, 'square', 0.08, 0, 110); },
   hop() { tone(300, 0.12, 'square', 0.05, 0, 900); noise(0.08, 0.05, 0, 3000, 'bandpass', 3); },
+  magnet() { if (!ok()) return; const t = A.ctx.currentTime; tone(220, 0.35, 'sawtooth', 0.06, t, 880); [0, 4, 7].forEach((n, i) => tone(587.3 * Math.pow(2, n / 12), 0.18, 'triangle', 0.1, t + 0.05 + i * 0.05)); },
+  fever() {
+    if (!ok()) return; const t = A.ctx.currentTime;
+    [0, 4, 7, 11, 12, 16, 19, 24].forEach((n, i) => tone(392 * Math.pow(2, n / 12), 0.2, 'square', 0.06, t + i * 0.045));
+    noise(0.9, 0.18, t, 400, 'bandpass', 1, 9000);
+  },
+  feverEnd() { tone(660, 0.4, 'triangle', 0.08, 0, 220); },
 };
 
 /* ----- generative music, intensity follows level ----- */
@@ -620,6 +640,11 @@ function playStep(s, t) {
     const arp = [0, 3, 7, 12, 15, 12, 7, 3];
     tone(220 * Math.pow(2, (root + arp[(st / 2) % 8] + 12) / 12), 0.09, 'square', L >= 5 ? 0.045 : 0.03, t);
   }
+  if (S.fever > 0) {                       // FEVER: a bright lead on top and an open hi-hat every off-beat
+    const lead = [12, 15, 19, 24, 19, 15, 22, 19];
+    if (st % 2 === 1) tone(440 * Math.pow(2, (root + lead[((st - 1) / 2) % 8]) / 12), 0.11, 'sawtooth', 0.035, t);
+    if (st % 4 === 2) noise(0.12, 0.08, t, 9000);
+  }
 }
 function musicStart() {
   if (!ok()) return;
@@ -647,7 +672,7 @@ const S = {
   combo: 0, maxCombo: 0, gems: 0, mult: 1, next: 0,
   shake: 0, flash: 0, flashColor: '#fff', timeScale: 1, warp: 0, coreKick: 0,
   lastSwitch: -9, switchFrom: 0, demoT: 0, runT: 0, paused: false, card: null,
-  shield: 0, safeT: -9, nears: 0, saves: 0, revive: 0, slow: false, dust2: false, earned: 0,
+  shield: 0, safeT: -9, nears: 0, saves: 0, revive: 0, slow: false, dust2: false, earned: 0, mag: 0, fever: 0, fevers: 0, mags: 0,
   mp: false, spawned: 0, cdSec: 0, sentScore: 0, sentT: 0, lastStanding: false, prevBest: 0,
 };
 const stars = Array.from({ length: 170 }, () => ({ a: rand(0, TAU), d: rand(0.02, 1), s: rand(0.3, 1) }));
@@ -699,7 +724,7 @@ let rng = Math.random;
 // Bump whenever spawn()/column() change what a seed produces. The server only puts
 // players with the same course version in a room, so mixed app versions never race
 // on different courses.
-const COURSE_V = 2;
+const COURSE_V = 3;
 // Objects become visible/collidable only inside this window ahead of the player.
 // Patterns can be generated further ahead than a full lap would allow, and without
 // this they would sit (and collide) right behind the player on the circle.
@@ -796,9 +821,10 @@ function spawn() {
       } else {                                       // gem river with a spike guard
         const cnt = 4 + ((rng() * 3) | 0);
         const shield = L >= 3 && rng() < 0.5;        // ...ending in a shield now and then
+        const magnet = !shield && L >= 2 && rng() < 0.6; // ...or a gem magnet
         for (let i = 0; i < cnt; i++) {
           a = i === ((cnt / 2) | 0) ? column(a, [other(r)], r, n, g) : column(a, [], r, n, g);
-          if (shield && i === cnt - 1) S.items[S.items.length - 1].type = 'shield';
+          if ((shield || magnet) && i === cnt - 1) S.items[S.items.length - 1].type = shield ? 'shield' : 'magnet';
           a += 0.19;
         }
         a += g * 0.4;
@@ -823,12 +849,12 @@ function unlockRing(n) {
 }
 
 /* ----- pilot profile: lifetime stats, achievements, comet skins (all local) ----- */
-const STAT0 = { runs: 0, time: 0, gems: 0, spikes: 0, nears: 0, saves: 0, bestCombo: 0, bestLevel: 1, wins: 0, dailies: 0 };
+const STAT0 = { runs: 0, time: 0, gems: 0, spikes: 0, nears: 0, saves: 0, bestCombo: 0, bestLevel: 1, wins: 0, dailies: 0, fevers: 0, mags: 0 };
 const loadStats = () => Object.assign({}, STAT0, store.get('stats', {}));
 const saveStats = st => store.set('stats', st);
 function recordRun() {
   const st = loadStats();
-  st.runs++; st.time += S.runT; st.gems += S.gems; st.spikes += S.passed; st.nears += S.nears; st.saves += S.saves;
+  st.runs++; st.time += S.runT; st.gems += S.gems; st.spikes += S.passed; st.nears += S.nears; st.saves += S.saves; st.fevers += S.fevers; st.mags += S.mags;
   st.bestCombo = Math.max(st.bestCombo, S.maxCombo); st.bestLevel = Math.max(st.bestLevel, S.level);
   if (S.daily) st.dailies++;
   saveStats(st);
@@ -849,6 +875,7 @@ const ACH = [
   { id: 'saved', ic: '🛡️', name: 'Saved!', desc: 'Survive a hit with a shield', ok: (r, st) => st.saves >= 1 },
   { id: 'streak', ic: '📅', name: 'Regular', desc: 'Play the daily 3 days in a row', ok: () => store.get('streak', { n: 0 }).n >= 3 },
   { id: 'win', ic: '🏆', name: 'Last One Standing', desc: 'Win a match (online or vs bots)', ok: (r, st) => st.wins >= 1 },
+  { id: 'fever', ic: '🌈', name: 'Fever Pitch', desc: 'Reach FEVER (max combo)', ok: (r, st) => st.fevers >= 1 },
   { id: 'hour', ic: '⏱️', name: 'Frequent Flyer', desc: 'Fly for 30 minutes in total', ok: (r, st) => st.time >= 1800 },
 ];
 // Comet skins: unlocked by achievements. `c` is the comet colour (null = theme colour).
@@ -862,6 +889,7 @@ const SKINS = [
   { id: 'void', name: 'Void', c: '#b48cff', need: 'streak' },
   { id: 'rose', name: 'Champion', c: '#ff4fd8', need: 'win' },
   { id: 'rainbow', name: 'Rainbow', c: 'rainbow', need: 's300' },
+  { id: 'aurora', name: 'Aurora', c: '#7dffe3', need: 'fever' },
 ];
 const unlocked = () => new Set(store.get('ach', []));
 function checkAchievements() {
@@ -884,7 +912,7 @@ function renderPilot() {
   const st = loadStats(), got = unlocked();
   const mins = Math.floor(st.time / 60);
   const cells = [['RUNS', st.runs], ['BEST', S.best], ['LEVEL', st.bestLevel], ['GEMS', st.gems], ['SPIKES', st.spikes], ['CLUTCH', st.nears],
-    ['TOP COMBO', st.bestCombo], ['WINS', st.wins], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+    ['TOP COMBO', st.bestCombo], ['FEVERS', st.fevers], ['WINS', st.wins], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
   $('#pStats').innerHTML = cells.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
   $('#pSkins').innerHTML = SKINS.map(k => {
     const lock = k.need && !got.has(k.need);
@@ -1023,7 +1051,7 @@ function start(seed, mp = false, daily = false) {
   S.mp = mp; S.daily = daily;
   rng = mulberry32(seed !== undefined ? seed : (Math.random() * 2 ** 31) | 0);
   S.mode = 'playing'; S.paused = false; S.tutorial = false;
-  S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0;
+  S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0; S.mag = 0; S.fever = 0; S.fevers = 0; S.mags = 0;
   S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
   S.revive = 0; S.slow = false; S.dust2 = false; S.earned = 0;
   if (mp) armed = null; else applyPowerups();
@@ -1078,15 +1106,51 @@ function collect(it, p) {
   S.combo++; S.gems++; S.maxCombo = Math.max(S.maxCombo, S.combo);
   const prevMult = S.mult;
   S.mult = 1 + Math.min(5, Math.floor(S.combo / 5));
-  addScore(S.mult);
-  popText('+' + S.mult, p.x, p.y - 18 * U, T.g, 20, 0.6);
-  burst(p.x, p.y, 12, [T.g, '#ffffff'], 200, 0.5, 12);
+  const pts = S.mult * (S.fever > 0 ? 2 : 1);
+  addScore(pts);
+  popText('+' + pts, p.x, p.y - 18 * U, S.fever > 0 ? '#ffffff' : T.g, S.fever > 0 ? 24 : 20, 0.6);
+  burst(p.x, p.y, S.fever > 0 ? 18 : 12, S.fever > 0 ? [T.g, T.b, '#ffffff'] : [T.g, '#ffffff'], 200, 0.5, 12);
   SFX.gem(S.combo); haptic('light');
   if (S.mult > prevMult) {
     popText('x' + S.mult + ' COMBO!', CX, CY + R_OUT + 46 * U, T.g, 30, 1.1);
     wave(CX, CY, T.g, R_OUT / U + 30, 5, 0.6);
     SFX.combo(S.mult);
   }
+  if (S.combo === FEVER_AT || (S.combo > FEVER_AT && (S.combo - FEVER_AT) % FEVER_AGAIN === 0)) startFever();
+}
+
+/* ----- FEVER: hit the max x6 combo and gems score double for a while ----- */
+const FEVER_AT = 25, FEVER_AGAIN = 15, FEVER_DUR = 8;
+function startFever() {
+  S.fever = FEVER_DUR; S.fevers++;
+  S.flash = 0.45; S.flashColor = T.g; S.warp = 1.2;
+  wave(CX, CY, T.g, R_OUT / U + 90, 12, 0.9); wave(CX, CY, T.b, R_OUT / U + 50, 6, 0.8);
+  popText('FEVER!', CX, CY - R_OUT - 44 * U, T.g, 46, 1.6);
+  popText('GEMS x2', CX, CY - R_OUT - 12 * U, '#ffffff', 18, 1.6);
+  SFX.fever(); haptic('success');
+}
+function endFever(lost) {
+  if (S.fever <= 0) return;
+  S.fever = 0;
+  popText(lost ? 'FEVER LOST' : 'FEVER OVER', CX, CY + R_OUT + 46 * U, 'rgba(255,255,255,.8)', 20, 1);
+  SFX.feverEnd();
+}
+
+/* ----- magnet: for a few seconds, gems on every orbit fly to you ----- */
+const MAG_DUR = 7, MAG_REACH = 0.55;
+function getMagnet(p) {
+  S.mag = MAG_DUR; S.mags++;
+  popText('MAGNET!', p.x, p.y - 22 * U, T.g, 22, 0.9);
+  burst(p.x, p.y, 16, [T.g, '#ffffff'], 220, 0.6, 12);
+  wave(p.x, p.y, T.g, 70, 4, 0.5);
+  SFX.magnet(); haptic('medium');
+}
+// Where a gem is drawn/collected: pulled in toward the player's orbit while the magnet is on.
+function gemPos(it, prr) {
+  const r = radiusAt(it.ring), ahead = it.a - S.theta;
+  if (S.mag <= 0 || it.type !== 'gem' || ahead > MAG_REACH || ahead < -0.1) return pos(it.a, r);
+  const k = clamp(1 - ahead / MAG_REACH, 0, 1);
+  return pos(it.a, lerp(r, prr, k * k));
 }
 
 function getShield(p) {
@@ -1115,6 +1179,7 @@ function missGem(it) {
     popText('COMBO LOST', p.x, p.y - 20 * U, 'rgba(255,255,255,.7)', 16, 0.8);
   }
   S.combo = 0; S.mult = 1;
+  endFever(true);
 }
 
 function levelUp() {
@@ -1132,7 +1197,7 @@ function levelUp() {
 }
 
 function die(p) {
-  S.mode = 'dying'; S.timeScale = 0.12;
+  S.mode = 'dying'; S.timeScale = 0.12; S.mag = 0; S.fever = 0;
   burst(p.x, p.y, 90, [T.a, T.b, '#ffffff'], 520, 1.4, 18);
   burst(p.x, p.y, 30, ['#ffffff'], 900, 0.6, 10);
   wave(p.x, p.y, T.b, 220, 10, 0.9); wave(p.x, p.y, '#ffffff', 120, 4, 0.6);
@@ -1291,10 +1356,12 @@ function update(dt) {
 
   if (S.mode === 'playing') {
     S.runT += dt;
+    if (S.mag > 0) S.mag = Math.max(0, S.mag - gdt);
+    if (S.fever > 0) { S.fever -= gdt; if (S.fever <= 0) { S.fever = 0.001; endFever(false); } }
     S.theta += S.omega * gdt;
     S.rPos += (S.ring - S.rPos) * (1 - Math.exp(-gdt * 22));
     spawn();
-    const pp = playerPos();
+    const pp = playerPos(), prr = radiusAt(S.rPos);
     for (let i = S.items.length - 1; i >= 0; i--) {
       const it = S.items[i];
       if (it.fade > 0) { it.fade += gdt * 4; if (it.fade >= 1) S.items.splice(i, 1); continue; }
@@ -1305,7 +1372,7 @@ function update(dt) {
         burst(hp.x, hp.y, 8, [T.b, '#ffffff'], 140, 0.35, 9);
         SFX.hop();
       }
-      const ip = itemPos(it);
+      const ip = it.type === 'spike' ? itemPos(it) : gemPos(it, prr);
       const d = Math.hypot(ip.x - pp.x, ip.y - pp.y);
       if (it.type === 'spike') {
         if (d < (P_R + SPIKE_R * 0.72) * U && S.t > S.safeT) {
@@ -1316,6 +1383,8 @@ function update(dt) {
         if (!it.passed && S.theta > it.a + 0.05) { it.passed = true; onPassSpike(it, pp); }
       } else if (it.type === 'shield') {
         if (d < (P_R + GEM_R + 7) * U) { getShield(ip); S.items.splice(i, 1); continue; }
+      } else if (it.type === 'magnet') {
+        if (d < (P_R + GEM_R + 7) * U) { getMagnet(ip); S.items.splice(i, 1); continue; }
       } else {
         if (d < (P_R + GEM_R + 5) * U) { collect(it, ip); S.items.splice(i, 1); continue; }
         if (!it.passed && S.theta > it.a + 0.25) { it.passed = true; missGem(it); }
@@ -1494,21 +1563,21 @@ function render() {
   for (const it of S.items) {
     if (!inView(it)) continue;
     if (!it.shown) { it.shown = true; it.born = S.t; }   // fade in as it enters the view
-    const p = itemPos(it);
+    const p = it.type === 'spike' ? itemPos(it) : gemPos(it, prr);
     const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     if (it.type === 'spike') {
       const ahead = it.a - S.theta;
       const danger = ahead > -0.1 && ahead < 1.2 && Math.abs(radiusAt(itemRing(it)) - prr) < 12 * U ? 1 - Math.max(0, ahead) / 1.2 : 0;
       drawImg(SPR.b, p.x, p.y, SPIKE_R * U * (5 + danger * 3 + beat), al * (0.45 + danger * 0.45));
     } else {
-      drawImg(it.type === 'shield' ? SPR.a : SPR.g, p.x, p.y, GEM_R * U * (it.type === 'shield' ? 6 : 4.5), al * 0.5);
+      drawImg(it.type === 'shield' ? SPR.a : SPR.g, p.x, p.y, GEM_R * U * (it.type === 'gem' ? 4.5 : 6), al * 0.5);
     }
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const it of S.items) {
     if (!it.shown) continue;
     if (it.from !== undefined && S.theta < it.hopA) drawHopTarget(it);
-    const p = itemPos(it);
+    const p = it.type === 'spike' ? itemPos(it) : gemPos(it, prr);
     const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     ctx.save(); ctx.translate(p.x, p.y); ctx.globalAlpha = al;
     if (it.type === 'spike') {
@@ -1518,6 +1587,10 @@ function render() {
     } else if (it.type === 'shield') {
       const s = GEM_R * 4 * U * app * (1 + Math.sin(S.t * 6) * 0.08);
       ctx.drawImage(SPR.shield, -s / 2, -s / 2, s, s);
+    } else if (it.type === 'magnet') {
+      ctx.rotate(Math.sin(S.t * 4) * 0.25);
+      const s = GEM_R * 4 * U * app * (1 + Math.sin(S.t * 6) * 0.08);
+      ctx.drawImage(SPR.magnet, -s / 2, -s / 2, s, s);
     } else {
       ctx.rotate(Math.sin(S.t * 3 + it.a * 5) * 0.4);
       const s = GEM_R * 2.6 * U * app * (1 + Math.sin(S.t * 7 + it.a * 3) * 0.1);
@@ -1540,8 +1613,8 @@ function render() {
     ctx.strokeStyle = trailColor(0); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     for (let i = 1; i < tr.length; i++) {
       const k = 1 - i / tr.length;
-      if (skin.c === 'rainbow') ctx.strokeStyle = trailColor(i >> 2);
-      ctx.globalAlpha = k * 0.75; ctx.lineWidth = P_R * 2 * U * k;
+      if (skin.c === 'rainbow' || S.fever > 0) ctx.strokeStyle = S.fever > 0 ? RAINBOW[((i >> 1) + ((S.t * 14) | 0)) % RAINBOW.length] : trailColor(i >> 2);
+      ctx.globalAlpha = k * 0.75; ctx.lineWidth = P_R * (S.fever > 0 ? 3 : 2) * U * k;
       ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
     }
   }
@@ -1553,6 +1626,13 @@ function render() {
     drawImg(SPR.w, p.x, p.y, P_R * U * 3, 1);
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.75, 0, TAU); ctx.fill();
+    if (S.mag > 0) {                       // magnet field: dashed ring that spins, fading out as it runs down
+      const fade = Math.min(1, S.mag / 1.2) * (S.mag < 1.5 ? 0.6 + 0.4 * Math.sin(S.t * 30) : 1);
+      ctx.save(); ctx.globalAlpha = 0.7 * fade; ctx.strokeStyle = T.g; ctx.lineWidth = 2 * U;
+      ctx.setLineDash([5 * U, 5 * U]); ctx.lineDashOffset = -S.t * 50 * U;
+      ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * (2.8 + 0.3 * Math.sin(S.t * 8)), 0, TAU); ctx.stroke();
+      ctx.restore();
+    }
     if (S.shield || S.t < S.safeT) {
       const blink = S.shield ? 1 : (Math.sin(S.t * 40) > 0 ? 0.8 : 0.2);
       ctx.globalAlpha = (0.55 + 0.25 * Math.sin(S.t * 6)) * blink; ctx.strokeStyle = T.a; ctx.lineWidth = 2.2 * U;
@@ -1586,18 +1666,28 @@ function render() {
     ctx.textAlign = 'left';
     txt('LV ' + S.level, 18, y, 15, '#ffffff', 0.75, 800);
     txt(S.daily ? 'DAILY · BEST ' + S.dailyBest : 'BEST ' + S.best, 18, y + 20, 11, S.daily ? T.g : '#ffffff', S.daily ? 0.7 : 0.45, 800);
-    if (S.shield) drawImg(SPR.shield, 30, y + 44, 22, 0.9 + 0.1 * Math.sin(S.t * 6));
+    let hy = y + 44;
+    if (S.shield) { drawImg(SPR.shield, 30, hy, 22, 0.9 + 0.1 * Math.sin(S.t * 6)); hy += 26; }
+    if (S.mag > 0) {
+      drawImg(SPR.magnet, 30, hy, 22, 1);
+      ctx.globalAlpha = 0.25; ctx.fillStyle = '#fff'; roundRect(46, hy - 2, 40, 4, 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = T.g; roundRect(46, hy - 2, 40 * Math.min(1, S.mag / MAG_DUR), 4, 2); ctx.fill();
+      hy += 26;
+    }
     const pwHud = (S.revive ? '💫' : '') + (S.dust2 ? '✦x2' : '') + (slowOn() ? '🐢' : '');
-    if (pwHud) txt(pwHud, 18, y + (S.shield ? 70 : 46), 13, T.g, 0.85, 800);
+    if (pwHud) txt(pwHud, 18, hy + 2, 13, T.g, 0.85, 800);
     ctx.textAlign = 'center';
     if (S.combo > 0) {
       const bw = Math.min(150, W * 0.36), bx = CX - bw / 2, by = y + 14;
-      ctx.shadowColor = T.g; ctx.shadowBlur = 12;
-      txt('x' + S.mult, CX, y - 4, 22 + (S.mult - 1) * 2, T.g, 1);
+      const fv = S.fever > 0;
+      ctx.shadowColor = T.g; ctx.shadowBlur = fv ? 22 : 12;
+      txt(fv ? 'FEVER x' + S.mult * 2 : 'x' + S.mult, CX, y - 4, (fv ? 24 : 22 + (S.mult - 1) * 2) * (fv ? 1 + 0.06 * Math.sin(S.t * 16) : 1), fv ? RAINBOW[((S.t * 10) | 0) % RAINBOW.length] : T.g, 1);
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 0.2; ctx.fillStyle = '#fff'; roundRect(bx, by, bw, 5, 3); ctx.fill();
-      ctx.globalAlpha = 1; ctx.fillStyle = T.g;
-      roundRect(bx, by, bw * (S.mult >= 6 ? 1 : (S.combo % 5) / 5 || 0.02), 5, 3); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = fv ? '#ffffff' : T.g;
+      // during FEVER the bar shows the time left; otherwise progress to the next multiplier, then to FEVER
+      const prog = fv ? S.fever / FEVER_DUR : S.mult < 6 ? (S.combo % 5) / 5 : ((S.combo - FEVER_AT) % FEVER_AGAIN) / FEVER_AGAIN;
+      roundRect(bx, by, bw * clamp(prog, 0.02, 1), 5, 3); ctx.fill();
     }
     if (S.runs <= 3 && S.runT < 4.5 && S.mode === 'playing' && S.rings <= 2) {
       const a = Math.min(1, (4.5 - S.runT)) * (0.6 + 0.4 * Math.sin(S.t * 8));
@@ -1649,6 +1739,11 @@ function drawBackdrop() {
   const blob = (img, x, y, size, a) => { g.globalAlpha = a; g.drawImage(img, x - size / 2, y - size / 2, size, size); };
   blob(SPR.a, cx + Math.cos(nt) * w * 0.3, cy + Math.sin(nt * 1.3) * h * 0.25, big * 1.3, 0.07);
   blob(SPR.b, cx + Math.cos(nt * 0.8 + 2) * w * 0.35, cy + Math.sin(nt + 1) * h * 0.3, big * 1.1, 0.06);
+  if (S.fever > 0 && S.mode === 'playing') {        // FEVER: a hot glow that pulses on the beat
+    const k = Math.min(1, S.fever / 0.8) * (0.1 + beatPulse() * 0.12);
+    blob(SPR.g, cx, cy, big * 1.6, k);
+    blob(SPR.b, cx + Math.cos(S.t * 2) * w * 0.25, cy + Math.sin(S.t * 2.4) * h * 0.2, big, k * 0.8);
+  }
   // vignette
   g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
   const vg = g.createRadialGradient(cx, cy, Math.min(w, h) * 0.35, cx, cy, diag * 0.6);
