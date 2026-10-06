@@ -172,6 +172,19 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .pw button.poor .pr{color:#fff}
 .oDust{font-size:14px;font-weight:900;letter-spacing:.16em;color:var(--g);text-shadow:0 0 10px var(--g);min-height:18px}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
+/* ---------- missions ---------- */
+.mis{list-style:none;width:min(340px,100%);display:flex;flex-direction:column;gap:6px}
+.mis li{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.06)}
+.mis li.got{background:var(--a22);box-shadow:inset 0 0 0 1.5px var(--a)}
+.mis li.fresh{animation:slam .55s cubic-bezier(.18,1.5,.4,1) .5s both}
+.mis .tx{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.mis .tx b{font-size:12px;font-weight:800;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mis i{display:block;height:4px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden}
+.mis s{display:block;height:100%;border-radius:4px;background:var(--g);box-shadow:0 0 8px var(--g)}
+.mis .pr{font-size:13px;font-weight:900;color:var(--g);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.mis .pr small{font-size:10px;margin-left:3px;opacity:.8}
+#oMis{margin:-4px 0 6px}
+@media (max-height:700px){#oMis li:not(.fresh){display:none}}
 /* ---------- boot / loading ---------- */
 #boot{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;background:radial-gradient(circle at 50% 45%,#12063a 0,var(--bg) 70%);transition:opacity .45s ease,visibility .45s;touch-action:none}
 #boot.done{opacity:0;visibility:hidden;pointer-events:none}
@@ -308,6 +321,9 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 <div id="pilot" class="screen panel">
   <div class="go">PILOT</div>
   <div class="scroll">
+    <div class="h2" id="pMisH">MISSIONS</div>
+    <ul class="mis" id="pMis"></ul>
+    <div class="h2">STATS</div>
     <div class="grid" id="pStats"></div>
     <div class="h2">COMET</div>
     <div class="skins" id="pSkins"></div>
@@ -350,6 +366,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
     <div>COMBO<b id="oCombo">0</b></div>
     <div>LEVEL<b id="oLevel">1</b></div>
   </div>
+  <ul class="mis" id="oMis"></ul>
   <div class="btns">
     <button class="btn primary" id="again">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
@@ -859,6 +876,7 @@ function recordRun() {
   if (S.daily) st.dailies++;
   saveStats(st);
   checkAchievements();
+  checkMissions(true);
 }
 // r = this run (S), st = lifetime stats
 const ACH = [
@@ -912,7 +930,10 @@ function renderPilot() {
   const st = loadStats(), got = unlocked();
   const mins = Math.floor(st.time / 60);
   const cells = [['RUNS', st.runs], ['BEST', S.best], ['LEVEL', st.bestLevel], ['GEMS', st.gems], ['SPIKES', st.spikes], ['CLUTCH', st.nears],
-    ['TOP COMBO', st.bestCombo], ['FEVERS', st.fevers], ['WINS', st.wins], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+    ['TOP COMBO', st.bestCombo], ['FEVERS', st.fevers], ['MAGNETS', st.mags], ['WINS', st.wins], ['STARDUST', dust()], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+  const ms = S.mode === 'title' ? refillMissions() : loadMissions();
+  $('#pMis').innerHTML = missionsHTML(ms.list, st);
+  $('#pMisH').textContent = `MISSIONS · ${ms.done} DONE`;
   $('#pStats').innerHTML = cells.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
   $('#pSkins').innerHTML = SKINS.map(k => {
     const lock = k.need && !got.has(k.need);
@@ -929,6 +950,74 @@ function openPilot() {
   audioInit(); SFX.click();
   store.set('achNew', false); $('#pilotBtn').classList.remove('new');
   renderPilot(); showScreen('pilot');
+}
+
+/* ----- missions: three goals at a time, each pays stardust and gets harder next time -----
+   `run` missions count within one run (checked live); the others count lifetime stats
+   from when the mission was given (`base`). Completed missions show a tick until the
+   next run starts, then get replaced. */
+const MISSIONS = [
+  { id: 'score', run: true, goals: [40, 80, 150, 250, 400], txt: n => `Score ${n} in one run`, v: () => S.score },
+  { id: 'gems', run: true, goals: [10, 20, 35, 55, 80], txt: n => `Collect ${n} gems in one run`, v: () => S.gems },
+  { id: 'near', run: true, goals: [2, 4, 7, 10, 15], txt: n => `Make ${n} near misses in one run`, v: () => S.nears },
+  { id: 'level', run: true, goals: [3, 4, 6, 8, 10], txt: n => `Reach level ${n}`, v: () => S.level },
+  { id: 'combo', run: true, goals: [5, 10, 15, 25, 40], txt: n => `Build a ${n}-gem combo`, v: () => S.maxCombo },
+  { id: 'fever', run: true, goals: [1, 1, 2, 2, 3], txt: n => n > 1 ? `Reach FEVER ${n} times in one run` : 'Reach FEVER', v: () => S.fevers },
+  { id: 'magnet', run: true, goals: [1, 1, 2, 2, 3], txt: n => n > 1 ? `Grab ${n} magnets in one run` : 'Grab a magnet', v: () => S.mags },
+  { id: 'spikes', goals: [60, 120, 250, 500, 900], txt: n => `Dodge ${n} spikes`, stat: 'spikes' },
+  { id: 'daily', goals: [1, 2, 3, 5, 7], txt: n => `Play ${n} daily challenge${n > 1 ? 's' : ''}`, stat: 'dailies' },
+  { id: 'runs', goals: [3, 6, 10, 15, 25], txt: n => `Play ${n} runs`, stat: 'runs' },
+];
+const M_REWARD = [20, 30, 45, 65, 90];
+const mDef = id => MISSIONS.find(d => d.id === id);
+function loadMissions() {
+  const ms = store.get('missions', null) || { list: [], tier: {}, done: 0 };
+  ms.list = ms.list.filter(m => mDef(m.id));
+  return ms;
+}
+// Swap finished missions for new ones (of kinds not already on the list).
+function refillMissions() {
+  const ms = loadMissions(), st = loadStats();
+  ms.list = ms.list.filter(m => !m.done);
+  while (ms.list.length < 3) {
+    const free = MISSIONS.filter(d => !ms.list.some(m => m.id === d.id));
+    const d = free[(Math.random() * free.length) | 0];
+    ms.list.push({ id: d.id, tier: Math.min(ms.tier[d.id] || 0, d.goals.length - 1), base: d.stat ? st[d.stat] : 0, done: false });
+  }
+  store.set('missions', ms);
+  return ms;
+}
+function missionProgress(m, st) {
+  const d = mDef(m.id), goal = d.goals[m.tier];
+  const v = m.done ? goal : d.run ? (S.mode === 'title' ? 0 : d.v()) : (st || loadStats())[d.stat] - m.base;
+  return { d, goal, v: clamp(v, 0, goal), reward: M_REWARD[m.tier] };
+}
+// Called every frame of a run (run missions) and after each run (lifetime missions).
+function checkMissions(lifetime) {
+  if (!S.missions) return;
+  const st = lifetime ? loadStats() : null;
+  let changed = false;
+  for (const m of S.missions.list) {
+    if (m.done || (!lifetime && !mDef(m.id).run)) continue;
+    const p = missionProgress(m, st);
+    if (p.v < p.goal) continue;
+    m.done = true; m.fresh = true; changed = true;
+    S.missions.tier[m.id] = (S.missions.tier[m.id] || 0) + 1; S.missions.done++;
+    store.set('dust', dust() + p.reward); S.mEarned = (S.mEarned || 0) + p.reward;
+    if (S.mode === 'playing') {
+      popText('✓ ' + p.d.txt(p.goal).toUpperCase(), CX, CY - R_OUT - 78 * U, '#ffffff', 15, 2);
+      popText(`MISSION +${p.reward} ✦`, CX, CY - R_OUT - 56 * U, T.g, 22, 2);
+    }
+    SFX.achieve(); haptic('success');
+  }
+  if (changed) store.set('missions', S.missions);
+}
+function missionsHTML(list, st) {
+  return list.map(m => {
+    const p = missionProgress(m, st);
+    return `<li class="${m.done ? 'got' : ''}${m.fresh ? ' fresh' : ''}"><span class="tx"><b>${m.done ? '✓ ' : ''}${p.d.txt(p.goal)}</b>` +
+      `<i><s style="width:${(100 * p.v / p.goal).toFixed(1)}%"></s></i></span><span class="pr">${m.done ? `+${p.reward}` : `${p.v}/${p.goal}`}<small>✦${m.done ? '' : ' ' + p.reward}</small></span></li>`;
+  }).join('');
 }
 
 /* ----- daily challenge: one fixed course per (local) day ----- */
@@ -1062,6 +1151,7 @@ function start(seed, mp = false, daily = false) {
   S.next = 2.4;
   S.sentScore = 0; S.sentT = 0; S.lastStanding = false; S.prevBest = S.best;
   S.runs++; store.set('runs', S.runs);
+  S.missions = refillMissions(); S.mEarned = 0;
   applyTheme(0);
   hideScreens();
   $('#oGlobal').textContent = '';
@@ -1233,7 +1323,10 @@ function gameOver() {
     syncDaily();
   }
   $('#oCombo').textContent = S.maxCombo; $('#oLevel').textContent = S.level;
-  $('#oDust').textContent = S.earned ? `+${S.earned} ✦ STARDUST${S.dust2 ? ' (x2)' : ''} · ${dust()} TOTAL` : '';
+  $('#oMis').innerHTML = S.missions ? missionsHTML(S.missions.list) : '';
+  if (S.missions) { S.missions.list.forEach(m => { m.fresh = false; }); store.set('missions', S.missions); }
+  const got = S.earned + (S.mEarned || 0);
+  $('#oDust').textContent = got ? `+${got} ✦ STARDUST${S.dust2 ? ' (x2)' : ''} · ${dust()} TOTAL` : '';
   $('#tBest').textContent = S.best;
   const nb = $('#newBest'); nb.classList.remove('on');
   $('#over').classList.add('show');
@@ -1361,6 +1454,7 @@ function update(dt) {
     S.theta += S.omega * gdt;
     S.rPos += (S.ring - S.rPos) * (1 - Math.exp(-gdt * 22));
     spawn();
+    checkMissions(false);
     const pp = playerPos(), prr = radiusAt(S.rPos);
     for (let i = S.items.length - 1; i >= 0; i--) {
       const it = S.items[i];
