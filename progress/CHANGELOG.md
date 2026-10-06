@@ -25,3 +25,15 @@ Screenshot: `05-pilot-screen.png`
 ## 06. Swipe controls for 3+ orbits
 With 3 or more orbits, swipe up to move out and swipe down to move in; taps no longer move you. The IN/OUT pads are replaced by a small animated swipe hint. With 2 orbits, any tap still switches. In solo, the first two times the third orbit appears, the game pauses on a NEW ORBIT tutorial and resumes on a swipe or tap with a short grace period. Multiplayer and bot matches never pause: the countdown explains swipes and a banner appears instead.
 Screenshots: `06-swipe-tutorial.png`, `06-swipe-hint.png`
+
+## 07. FEVER mode and the gem magnet
+Reaching the maximum x6 combo (25 gems in a row) now starts **FEVER** for 8 seconds: every gem scores double (up to +12), the trail turns into a wide rainbow, the background pulses on the beat and the music adds a lead line. Every 15 more gems in the same combo triggers it again, and missing a gem ends it. A new **magnet** pickup can appear at the end of gem trails from level 2: for 7 seconds, gems on every orbit fly into your comet, which is the easiest way to reach FEVER. A new achievement, Fever Pitch, unlocks the Aurora comet. (The course changed, so the course version is now 3.)
+Screenshot: `07-fever-magnet.png` (FEVER running, magnet timer on the left)
+
+## 08. Missions
+There are now always three missions, such as "Score 80 in one run", "Make 4 near misses", "Reach FEVER", "Grab a magnet", "Dodge 120 spikes" or "Play 2 daily challenges". Each pays 20–90 ✦ stardust when done; a banner pops up mid-run the moment you complete one. The results screen shows your missions with progress bars (on short phones only the ones you just finished), and the Pilot screen lists them with how many you've done in total. Finished missions are swapped for a new kind at the start of the next run, and each kind gets harder (and pays more) every time you complete it.
+Screenshots: `08-missions-results.png`, `08-missions-pilot.png`
+
+## 09. Race your daily ghost
+Your best daily challenge run is now saved as a ghost. The next time you play that day's course, a dim white comet labelled "BEST 40" (or whatever your best is) flies your old line just behind you and bursts where that run crashed. Passing its score pops "YOU BEAT YOUR GHOST!". The daily button shows "👻 race it" when a ghost is waiting. Also fixed: mid-run callouts that appeared at the same moment (e.g. "x3 COMBO!" and a shield message) used to print on top of each other; they now stack.
+Screenshots: `09-daily-ghost.png`, `09-ghost-beaten.png`

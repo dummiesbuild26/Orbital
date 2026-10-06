@@ -172,6 +172,19 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 .pw button.poor .pr{color:#fff}
 .oDust{font-size:14px;font-weight:900;letter-spacing:.16em;color:var(--g);text-shadow:0 0 10px var(--g);min-height:18px}
 .linkbtn{background:none;border:none;color:#fff;opacity:.5;font:700 12px var(--font);text-decoration:underline;cursor:pointer;padding:8px}
+/* ---------- missions ---------- */
+.mis{list-style:none;width:min(340px,100%);display:flex;flex-direction:column;gap:6px}
+.mis li{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.06)}
+.mis li.got{background:var(--a22);box-shadow:inset 0 0 0 1.5px var(--a)}
+.mis li.fresh{animation:slam .55s cubic-bezier(.18,1.5,.4,1) .5s both}
+.mis .tx{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.mis .tx b{font-size:12px;font-weight:800;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mis i{display:block;height:4px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden}
+.mis s{display:block;height:100%;border-radius:4px;background:var(--g);box-shadow:0 0 8px var(--g)}
+.mis .pr{font-size:13px;font-weight:900;color:var(--g);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.mis .pr small{font-size:10px;margin-left:3px;opacity:.8}
+#oMis{margin:-4px 0 6px}
+@media (max-height:700px){#oMis li:not(.fresh){display:none}}
 /* ---------- boot / loading ---------- */
 #boot{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;background:radial-gradient(circle at 50% 45%,#12063a 0,var(--bg) 70%);transition:opacity .45s ease,visibility .45s;touch-action:none}
 #boot.done{opacity:0;visibility:hidden;pointer-events:none}
@@ -308,6 +321,9 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
 <div id="pilot" class="screen panel">
   <div class="go">PILOT</div>
   <div class="scroll">
+    <div class="h2" id="pMisH">MISSIONS</div>
+    <ul class="mis" id="pMis"></ul>
+    <div class="h2">STATS</div>
     <div class="grid" id="pStats"></div>
     <div class="h2">COMET</div>
     <div class="skins" id="pSkins"></div>
@@ -350,6 +366,7 @@ canvas{position:fixed;inset:0;display:block;width:100%;height:100%}
     <div>COMBO<b id="oCombo">0</b></div>
     <div>LEVEL<b id="oLevel">1</b></div>
   </div>
+  <ul class="mis" id="oMis"></ul>
   <div class="btns">
     <button class="btn primary" id="again">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
@@ -501,12 +518,25 @@ const shieldSprite = color => cached('shield' + color, 96, (g, s) => {
   g.lineTo(c - s * 0.2, c - s * 0.17); g.closePath();
   g.fillStyle = color; g.fill(); g.lineWidth = 2.5; g.stroke();
 });
+const magnetSprite = color => cached('magnet' + color, 96, (g, s) => {
+  const c = s / 2;
+  g.beginPath(); g.arc(c, c, s * 0.42, 0, TAU);
+  g.fillStyle = hexA(color, 0.22); g.fill();
+  g.lineWidth = 4; g.strokeStyle = '#fff'; g.stroke();
+  // horseshoe: a thick U with white tips
+  g.lineCap = 'butt'; g.lineWidth = s * 0.13; g.strokeStyle = color;
+  g.beginPath(); g.moveTo(c - s * 0.15, c - s * 0.2); g.lineTo(c - s * 0.15, c + s * 0.02);
+  g.arc(c, c + s * 0.02, s * 0.15, Math.PI, 0, true); g.lineTo(c + s * 0.15, c - s * 0.2); g.stroke();
+  g.strokeStyle = '#fff';
+  g.beginPath(); g.moveTo(c - s * 0.15, c - s * 0.26); g.lineTo(c - s * 0.15, c - s * 0.17);
+  g.moveTo(c + s * 0.15, c - s * 0.26); g.lineTo(c + s * 0.15, c - s * 0.17); g.stroke();
+});
 let T, SPR;
 function applyTheme(i) {
   T = THEMES[i % THEMES.length];
   SPR = {
     a: glowSprite(T.a), b: glowSprite(T.b), g: glowSprite(T.g), w: glowSprite('#ffffff'),
-    spike: spikeSprite(T.b), gem: gemSprite(T.g), shield: shieldSprite(T.a),
+    spike: spikeSprite(T.b), gem: gemSprite(T.g), shield: shieldSprite(T.a), magnet: magnetSprite(T.g),
   };
   const r = document.documentElement.style;
   r.setProperty('--a', T.a); r.setProperty('--b', T.b); r.setProperty('--g', T.g); r.setProperty('--bg', T.bg[1]);
@@ -519,8 +549,8 @@ function applyTheme(i) {
 applyTheme(0);
 // Build every theme's sprites up front so level-ups and new colors never hitch mid-run.
 setTimeout(() => {
-  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); shieldSprite(th.a); }
-  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88', '#ffd84a', '#ff7a1a', '#ff4fd8', '#ff2d55']) glowSprite(c);
+  for (const th of THEMES) { glowSprite(th.a); glowSprite(th.b); glowSprite(th.g); spikeSprite(th.b); gemSprite(th.g); shieldSprite(th.a); magnetSprite(th.g); }
+  for (const c of ['#22f3ff', '#ff2d95', '#fff36b', '#7dff5a', '#b48cff', '#ff9e2c', '#ffffff', '#2bff88', '#ffd84a', '#ff7a1a', '#ff4fd8', '#ff2d55', '#9ff6ff', '#7dffe3']) glowSprite(c);
 }, 50);
 
 /* =========================================================
@@ -591,6 +621,13 @@ const SFX = {
   shield() { if (!ok()) return; const t = A.ctx.currentTime; [0, 5, 12].forEach((n, i) => tone(440 * Math.pow(2, n / 12), 0.2, 'triangle', 0.14, t + i * 0.05)); },
   shieldBreak() { noise(0.5, 0.35, 0, 5000, 'highpass', 0.7, 400); tone(880, 0.35, 'square', 0.08, 0, 110); },
   hop() { tone(300, 0.12, 'square', 0.05, 0, 900); noise(0.08, 0.05, 0, 3000, 'bandpass', 3); },
+  magnet() { if (!ok()) return; const t = A.ctx.currentTime; tone(220, 0.35, 'sawtooth', 0.06, t, 880); [0, 4, 7].forEach((n, i) => tone(587.3 * Math.pow(2, n / 12), 0.18, 'triangle', 0.1, t + 0.05 + i * 0.05)); },
+  fever() {
+    if (!ok()) return; const t = A.ctx.currentTime;
+    [0, 4, 7, 11, 12, 16, 19, 24].forEach((n, i) => tone(392 * Math.pow(2, n / 12), 0.2, 'square', 0.06, t + i * 0.045));
+    noise(0.9, 0.18, t, 400, 'bandpass', 1, 9000);
+  },
+  feverEnd() { tone(660, 0.4, 'triangle', 0.08, 0, 220); },
 };
 
 /* ----- generative music, intensity follows level ----- */
@@ -620,6 +657,11 @@ function playStep(s, t) {
     const arp = [0, 3, 7, 12, 15, 12, 7, 3];
     tone(220 * Math.pow(2, (root + arp[(st / 2) % 8] + 12) / 12), 0.09, 'square', L >= 5 ? 0.045 : 0.03, t);
   }
+  if (S.fever > 0) {                       // FEVER: a bright lead on top and an open hi-hat every off-beat
+    const lead = [12, 15, 19, 24, 19, 15, 22, 19];
+    if (st % 2 === 1) tone(440 * Math.pow(2, (root + lead[((st - 1) / 2) % 8]) / 12), 0.11, 'sawtooth', 0.035, t);
+    if (st % 4 === 2) noise(0.12, 0.08, t, 9000);
+  }
 }
 function musicStart() {
   if (!ok()) return;
@@ -647,7 +689,7 @@ const S = {
   combo: 0, maxCombo: 0, gems: 0, mult: 1, next: 0,
   shake: 0, flash: 0, flashColor: '#fff', timeScale: 1, warp: 0, coreKick: 0,
   lastSwitch: -9, switchFrom: 0, demoT: 0, runT: 0, paused: false, card: null,
-  shield: 0, safeT: -9, nears: 0, saves: 0, revive: 0, slow: false, dust2: false, earned: 0,
+  shield: 0, safeT: -9, nears: 0, saves: 0, revive: 0, slow: false, dust2: false, earned: 0, mag: 0, fever: 0, fevers: 0, mags: 0,
   mp: false, spawned: 0, cdSec: 0, sentScore: 0, sentT: 0, lastStanding: false, prevBest: 0,
 };
 const stars = Array.from({ length: 170 }, () => ({ a: rand(0, TAU), d: rand(0.02, 1), s: rand(0.3, 1) }));
@@ -680,7 +722,15 @@ function burst(x, y, n, colors, speed = 260, life = 0.8, size = 14, grav = 0) {
 }
 const SPR_FOR = c => glowSprite(c);
 function wave(x, y, color, max = 120, width = 6, life = 0.6) { S.waves.push({ x, y, color, max: max * U, width, life, t: 0 }); }
-function popText(str, x, y, color, size = 26, life = 0.9) { S.texts.push({ str, x, y, color, size, life, t: 0 }); }
+// Callouts that would land on top of a fresh one at the same spot are stacked below it.
+function popText(str, x, y, color, size = 26, life = 0.9) {
+  for (let n = 0; n < 4; n++) {
+    const hit = S.texts.find(o => o.t < o.life * 0.7 && Math.abs(o.x - x) < 40 * U && Math.abs(o.y - y) < (o.size + size) * U * 0.55);
+    if (!hit) break;
+    y = hit.y + (hit.size + size) * U * 0.6;
+  }
+  S.texts.push({ str, x, y, color, size, life, t: 0 });
+}
 function addScore(n) { S.score += n; S.coreKick = 1; }
 
 /* ----- spawning -----
@@ -699,7 +749,7 @@ let rng = Math.random;
 // Bump whenever spawn()/column() change what a seed produces. The server only puts
 // players with the same course version in a room, so mixed app versions never race
 // on different courses.
-const COURSE_V = 2;
+const COURSE_V = 3;
 // Objects become visible/collidable only inside this window ahead of the player.
 // Patterns can be generated further ahead than a full lap would allow, and without
 // this they would sit (and collide) right behind the player on the circle.
@@ -796,9 +846,10 @@ function spawn() {
       } else {                                       // gem river with a spike guard
         const cnt = 4 + ((rng() * 3) | 0);
         const shield = L >= 3 && rng() < 0.5;        // ...ending in a shield now and then
+        const magnet = !shield && L >= 2 && rng() < 0.6; // ...or a gem magnet
         for (let i = 0; i < cnt; i++) {
           a = i === ((cnt / 2) | 0) ? column(a, [other(r)], r, n, g) : column(a, [], r, n, g);
-          if (shield && i === cnt - 1) S.items[S.items.length - 1].type = 'shield';
+          if ((shield || magnet) && i === cnt - 1) S.items[S.items.length - 1].type = shield ? 'shield' : 'magnet';
           a += 0.19;
         }
         a += g * 0.4;
@@ -823,16 +874,17 @@ function unlockRing(n) {
 }
 
 /* ----- pilot profile: lifetime stats, achievements, comet skins (all local) ----- */
-const STAT0 = { runs: 0, time: 0, gems: 0, spikes: 0, nears: 0, saves: 0, bestCombo: 0, bestLevel: 1, wins: 0, dailies: 0 };
+const STAT0 = { runs: 0, time: 0, gems: 0, spikes: 0, nears: 0, saves: 0, bestCombo: 0, bestLevel: 1, wins: 0, dailies: 0, fevers: 0, mags: 0 };
 const loadStats = () => Object.assign({}, STAT0, store.get('stats', {}));
 const saveStats = st => store.set('stats', st);
 function recordRun() {
   const st = loadStats();
-  st.runs++; st.time += S.runT; st.gems += S.gems; st.spikes += S.passed; st.nears += S.nears; st.saves += S.saves;
+  st.runs++; st.time += S.runT; st.gems += S.gems; st.spikes += S.passed; st.nears += S.nears; st.saves += S.saves; st.fevers += S.fevers; st.mags += S.mags;
   st.bestCombo = Math.max(st.bestCombo, S.maxCombo); st.bestLevel = Math.max(st.bestLevel, S.level);
   if (S.daily) st.dailies++;
   saveStats(st);
   checkAchievements();
+  checkMissions(true);
 }
 // r = this run (S), st = lifetime stats
 const ACH = [
@@ -849,6 +901,7 @@ const ACH = [
   { id: 'saved', ic: '🛡️', name: 'Saved!', desc: 'Survive a hit with a shield', ok: (r, st) => st.saves >= 1 },
   { id: 'streak', ic: '📅', name: 'Regular', desc: 'Play the daily 3 days in a row', ok: () => store.get('streak', { n: 0 }).n >= 3 },
   { id: 'win', ic: '🏆', name: 'Last One Standing', desc: 'Win a match (online or vs bots)', ok: (r, st) => st.wins >= 1 },
+  { id: 'fever', ic: '🌈', name: 'Fever Pitch', desc: 'Reach FEVER (max combo)', ok: (r, st) => st.fevers >= 1 },
   { id: 'hour', ic: '⏱️', name: 'Frequent Flyer', desc: 'Fly for 30 minutes in total', ok: (r, st) => st.time >= 1800 },
 ];
 // Comet skins: unlocked by achievements. `c` is the comet colour (null = theme colour).
@@ -862,6 +915,7 @@ const SKINS = [
   { id: 'void', name: 'Void', c: '#b48cff', need: 'streak' },
   { id: 'rose', name: 'Champion', c: '#ff4fd8', need: 'win' },
   { id: 'rainbow', name: 'Rainbow', c: 'rainbow', need: 's300' },
+  { id: 'aurora', name: 'Aurora', c: '#7dffe3', need: 'fever' },
 ];
 const unlocked = () => new Set(store.get('ach', []));
 function checkAchievements() {
@@ -884,7 +938,10 @@ function renderPilot() {
   const st = loadStats(), got = unlocked();
   const mins = Math.floor(st.time / 60);
   const cells = [['RUNS', st.runs], ['BEST', S.best], ['LEVEL', st.bestLevel], ['GEMS', st.gems], ['SPIKES', st.spikes], ['CLUTCH', st.nears],
-    ['TOP COMBO', st.bestCombo], ['WINS', st.wins], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+    ['TOP COMBO', st.bestCombo], ['FEVERS', st.fevers], ['MAGNETS', st.mags], ['WINS', st.wins], ['STARDUST', dust()], ['FLIGHT', mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`]];
+  const ms = S.mode === 'title' ? refillMissions() : loadMissions();
+  $('#pMis').innerHTML = missionsHTML(ms.list, st);
+  $('#pMisH').textContent = `MISSIONS · ${ms.done} DONE`;
   $('#pStats').innerHTML = cells.map(([k, v]) => `<div>${k}<b>${v}</b></div>`).join('');
   $('#pSkins').innerHTML = SKINS.map(k => {
     const lock = k.need && !got.has(k.need);
@@ -901,6 +958,74 @@ function openPilot() {
   audioInit(); SFX.click();
   store.set('achNew', false); $('#pilotBtn').classList.remove('new');
   renderPilot(); showScreen('pilot');
+}
+
+/* ----- missions: three goals at a time, each pays stardust and gets harder next time -----
+   `run` missions count within one run (checked live); the others count lifetime stats
+   from when the mission was given (`base`). Completed missions show a tick until the
+   next run starts, then get replaced. */
+const MISSIONS = [
+  { id: 'score', run: true, goals: [40, 80, 150, 250, 400], txt: n => `Score ${n} in one run`, v: () => S.score },
+  { id: 'gems', run: true, goals: [10, 20, 35, 55, 80], txt: n => `Collect ${n} gems in one run`, v: () => S.gems },
+  { id: 'near', run: true, goals: [2, 4, 7, 10, 15], txt: n => `Make ${n} near misses in one run`, v: () => S.nears },
+  { id: 'level', run: true, goals: [3, 4, 6, 8, 10], txt: n => `Reach level ${n}`, v: () => S.level },
+  { id: 'combo', run: true, goals: [5, 10, 15, 25, 40], txt: n => `Build a ${n}-gem combo`, v: () => S.maxCombo },
+  { id: 'fever', run: true, goals: [1, 1, 2, 2, 3], txt: n => n > 1 ? `Reach FEVER ${n} times in one run` : 'Reach FEVER', v: () => S.fevers },
+  { id: 'magnet', run: true, goals: [1, 1, 2, 2, 3], txt: n => n > 1 ? `Grab ${n} magnets in one run` : 'Grab a magnet', v: () => S.mags },
+  { id: 'spikes', goals: [60, 120, 250, 500, 900], txt: n => `Dodge ${n} spikes`, stat: 'spikes' },
+  { id: 'daily', goals: [1, 2, 3, 5, 7], txt: n => `Play ${n} daily challenge${n > 1 ? 's' : ''}`, stat: 'dailies' },
+  { id: 'runs', goals: [3, 6, 10, 15, 25], txt: n => `Play ${n} runs`, stat: 'runs' },
+];
+const M_REWARD = [20, 30, 45, 65, 90];
+const mDef = id => MISSIONS.find(d => d.id === id);
+function loadMissions() {
+  const ms = store.get('missions', null) || { list: [], tier: {}, done: 0 };
+  ms.list = ms.list.filter(m => mDef(m.id));
+  return ms;
+}
+// Swap finished missions for new ones (of kinds not already on the list).
+function refillMissions() {
+  const ms = loadMissions(), st = loadStats();
+  ms.list = ms.list.filter(m => !m.done);
+  while (ms.list.length < 3) {
+    const free = MISSIONS.filter(d => !ms.list.some(m => m.id === d.id));
+    const d = free[(Math.random() * free.length) | 0];
+    ms.list.push({ id: d.id, tier: Math.min(ms.tier[d.id] || 0, d.goals.length - 1), base: d.stat ? st[d.stat] : 0, done: false });
+  }
+  store.set('missions', ms);
+  return ms;
+}
+function missionProgress(m, st) {
+  const d = mDef(m.id), goal = d.goals[m.tier];
+  const v = m.done ? goal : d.run ? (S.mode === 'title' ? 0 : d.v()) : (st || loadStats())[d.stat] - m.base;
+  return { d, goal, v: clamp(v, 0, goal), reward: M_REWARD[m.tier] };
+}
+// Called every frame of a run (run missions) and after each run (lifetime missions).
+function checkMissions(lifetime) {
+  if (!S.missions) return;
+  const st = lifetime ? loadStats() : null;
+  let changed = false;
+  for (const m of S.missions.list) {
+    if (m.done || (!lifetime && !mDef(m.id).run)) continue;
+    const p = missionProgress(m, st);
+    if (p.v < p.goal) continue;
+    m.done = true; m.fresh = true; changed = true;
+    S.missions.tier[m.id] = (S.missions.tier[m.id] || 0) + 1; S.missions.done++;
+    store.set('dust', dust() + p.reward); S.mEarned = (S.mEarned || 0) + p.reward;
+    if (S.mode === 'playing') {
+      popText('✓ ' + p.d.txt(p.goal).toUpperCase(), CX, CY - R_OUT - 78 * U, '#ffffff', 15, 2);
+      popText(`MISSION +${p.reward} ✦`, CX, CY - R_OUT - 56 * U, T.g, 22, 2);
+    }
+    SFX.achieve(); haptic('success');
+  }
+  if (changed) store.set('missions', S.missions);
+}
+function missionsHTML(list, st) {
+  return list.map(m => {
+    const p = missionProgress(m, st);
+    return `<li class="${m.done ? 'got' : ''}${m.fresh ? ' fresh' : ''}"><span class="tx"><b>${m.done ? '✓ ' : ''}${p.d.txt(p.goal)}</b>` +
+      `<i><s style="width:${(100 * p.v / p.goal).toFixed(1)}%"></s></i></span><span class="pr">${m.done ? `+${p.reward}` : `${p.v}/${p.goal}`}<small>✦${m.done ? '' : ' ' + p.reward}</small></span></li>`;
+  }).join('');
 }
 
 /* ----- daily challenge: one fixed course per (local) day ----- */
@@ -921,7 +1046,7 @@ function syncDaily() {
   const y = new Date(); y.setDate(y.getDate() - 1);
   const streak = st.last === d.key || st.last === dayKey(y) ? st.n : 0;
   $('#dInfo').textContent = d.tries
-    ? `Today's best ${d.best}${streak > 1 ? ` · 🔥 ${streak}` : ''}`
+    ? `Today's best ${d.best}${streak > 1 ? ` · 🔥 ${streak}` : ''}${(store.get('dailyGhost', null) || {}).key === d.key ? ' · 👻 race it' : ''}`
     : streak > 0 ? `🔥 ${streak} day streak · play today` : 'A new course every day';
 }
 function startDaily() {
@@ -935,7 +1060,54 @@ function startDaily() {
   }
   start(daySeed(d.key), false, true);
   S.dailyBest = d.best;
+  const gh = store.get('dailyGhost', null);
+  if (gh && gh.key === d.key && gh.v === COURSE_V && Array.isArray(gh.ev)) {
+    S.pb = { ev: gh.ev, i: 0, ring: 0, rPos: 0, end: gh.end, score: gh.score, phi: 0, dead: false, beat: false, trail: [] };
+  }
   banner('☀ DAILY CHALLENGE · ' + d.key, 2200);
+}
+
+/* Daily ghost: your best run on today's course, replayed from its orbit switches
+   (recorded at course angles, so it flies exactly as you did). It trails just
+   behind you and bursts where that run ended. */
+function updatePbGhost(gdt) {
+  const g = S.pb, phi = S.theta - 0.14;
+  g.phi = phi;
+  while (g.i < g.ev.length && g.ev[g.i] <= phi) { g.ring = g.ev[g.i + 1]; g.i += 2; }
+  g.rPos += (g.ring - g.rPos) * (1 - Math.exp(-gdt * 22));
+  if (!g.dead && phi >= g.end) {
+    g.dead = true;
+    const p = pos(g.end, radiusAt(g.rPos));
+    burst(p.x, p.y, 30, ['#ffffff', T.g], 300, 0.9, 12);
+    wave(p.x, p.y, '#ffffff', 90, 5, 0.6);
+  }
+  if (!g.beat && S.score > g.score) {
+    g.beat = true;
+    popText('YOU BEAT YOUR GHOST!', CX, CY + R_OUT + 46 * U, T.g, 24, 1.8);
+    wave(CX, CY, T.g, R_OUT / U + 40, 6, 0.7);
+    SFX.best(); haptic('success');
+  }
+  if (!g.dead) { g.trail.unshift(pos(phi, radiusAt(g.rPos))); if (g.trail.length > 16) g.trail.pop(); }
+  else if (g.trail.length) g.trail.pop();
+}
+function drawPbGhost() {
+  const g = S.pb, tr = g.trail;
+  ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = '#ffffff'; ctx.lineCap = 'round';
+  for (let i = 1; i < tr.length; i++) {
+    const k = 1 - i / tr.length;
+    ctx.globalAlpha = k * 0.3; ctx.lineWidth = P_R * 1.4 * U * k;
+    ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
+  }
+  if (g.dead) { ctx.globalCompositeOperation = 'source-over'; return; }
+  const p = pos(g.phi, radiusAt(g.rPos));
+  drawImg(SPR.w, p.x, p.y, P_R * U * 4.5, 0.45);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 0.6; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5 * U;
+  ctx.setLineDash([3 * U, 3 * U]);
+  ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.9, 0, TAU); ctx.stroke();
+  ctx.setLineDash([]);
+  const ang = g.phi - Math.PI / 2, rr = R_OUT + 18 * U;
+  txt('BEST ' + g.score, CX + Math.cos(ang) * rr, CY + Math.sin(ang) * rr, 11, '#ffffff', 0.7, 800);
 }
 
 /* ----- power-ups: bought with stardust before a solo or daily run ----- */
@@ -1023,7 +1195,7 @@ function start(seed, mp = false, daily = false) {
   S.mp = mp; S.daily = daily;
   rng = mulberry32(seed !== undefined ? seed : (Math.random() * 2 ** 31) | 0);
   S.mode = 'playing'; S.paused = false; S.tutorial = false;
-  S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0;
+  S.shield = 0; S.safeT = -9; S.nears = 0; S.saves = 0; S.mag = 0; S.fever = 0; S.fevers = 0; S.mags = 0;
   S.score = 0; S.passed = 0; S.spawned = 0; S.level = 1; S.combo = 0; S.maxCombo = 0; S.gems = 0; S.mult = 1;
   S.revive = 0; S.slow = false; S.dust2 = false; S.earned = 0;
   if (mp) armed = null; else applyPowerups();
@@ -1034,6 +1206,8 @@ function start(seed, mp = false, daily = false) {
   S.next = 2.4;
   S.sentScore = 0; S.sentT = 0; S.lastStanding = false; S.prevBest = S.best;
   S.runs++; store.set('runs', S.runs);
+  S.missions = refillMissions(); S.mEarned = 0;
+  S.log = daily ? [] : null; S.pb = null;
   applyTheme(0);
   hideScreens();
   $('#oGlobal').textContent = '';
@@ -1053,6 +1227,7 @@ function switchRing(dir, strict) {
   if (to < 0 || to > n - 1) to = S.ring - dir;
   if (to < 0 || to > n - 1) return;
   S.switchFrom = S.ring; S.ring = to; S.lastSwitch = S.t;
+  if (S.daily && S.log) S.log.push(+S.theta.toFixed(4), to);
   const p = playerPos();
   burst(p.x, p.y, 6, [T.a, '#ffffff'], 120, 0.35, 10);
   SFX.swap(to < S.switchFrom); haptic('light');
@@ -1078,15 +1253,51 @@ function collect(it, p) {
   S.combo++; S.gems++; S.maxCombo = Math.max(S.maxCombo, S.combo);
   const prevMult = S.mult;
   S.mult = 1 + Math.min(5, Math.floor(S.combo / 5));
-  addScore(S.mult);
-  popText('+' + S.mult, p.x, p.y - 18 * U, T.g, 20, 0.6);
-  burst(p.x, p.y, 12, [T.g, '#ffffff'], 200, 0.5, 12);
+  const pts = S.mult * (S.fever > 0 ? 2 : 1);
+  addScore(pts);
+  popText('+' + pts, p.x, p.y - 18 * U, S.fever > 0 ? '#ffffff' : T.g, S.fever > 0 ? 24 : 20, 0.6);
+  burst(p.x, p.y, S.fever > 0 ? 18 : 12, S.fever > 0 ? [T.g, T.b, '#ffffff'] : [T.g, '#ffffff'], 200, 0.5, 12);
   SFX.gem(S.combo); haptic('light');
   if (S.mult > prevMult) {
     popText('x' + S.mult + ' COMBO!', CX, CY + R_OUT + 46 * U, T.g, 30, 1.1);
     wave(CX, CY, T.g, R_OUT / U + 30, 5, 0.6);
     SFX.combo(S.mult);
   }
+  if (S.combo === FEVER_AT || (S.combo > FEVER_AT && (S.combo - FEVER_AT) % FEVER_AGAIN === 0)) startFever();
+}
+
+/* ----- FEVER: hit the max x6 combo and gems score double for a while ----- */
+const FEVER_AT = 25, FEVER_AGAIN = 15, FEVER_DUR = 8;
+function startFever() {
+  S.fever = FEVER_DUR; S.fevers++;
+  S.flash = 0.45; S.flashColor = T.g; S.warp = 1.2;
+  wave(CX, CY, T.g, R_OUT / U + 90, 12, 0.9); wave(CX, CY, T.b, R_OUT / U + 50, 6, 0.8);
+  popText('FEVER!', CX, CY - R_OUT - 44 * U, T.g, 46, 1.6);
+  popText('GEMS x2', CX, CY - R_OUT - 12 * U, '#ffffff', 18, 1.6);
+  SFX.fever(); haptic('success');
+}
+function endFever(lost) {
+  if (S.fever <= 0) return;
+  S.fever = 0;
+  popText(lost ? 'FEVER LOST' : 'FEVER OVER', CX, CY + R_OUT + 46 * U, 'rgba(255,255,255,.8)', 20, 1);
+  SFX.feverEnd();
+}
+
+/* ----- magnet: for a few seconds, gems on every orbit fly to you ----- */
+const MAG_DUR = 7, MAG_REACH = 0.55;
+function getMagnet(p) {
+  S.mag = MAG_DUR; S.mags++;
+  popText('MAGNET!', p.x, p.y - 22 * U, T.g, 22, 0.9);
+  burst(p.x, p.y, 16, [T.g, '#ffffff'], 220, 0.6, 12);
+  wave(p.x, p.y, T.g, 70, 4, 0.5);
+  SFX.magnet(); haptic('medium');
+}
+// Where a gem is drawn/collected: pulled in toward the player's orbit while the magnet is on.
+function gemPos(it, prr) {
+  const r = radiusAt(it.ring), ahead = it.a - S.theta;
+  if (S.mag <= 0 || it.type !== 'gem' || ahead > MAG_REACH || ahead < -0.1) return pos(it.a, r);
+  const k = clamp(1 - ahead / MAG_REACH, 0, 1);
+  return pos(it.a, lerp(r, prr, k * k));
 }
 
 function getShield(p) {
@@ -1115,6 +1326,7 @@ function missGem(it) {
     popText('COMBO LOST', p.x, p.y - 20 * U, 'rgba(255,255,255,.7)', 16, 0.8);
   }
   S.combo = 0; S.mult = 1;
+  endFever(true);
 }
 
 function levelUp() {
@@ -1132,7 +1344,7 @@ function levelUp() {
 }
 
 function die(p) {
-  S.mode = 'dying'; S.timeScale = 0.12;
+  S.mode = 'dying'; S.timeScale = 0.12; S.mag = 0; S.fever = 0; S.deathA = S.theta;
   burst(p.x, p.y, 90, [T.a, T.b, '#ffffff'], 520, 1.4, 18);
   burst(p.x, p.y, 30, ['#ffffff'], 900, 0.6, 10);
   wave(p.x, p.y, T.b, 220, 10, 0.9); wave(p.x, p.y, '#ffffff', 120, 4, 0.6);
@@ -1161,14 +1373,20 @@ function gameOver() {
   $('#oBestL').textContent = 'BEST';
   if (S.daily) {
     const d = dailyState(), dBest = S.score > d.best;
-    if (dBest) { d.best = S.score; store.set('daily', d); }
+    if (dBest) {
+      d.best = S.score; store.set('daily', d);
+      if (S.log) store.set('dailyGhost', { key: d.key, v: COURSE_V, score: S.score, end: +S.deathA.toFixed(4), ev: S.log });
+    }
     S.dailyBest = d.best;
     if (!isBest) $('#oTitle').textContent = dBest ? 'DAILY BEST!' : 'DAILY CHALLENGE';
     $('#oBestL').textContent = 'TODAY'; $('#oBest').textContent = d.best;
     syncDaily();
   }
   $('#oCombo').textContent = S.maxCombo; $('#oLevel').textContent = S.level;
-  $('#oDust').textContent = S.earned ? `+${S.earned} ✦ STARDUST${S.dust2 ? ' (x2)' : ''} · ${dust()} TOTAL` : '';
+  $('#oMis').innerHTML = S.missions ? missionsHTML(S.missions.list) : '';
+  if (S.missions) { S.missions.list.forEach(m => { m.fresh = false; }); store.set('missions', S.missions); }
+  const got = S.earned + (S.mEarned || 0);
+  $('#oDust').textContent = got ? `+${got} ✦ STARDUST${S.dust2 ? ' (x2)' : ''} · ${dust()} TOTAL` : '';
   $('#tBest').textContent = S.best;
   const nb = $('#newBest'); nb.classList.remove('on');
   $('#over').classList.add('show');
@@ -1291,10 +1509,13 @@ function update(dt) {
 
   if (S.mode === 'playing') {
     S.runT += dt;
+    if (S.mag > 0) S.mag = Math.max(0, S.mag - gdt);
+    if (S.fever > 0) { S.fever -= gdt; if (S.fever <= 0) { S.fever = 0.001; endFever(false); } }
     S.theta += S.omega * gdt;
     S.rPos += (S.ring - S.rPos) * (1 - Math.exp(-gdt * 22));
     spawn();
-    const pp = playerPos();
+    checkMissions(false);
+    const pp = playerPos(), prr = radiusAt(S.rPos);
     for (let i = S.items.length - 1; i >= 0; i--) {
       const it = S.items[i];
       if (it.fade > 0) { it.fade += gdt * 4; if (it.fade >= 1) S.items.splice(i, 1); continue; }
@@ -1305,7 +1526,7 @@ function update(dt) {
         burst(hp.x, hp.y, 8, [T.b, '#ffffff'], 140, 0.35, 9);
         SFX.hop();
       }
-      const ip = itemPos(it);
+      const ip = it.type === 'spike' ? itemPos(it) : gemPos(it, prr);
       const d = Math.hypot(ip.x - pp.x, ip.y - pp.y);
       if (it.type === 'spike') {
         if (d < (P_R + SPIKE_R * 0.72) * U && S.t > S.safeT) {
@@ -1316,12 +1537,15 @@ function update(dt) {
         if (!it.passed && S.theta > it.a + 0.05) { it.passed = true; onPassSpike(it, pp); }
       } else if (it.type === 'shield') {
         if (d < (P_R + GEM_R + 7) * U) { getShield(ip); S.items.splice(i, 1); continue; }
+      } else if (it.type === 'magnet') {
+        if (d < (P_R + GEM_R + 7) * U) { getMagnet(ip); S.items.splice(i, 1); continue; }
       } else {
         if (d < (P_R + GEM_R + 5) * U) { collect(it, ip); S.items.splice(i, 1); continue; }
         if (!it.passed && S.theta > it.a + 0.25) { it.passed = true; missGem(it); }
       }
       if (S.theta > it.a + 0.7) it.fade = 0.001;
     }
+    if (S.pb) updatePbGhost(gdt);
     if (S.mp && S.mode === 'playing' && S.score !== S.sentScore && S.t - S.sentT > 0.3) {
       S.sentScore = S.score; S.sentT = S.t; Net.send({ t: 'sc', s: S.score });
     }
@@ -1494,21 +1718,21 @@ function render() {
   for (const it of S.items) {
     if (!inView(it)) continue;
     if (!it.shown) { it.shown = true; it.born = S.t; }   // fade in as it enters the view
-    const p = itemPos(it);
+    const p = it.type === 'spike' ? itemPos(it) : gemPos(it, prr);
     const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     if (it.type === 'spike') {
       const ahead = it.a - S.theta;
       const danger = ahead > -0.1 && ahead < 1.2 && Math.abs(radiusAt(itemRing(it)) - prr) < 12 * U ? 1 - Math.max(0, ahead) / 1.2 : 0;
       drawImg(SPR.b, p.x, p.y, SPIKE_R * U * (5 + danger * 3 + beat), al * (0.45 + danger * 0.45));
     } else {
-      drawImg(it.type === 'shield' ? SPR.a : SPR.g, p.x, p.y, GEM_R * U * (it.type === 'shield' ? 6 : 4.5), al * 0.5);
+      drawImg(it.type === 'shield' ? SPR.a : SPR.g, p.x, p.y, GEM_R * U * (it.type === 'gem' ? 4.5 : 6), al * 0.5);
     }
   }
   ctx.globalCompositeOperation = 'source-over';
   for (const it of S.items) {
     if (!it.shown) continue;
     if (it.from !== undefined && S.theta < it.hopA) drawHopTarget(it);
-    const p = itemPos(it);
+    const p = it.type === 'spike' ? itemPos(it) : gemPos(it, prr);
     const app = easeOut(clamp((S.t - it.born) / 0.25, 0, 1)), al = app * (1 - it.fade);
     ctx.save(); ctx.translate(p.x, p.y); ctx.globalAlpha = al;
     if (it.type === 'spike') {
@@ -1518,6 +1742,10 @@ function render() {
     } else if (it.type === 'shield') {
       const s = GEM_R * 4 * U * app * (1 + Math.sin(S.t * 6) * 0.08);
       ctx.drawImage(SPR.shield, -s / 2, -s / 2, s, s);
+    } else if (it.type === 'magnet') {
+      ctx.rotate(Math.sin(S.t * 4) * 0.25);
+      const s = GEM_R * 4 * U * app * (1 + Math.sin(S.t * 6) * 0.08);
+      ctx.drawImage(SPR.magnet, -s / 2, -s / 2, s, s);
     } else {
       ctx.rotate(Math.sin(S.t * 3 + it.a * 5) * 0.4);
       const s = GEM_R * 2.6 * U * app * (1 + Math.sin(S.t * 7 + it.a * 3) * 0.1);
@@ -1540,12 +1768,13 @@ function render() {
     ctx.strokeStyle = trailColor(0); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     for (let i = 1; i < tr.length; i++) {
       const k = 1 - i / tr.length;
-      if (skin.c === 'rainbow') ctx.strokeStyle = trailColor(i >> 2);
-      ctx.globalAlpha = k * 0.75; ctx.lineWidth = P_R * 2 * U * k;
+      if (skin.c === 'rainbow' || S.fever > 0) ctx.strokeStyle = S.fever > 0 ? RAINBOW[((i >> 1) + ((S.t * 14) | 0)) % RAINBOW.length] : trailColor(i >> 2);
+      ctx.globalAlpha = k * 0.75; ctx.lineWidth = P_R * (S.fever > 0 ? 3 : 2) * U * k;
       ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
     }
   }
   if (S.mp) Net.drawGhosts();
+  if (S.pb && S.mode === 'playing') drawPbGhost();
   // player
   if (S.mode !== 'dying' && S.mode !== 'spectate') {
     const p = playerPos();
@@ -1553,6 +1782,13 @@ function render() {
     drawImg(SPR.w, p.x, p.y, P_R * U * 3, 1);
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.fillStyle = '#fff';
     ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * 0.75, 0, TAU); ctx.fill();
+    if (S.mag > 0) {                       // magnet field: dashed ring that spins, fading out as it runs down
+      const fade = Math.min(1, S.mag / 1.2) * (S.mag < 1.5 ? 0.6 + 0.4 * Math.sin(S.t * 30) : 1);
+      ctx.save(); ctx.globalAlpha = 0.7 * fade; ctx.strokeStyle = T.g; ctx.lineWidth = 2 * U;
+      ctx.setLineDash([5 * U, 5 * U]); ctx.lineDashOffset = -S.t * 50 * U;
+      ctx.beginPath(); ctx.arc(p.x, p.y, P_R * U * (2.8 + 0.3 * Math.sin(S.t * 8)), 0, TAU); ctx.stroke();
+      ctx.restore();
+    }
     if (S.shield || S.t < S.safeT) {
       const blink = S.shield ? 1 : (Math.sin(S.t * 40) > 0 ? 0.8 : 0.2);
       ctx.globalAlpha = (0.55 + 0.25 * Math.sin(S.t * 6)) * blink; ctx.strokeStyle = T.a; ctx.lineWidth = 2.2 * U;
@@ -1586,18 +1822,28 @@ function render() {
     ctx.textAlign = 'left';
     txt('LV ' + S.level, 18, y, 15, '#ffffff', 0.75, 800);
     txt(S.daily ? 'DAILY · BEST ' + S.dailyBest : 'BEST ' + S.best, 18, y + 20, 11, S.daily ? T.g : '#ffffff', S.daily ? 0.7 : 0.45, 800);
-    if (S.shield) drawImg(SPR.shield, 30, y + 44, 22, 0.9 + 0.1 * Math.sin(S.t * 6));
+    let hy = y + 44;
+    if (S.shield) { drawImg(SPR.shield, 30, hy, 22, 0.9 + 0.1 * Math.sin(S.t * 6)); hy += 26; }
+    if (S.mag > 0) {
+      drawImg(SPR.magnet, 30, hy, 22, 1);
+      ctx.globalAlpha = 0.25; ctx.fillStyle = '#fff'; roundRect(46, hy - 2, 40, 4, 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = T.g; roundRect(46, hy - 2, 40 * Math.min(1, S.mag / MAG_DUR), 4, 2); ctx.fill();
+      hy += 26;
+    }
     const pwHud = (S.revive ? '💫' : '') + (S.dust2 ? '✦x2' : '') + (slowOn() ? '🐢' : '');
-    if (pwHud) txt(pwHud, 18, y + (S.shield ? 70 : 46), 13, T.g, 0.85, 800);
+    if (pwHud) txt(pwHud, 18, hy + 2, 13, T.g, 0.85, 800);
     ctx.textAlign = 'center';
     if (S.combo > 0) {
       const bw = Math.min(150, W * 0.36), bx = CX - bw / 2, by = y + 14;
-      ctx.shadowColor = T.g; ctx.shadowBlur = 12;
-      txt('x' + S.mult, CX, y - 4, 22 + (S.mult - 1) * 2, T.g, 1);
+      const fv = S.fever > 0;
+      ctx.shadowColor = T.g; ctx.shadowBlur = fv ? 22 : 12;
+      txt(fv ? 'FEVER x' + S.mult * 2 : 'x' + S.mult, CX, y - 4, (fv ? 24 : 22 + (S.mult - 1) * 2) * (fv ? 1 + 0.06 * Math.sin(S.t * 16) : 1), fv ? RAINBOW[((S.t * 10) | 0) % RAINBOW.length] : T.g, 1);
       ctx.shadowBlur = 0;
       ctx.globalAlpha = 0.2; ctx.fillStyle = '#fff'; roundRect(bx, by, bw, 5, 3); ctx.fill();
-      ctx.globalAlpha = 1; ctx.fillStyle = T.g;
-      roundRect(bx, by, bw * (S.mult >= 6 ? 1 : (S.combo % 5) / 5 || 0.02), 5, 3); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = fv ? '#ffffff' : T.g;
+      // during FEVER the bar shows the time left; otherwise progress to the next multiplier, then to FEVER
+      const prog = fv ? S.fever / FEVER_DUR : S.mult < 6 ? (S.combo % 5) / 5 : ((S.combo - FEVER_AT) % FEVER_AGAIN) / FEVER_AGAIN;
+      roundRect(bx, by, bw * clamp(prog, 0.02, 1), 5, 3); ctx.fill();
     }
     if (S.runs <= 3 && S.runT < 4.5 && S.mode === 'playing' && S.rings <= 2) {
       const a = Math.min(1, (4.5 - S.runT)) * (0.6 + 0.4 * Math.sin(S.t * 8));
@@ -1649,6 +1895,11 @@ function drawBackdrop() {
   const blob = (img, x, y, size, a) => { g.globalAlpha = a; g.drawImage(img, x - size / 2, y - size / 2, size, size); };
   blob(SPR.a, cx + Math.cos(nt) * w * 0.3, cy + Math.sin(nt * 1.3) * h * 0.25, big * 1.3, 0.07);
   blob(SPR.b, cx + Math.cos(nt * 0.8 + 2) * w * 0.35, cy + Math.sin(nt + 1) * h * 0.3, big * 1.1, 0.06);
+  if (S.fever > 0 && S.mode === 'playing') {        // FEVER: a hot glow that pulses on the beat
+    const k = Math.min(1, S.fever / 0.8) * (0.1 + beatPulse() * 0.12);
+    blob(SPR.g, cx, cy, big * 1.6, k);
+    blob(SPR.b, cx + Math.cos(S.t * 2) * w * 0.25, cy + Math.sin(S.t * 2.4) * h * 0.2, big, k * 0.8);
+  }
   // vignette
   g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
   const vg = g.createRadialGradient(cx, cy, Math.min(w, h) * 0.35, cx, cy, diag * 0.6);
